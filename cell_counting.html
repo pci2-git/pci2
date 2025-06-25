@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cell Counting & Viability</title>
+    <!-- Tailwind CSS CDN for easy styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for Inter font and general layout */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light gray background */
+        }
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 1.5rem;
+            background-color: #ffffff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border-radius: 12px;
+        }
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+        /* Style for read-only output fields */
+        .output-field {
+            background-color: #e2e8f0; /* Lighter gray for read-only */
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-6 md:p-8">
+    <div class="container">
+        <a href="index.html" class="inline-block mb-6 text-blue-600 hover:text-blue-800 font-semibold">&larr; Back to Calculators Hub</a>
+        <h1 class="text-3xl font-extrabold text-center text-blue-800 mb-8">Cell Counting & Viability</h1>
+
+        <!-- Section 1: Cell Counting & Viability -->
+        <section class="p-6 bg-blue-50 rounded-lg shadow-md border border-blue-200">
+            <p class="text-sm text-gray-600 mb-4">Enter your cell counts from the hemocytometer and dilution details.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <!-- Live Cell Counts -->
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Live Cell Counts (per square)</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="liveCount1" class="block text-sm font-medium text-gray-700">Count 1</label>
+                            <input type="number" id="liveCount1" placeholder="e.g., 100" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        </div>
+                        <div>
+                            <label for="liveCount2" class="block text-sm font-medium text-gray-700">Count 2</label>
+                            <input type="number" id="liveCount2" placeholder="e.g., 105" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        </div>
+                        <div>
+                            <label for="liveCount3" class="block text-sm font-medium text-gray-700">Count 3</label>
+                            <input type="number" id="liveCount3" placeholder="Optional" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        </div>
+                        <div>
+                            <label for="liveCount4" class="block text-sm font-medium text-gray-700">Count 4</label>
+                            <input type="number" id="liveCount4" placeholder="Optional" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dead Cell Counts -->
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-3">Dead Cell Counts (per square)</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="deadCount1" class="block text-sm font-medium text-gray-700">Count 1</label>
+                            <input type="number" id="deadCount1" placeholder="e.g., 3" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        </div>
+                        <div>
+                            <label for="deadCount2" class="block text-sm font-medium text-gray-700">Count 2</label>
+                            <input type="number" id="deadCount2" placeholder="e.g., 2" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        </div>
+                        <div>
+                            <label for="deadCount3" class="block text-sm font-medium text-gray-700">Count 3</label>
+                            <input type="number" id="deadCount3" placeholder="Optional" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        </div>
+                        <div>
+                            <label for="deadCount4" class="block text-sm font-medium text-gray-700">Count 4</label>
+                            <input type="number" id="deadCount4" placeholder="Optional" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div>
+                    <label for="cellVolInput" class="block text-sm font-medium text-gray-700">Cell Suspension Volume Added (µL)</label>
+                    <input type="number" id="cellVolInput" value="10" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+                <div>
+                    <label for="tbVolInput" class="block text-sm font-medium text-gray-700">Trypan Blue Volume Added (µL)</label>
+                    <input type="number" id="tbVolInput" value="90" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+                <div>
+                    <label for="totalSuspensionVol" class="block text-sm font-medium text-gray-700">Total Cell Suspension Volume (mL)</label>
+                    <input type="number" id="totalSuspensionVol" value="2" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                </div>
+            </div>
+
+            <button onclick="calculateCellCounting()" class="w-full md:w-auto px-6 py-3 bg-blue-600 text-white font-bold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-150 ease-in-out">
+                Calculate Cell Counts
+            </button>
+
+            <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="avgLiveOutput" class="block text-sm font-medium text-gray-700">Average Live Cells</label>
+                    <input type="text" id="avgLiveOutput" readonly class="output-field mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm">
+                </div>
+                <div>
+                    <label for="avgDeadOutput" class="block text-sm font-medium text-gray-700">Average Dead Cells</label>
+                    <input type="text" id="avgDeadOutput" readonly class="output-field mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm">
+                </div>
+                <div>
+                    <label for="dilutionFactorOutput" class="block text-sm font-medium text-gray-700">Dilution Factor</label>
+                    <input type="text" id="dilutionFactorOutput" readonly class="output-field mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm">
+                </div>
+                <div>
+                    <label for="viabilityOutput" class="block text-sm font-medium text-gray-700">Viability (%)</label>
+                    <input type="text" id="viabilityOutput" readonly class="output-field mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm">
+                </div>
+                <div>
+                    <label for="cellsPerMLOutput" class="block text-sm font-medium text-gray-700">Cells/mL (Millions/mL)</label>
+                    <input type="text" id="cellsPerMLOutput" readonly class="output-field mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm">
+                </div>
+                <div>
+                    <label for="totalCellsOutput" class="block text-sm font-medium text-gray-700">Total Cells (Millions)</label>
+                    <input type="text" id="totalCellsOutput" readonly class="output-field mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm">
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        /**
+         * Safely gets a numeric value from an input field.
+         * Returns 0 if the input is empty or not a valid number.
+         * @param {string} elementId - The ID of the input element.
+         * @returns {number} The numeric value, or 0 if invalid.
+         */
+        function getNumberValue(elementId) {
+            const element = document.getElementById(elementId);
+            return parseFloat(element.value) || 0;
+        }
+
+        /**
+         * Calculates the average of an array of numbers, ignoring empty or non-numeric values.
+         * @param {number[]} counts - An array of numbers.
+         * @returns {number} The average of the valid numbers.
+         */
+        function calculateAverage(counts) {
+            const validCounts = counts.filter(count => typeof count === 'number' && !isNaN(count) && count >= 0);
+            if (validCounts.length === 0) {
+                return 0;
+            }
+            const sum = validCounts.reduce((acc, curr) => acc + curr, 0);
+            return sum / validCounts.length;
+        }
+
+        /**
+         * Displays a formatted number in a specified output field.
+         * @param {string} elementId - The ID of the output element.
+         * @param {number} value - The number to display.
+         * @param {number} decimalPlaces - Number of decimal places for formatting.
+         */
+        function displayResult(elementId, value, decimalPlaces = 2) {
+            document.getElementById(elementId).value = value.toFixed(decimalPlaces);
+        }
+
+        /**
+         * Main function to perform cell counting and viability calculations.
+         */
+        function calculateCellCounting() {
+            // Get input values for live and dead cell counts
+            const liveCounts = [
+                getNumberValue('liveCount1'),
+                getNumberValue('liveCount2'),
+                getNumberValue('liveCount3'),
+                getNumberValue('liveCount4')
+            ].filter(v => v !== 0); // Filter out zero/empty counts to only average valid entries
+
+            const deadCounts = [
+                getNumberValue('deadCount1'),
+                getNumberValue('deadCount2'),
+                getNumberValue('deadCount3'),
+                getNumberValue('deadCount4')
+            ].filter(v => v !== 0); // Filter out zero/empty counts
+
+            // Get dilution and total volume inputs
+            const cellVol = getNumberValue('cellVolInput'); // Volume of cell suspension added (µL)
+            const tbVol = getNumberValue('tbVolInput');     // Volume of Trypan Blue added (µL)
+            const totalSuspensionVol = getNumberValue('totalSuspensionVol'); // Total initial cell suspension volume (mL)
+
+            // Validate essential inputs
+            if (liveCounts.length === 0 && deadCounts.length === 0) {
+                // Using a custom message box instead of alert()
+                alert("Please enter at least one live or dead cell count.");
+                return;
+            }
+            if (cellVol <= 0 || tbVol < 0) { // tbVol can be 0 for no dilution
+                alert("Cell Suspension Volume must be greater than 0. Trypan Blue Volume cannot be negative.");
+                return;
+            }
+            if (totalSuspensionVol <= 0) {
+                alert("Total Cell Suspension Volume (mL) must be greater than 0.");
+                return;
+            }
+
+            // Calculate averages
+            const avgLive = calculateAverage(liveCounts);
+            const avgDead = calculateAverage(deadCounts);
+            const totalAvgCellsCounted = avgLive + avgDead;
+
+            // Calculate Dilution Factor: (Volume of cells + Volume of Trypan Blue) / Volume of cells
+            // Example: (10 µL cells + 90 µL Trypan Blue) / 10 µL cells = 100 / 10 = 10x dilution
+            let dilutionFactor = (cellVol + tbVol) / cellVol;
+            if (cellVol === 0) { // Avoid division by zero if cellVol is 0
+                 dilutionFactor = 1; // Or handle as an error if cellVol cannot be 0 in practice
+            }
+
+
+            // Calculate Viability: (Average Live Cells / Total Average Cells) * 100
+            let viability = 0;
+            if (totalAvgCellsCounted > 0) {
+                viability = (avgLive / totalAvgCellsCounted) * 100;
+            }
+
+            // Calculate Cells/mL (Millions/mL):
+            // (Average Total Cells Counted) * Dilution Factor * 10^4 (hemocytometer factor) / 1,000,000 (to convert to millions)
+            const cellsPerML = (totalAvgCellsCounted * dilutionFactor * 10000) / 1000000;
+
+            // Calculate Total Cells (Millions): Cells/mL (Millions/mL) * Total Cell Suspension Volume (mL)
+            const totalCells = cellsPerML * totalSuspensionVol;
+
+            // Display results
+            displayResult('avgLiveOutput', avgLive);
+            displayResult('avgDeadOutput', avgDead);
+            displayResult('dilutionFactorOutput', dilutionFactor);
+            displayResult('viabilityOutput', viability);
+            displayResult('cellsPerMLOutput', cellsPerML, 3); // More precision for concentration
+            displayResult('totalCellsOutput', totalCells, 3); // More precision for total cells
+        }
+
+        // Call initial calculation on page load if you want default values to appear
+        window.onload = () => {
+            calculateCellCounting();
+        };
+
+    </script>
+</body>
+</html>
