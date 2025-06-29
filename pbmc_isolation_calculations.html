@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PBMC Isolation Calculator</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Use Inter as the default font */
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+        /* Custom styles for disabled inputs to look more like display fields */
+        .read-only-field {
+            background-color: #f3f4f6; /* gray-100 */
+            color: #4b5563; /* gray-600 */
+            cursor: not-allowed;
+            border-color: #d1d5db; /* gray-300 */
+        }
+        /* Custom styles for the table */
+        .results-table th, .results-table td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        .results-table tbody tr:nth-child(odd) {
+            background-color: #f9fafb; /* gray-50 */
+        }
+        .error-message {
+            display: none;
+            color: #ef4444; /* red-500 */
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+        .input-error {
+            border-color: #ef4444; /* red-500 */
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="w-full max-w-4xl mx-auto p-4 md:p-8">
+        <!-- Calculator Section -->
+        <div class="bg-white rounded-2xl shadow-lg p-6 md:p-10 mb-8">
+            
+            <!-- Header Section -->
+            <div class="text-center mb-8">
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-800">PBMC Isolation Calculator</h1>
+                <p class="text-gray-500 mt-2">Enter sample details, then add the results to the table below.</p>
+            </div>
+
+            <!-- Main Grid Layout -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                <!-- Column 1: User Inputs -->
+                <div class="space-y-6">
+                    <div>
+                        <label for="sampleId" class="block text-sm font-medium text-gray-700 mb-1">Sample ID</label>
+                        <input type="text" id="sampleId" class="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" placeholder="e.g., Patient-001">
+                    </div>
+                    <div>
+                        <label for="bloodVolume" class="block text-sm font-medium text-gray-700 mb-1">Blood Volume (ml)</label>
+                        <input type="number" id="bloodVolume" min="0" step="0.1" class="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200" placeholder="e.g., 8.5">
+                    </div>
+                    <div>
+                        <label for="leucoSepTubes" class="block text-sm font-medium text-gray-700 mb-1">Prepare this number of LeucoSep tubes</label>
+                        <input type="text" id="leucoSepTubes" class="w-full px-4 py-2 rounded-lg read-only-field" readonly>
+                    </div>
+                    <div>
+                        <label for="splitBloodTubes50ml" class="block text-sm font-medium text-gray-700 mb-1">Split blood in following 50mL tubes</label>
+                        <input type="text" id="splitBloodTubes50ml" class="w-full px-4 py-2 rounded-lg read-only-field" readonly>
+                    </div>
+                </div>
+
+                <!-- Column 2: Calculated Outputs -->
+                <div class="space-y-6">
+                     <div>
+                        <label for="bloodPer50mlTube" class="block text-sm font-medium text-gray-700 mb-1">Add This blood per 50mL tube (mL)</label>
+                        <input type="text" id="bloodPer50mlTube" class="w-full px-4 py-2 rounded-lg read-only-field" readonly>
+                    </div>
+                    <div>
+                        <label for="pbsPer50mlTube" class="block text-sm font-medium text-gray-700 mb-1">Add this PBS per 50mL tube (mL)</label>
+                        <input type="text" id="pbsPer50mlTube" class="w-full px-4 py-2 rounded-lg read-only-field" readonly>
+                    </div>
+                    <div>
+                        <label for="mixPerLeucoSepTube" class="block text-sm font-medium text-gray-700 mb-1">Add this blood+PBS mix per LeucoSep tube (mL)</label>
+                        <input type="text" id="mixPerLeucoSepTube" class="w-full px-4 py-2 rounded-lg read-only-field" readonly>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Button -->
+            <div class="mt-8 text-center">
+                <button id="calculateButton" class="w-full md:w-auto bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-transform transform hover:scale-105 duration-300">
+                    Calculate & Add to Table
+                </button>
+                <p id="errorMessage" class="error-message">Please fill in all fields correctly.</p>
+            </div>
+            
+        </div>
+
+        <!-- Results Table Section -->
+        <div id="tableContainer" class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Results Log</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-gray-600 results-table">
+                    <thead class="bg-gray-100 text-gray-700 uppercase font-semibold">
+                        <tr>
+                            <th class="rounded-l-lg">Sample ID</th>
+                            <th>Blood Vol. (ml)</th>
+                            <th>LeucoSep tubes</th>
+                            <th>Split blood in 50mL tubes</th>
+                            <th>Blood per 50mL tube (mL)</th>
+                            <th>PBS per 50mL tube (mL)</th>
+                            <th class="rounded-r-lg">Mix per LeucoSep tube (mL)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsTableBody">
+                        <!-- Rows will be added here dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <footer class="text-center mt-8">
+            <p class="text-sm text-gray-400">Built with ❤️ by Gemini</p>
+        </footer>
+    </div>
+
+    <script>
+        // --- Google Apps Script URL ---
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbylk1J68mH82csON5r4ycm3VWfdqTPh9cqfUOu8nyOYNm6AyPb7ulhaUWvXUlV-GqjH/exec';
+
+        // --- Element References ---
+        const sampleIdInput = document.getElementById('sampleId');
+        const bloodVolumeInput = document.getElementById('bloodVolume');
+        const calculateButton = document.getElementById('calculateButton');
+        const resultsTableBody = document.getElementById('resultsTableBody');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // Output fields
+        const splitBloodTubes50mlOutput = document.getElementById('splitBloodTubes50ml');
+        const bloodPer50mlTubeOutput = document.getElementById('bloodPer50mlTube');
+        const pbsPer50mlTubeOutput = document.getElementById('pbsPer50mlTube');
+        const leucoSepTubesOutput = document.getElementById('leucoSepTubes');
+        const mixPerLeucoSepTubeOutput = document.getElementById('mixPerLeucoSepTube');
+
+        /**
+         * Clears all the output fields in the calculator form.
+         */
+        function clearOutputs() {
+            splitBloodTubes50mlOutput.value = '';
+            bloodPer50mlTubeOutput.value = '';
+            pbsPer50mlTubeOutput.value = '';
+            leucoSepTubesOutput.value = '';
+            mixPerLeucoSepTubeOutput.value = '';
+        }
+
+        /**
+         * Clears the main input fields.
+         */
+        function clearInputs() {
+            sampleIdInput.value = '';
+            bloodVolumeInput.value = '';
+            sampleIdInput.focus();
+        }
+
+        /**
+         * Validates inputs and handles the main calculation and table insertion logic.
+         */
+        async function handleCalculation() {
+            // 1. Reset previous errors
+            errorMessage.style.display = 'none';
+            sampleIdInput.classList.remove('input-error');
+            bloodVolumeInput.classList.remove('input-error');
+
+            // 2. Get input values
+            const sampleId = sampleIdInput.value.trim();
+            const bloodVolume = parseFloat(bloodVolumeInput.value);
+
+            // 3. Validate inputs
+            let hasError = false;
+            if (!sampleId) {
+                sampleIdInput.classList.add('input-error');
+                hasError = true;
+            }
+            if (isNaN(bloodVolume) || bloodVolume <= 0) {
+                bloodVolumeInput.classList.add('input-error');
+                hasError = true;
+            }
+            if (hasError) {
+                errorMessage.textContent = 'Please fill in all fields with valid data.';
+                errorMessage.style.display = 'block';
+                clearOutputs();
+                return;
+            }
+
+            // --- Disable button to prevent multiple submissions ---
+            calculateButton.disabled = true;
+            calculateButton.textContent = 'Saving...';
+            calculateButton.classList.add('cursor-not-allowed', 'opacity-75');
+
+            // 4. Perform calculations
+            const splitBloodTubes50ml = Math.ceil((bloodVolume * 3) / 50);
+            const bloodPer50mlTube = splitBloodTubes50ml > 0 ? bloodVolume / splitBloodTubes50ml : 0;
+            const pbsPer50mlTube = splitBloodTubes50ml > 0 ? (bloodVolume * 2) / splitBloodTubes50ml : 0;
+            const leucoSepTubes = Math.ceil((bloodVolume * 3) / 32);
+            const mixPerLeucoSepTube = leucoSepTubes > 0 ? (bloodVolume * 3) / leucoSepTubes : 0;
+
+
+            // 5. Display calculated values in the top form
+            splitBloodTubes50mlOutput.value = splitBloodTubes50ml;
+            bloodPer50mlTubeOutput.value = bloodPer50mlTube.toFixed(1);
+            pbsPer50mlTubeOutput.value = pbsPer50mlTube.toFixed(1);
+            leucoSepTubesOutput.value = leucoSepTubes;
+            mixPerLeucoSepTubeOutput.value = mixPerLeucoSepTube.toFixed(1);
+
+            // --- Data Payload for Google Sheet ---
+            const dataToLog = {
+                sampleId: sampleId,
+                bloodVolume: bloodVolume.toFixed(1),
+                leucoSepTubes: leucoSepTubes,
+                splitBloodTubes50ml: splitBloodTubes50ml,
+                bloodPer50mlTube: bloodPer50mlTube.toFixed(1),
+                pbsPer50mlTube: pbsPer50mlTube.toFixed(1),
+                mixPerLeucoSepTube: mixPerLeucoSepTube.toFixed(1)
+            };
+
+            try {
+                // --- Send data to Google Apps Script ---
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    cache: 'no-cache',
+                    headers: {
+                        'Content-Type': 'text/plain;charset=utf-8',
+                    },
+                    body: JSON.stringify(dataToLog)
+                });
+
+                const result = await response.json();
+
+                if (result.status === "success") {
+                    // 6. Create and insert the new table row
+                    const newRow = document.createElement('tr');
+                    newRow.className = 'border-b border-gray-200 hover:bg-gray-100';
+                    newRow.innerHTML = `
+                        <td class="font-medium text-gray-800">${sampleId}</td>
+                        <td>${bloodVolume.toFixed(1)}</td>
+                        <td>${leucoSepTubes}</td>
+                        <td>${splitBloodTubes50ml}</td>
+                        <td>${bloodPer50mlTube.toFixed(1)}</td>
+                        <td>${pbsPer50mlTube.toFixed(1)}</td>
+                        <td>${mixPerLeucoSepTube.toFixed(1)}</td>
+                    `;
+                    resultsTableBody.appendChild(newRow);
+
+                    // 7. Clear main inputs for the next entry is now disabled.
+                    // clearInputs();
+                    
+                    errorMessage.textContent = 'Successfully saved to Google Sheet!';
+                    errorMessage.style.color = '#10b981'; // green-500
+                    errorMessage.style.display = 'block';
+
+                } else {
+                    throw new Error(result.message || 'Unknown error from Google Script');
+                }
+
+            } catch (error) {
+                console.error('Error saving data:', error);
+                errorMessage.textContent = `Failed to save: ${error.message}. See console for details.`;
+                errorMessage.style.color = '#ef4444'; // red-500
+                errorMessage.style.display = 'block';
+            } finally {
+                // --- Re-enable button ---
+                calculateButton.disabled = false;
+                calculateButton.textContent = 'Calculate & Add to Table';
+                calculateButton.classList.remove('cursor-not-allowed', 'opacity-75');
+
+                // Hide success/error message after a few seconds
+                setTimeout(() => {
+                    errorMessage.style.display = 'none';
+                    // Reset styles and text for the next message
+                    errorMessage.style.color = '#ef4444'; 
+                    errorMessage.textContent = 'Please fill in all fields with valid data.';
+                }, 5000);
+            }
+        }
+
+
+        // --- Event Listeners ---
+        calculateButton.addEventListener('click', handleCalculation);
+
+        // --- Initial State ---
+        // Clear all fields on page load for a clean start.
+        window.onload = () => {
+            clearInputs();
+            clearOutputs();
+        };
+    </script>
+</body>
+</html>
