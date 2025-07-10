@@ -24,7 +24,7 @@
             
             <!-- Header Section -->
             <div class="text-center mb-8">
-                <h1 class="text-3xl md:text-4xl font-bold text-gray-800">Cell Counting Calculator</h1>
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-800">PBMC Counting Calculator</h1>
                 <p class="text-gray-500 mt-2">Enter sample and counting details below.</p>
             </div>
 
@@ -68,11 +68,11 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-6 mt-4">
                         <div>
                             <label for="countlessLive" class="block text-sm font-medium text-gray-700 mb-1">Live cells (cells/mL)</label>
-                            <input type="number" id="countlessLive" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <input type="text" id="countlessLive" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. 1.23E7">
                         </div>
                         <div>
                             <label for="countlessDead" class="block text-sm font-medium text-gray-700 mb-1">Dead cells (cells/mL)</label>
-                            <input type="number" id="countlessDead" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <input type="text" id="countlessDead" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. 4.54E4">
                         </div>
                         <div>
                             <label for="countlessViability" class="block text-sm font-medium text-gray-700 mb-1">Viability (%)</label>
@@ -501,6 +501,9 @@
                 const hiddenCalcs = cryoRow.querySelectorAll('.hidden-calc');
                 hiddenCalcs.forEach(calc => calc.classList.remove('hidden-calc'));
                 
+                // Trigger calculation to populate the now-visible fields
+                handleCryoInput({ target: cryoRow.querySelector('.cryo-per-aliquot-input') });
+                
                 // --- Gather All Data for Logging ---
                 const resultRow = resultsTableBody.querySelector(`tr[data-calc-id="${calcId}"]`);
                 const flowRow = flowCalcTableBody.querySelector(`tr[data-calc-id="${calcId}"]`);
@@ -538,7 +541,7 @@
 
                     button.textContent = 'Done';
                     button.classList.remove('bg-blue-600', 'hover:bg-blue-700');
-                    button.classList.add('bg-green-600', 'cursor-default');
+                    button.classList.add('bg-gray-500', 'cursor-default');
                 
                 } catch (error) {
                     console.error('Error logging data:', error);
@@ -612,15 +615,13 @@
             }
 
             /**
-             * Formats a number into scientific notation if it's large, otherwise fixed decimal.
+             * Formats a number into millions with regular decimal notation (no scientific)
              */
             function formatNumber(num, millions = false) {
                 if (isNaN(num) || num === 0) return '0.0';
                 if (millions) num /= 1e6;
 
-                if (num > 1000 || (num < 0.01 && num > 0)) {
-                    return num.toExponential(1);
-                }
+                // Always use regular decimal notation for millions display
                 return num.toFixed(1);
             }
         });
