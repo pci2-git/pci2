@@ -33,7 +33,7 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 mt-4">
                     <div>
                         <label for="sampleId" class="block text-sm font-medium text-gray-700 mb-1">Sample ID</label>
-                        <input type="text" id="sampleId" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="PNOC020-p6v3pre">
+                        <input type="text" id="sampleId" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. PNOC020-p6v3pre">
                     </div>
                     <div>
                         <label for="totalSampleVolume" class="block text-sm font-medium text-gray-700 mb-1">Total Sample Volume (mL)</label>
@@ -250,8 +250,8 @@
             countingMethodSelect.addEventListener('change', handleMethodChange);
             calculateButton.addEventListener('click', handleCalculation);
             manualCountInputs.forEach(input => input.addEventListener('input', calculateManualOutputs));
-            countlessLiveInput.addEventListener('input', calculateCountessViability);
-            countlessDeadInput.addEventListener('input', calculateCountessViability);
+            countlessLiveInput.addEventListener('input', handleCountlessInput);
+            countlessDeadInput.addEventListener('input', handleCountlessInput);
             flowCalcTableBody.addEventListener('input', handleFlowCalcInput);
             cryoCalcTableBody.addEventListener('input', handleCryoInput);
             cryoCalcTableBody.addEventListener('click', handleLogClick);
@@ -269,6 +269,22 @@
             }
 
             /**
+             * Handles input for Countess 3 fields - formats to scientific notation and calculates viability
+             */
+            function handleCountlessInput(event) {
+                const input = event.target;
+                const value = input.value.trim();
+                
+                if (value && !isNaN(parseFloat(value))) {
+                    const numValue = parseFloat(value);
+                    // Format to scientific notation in 3.12E4 format
+                    input.value = formatToScientific(numValue);
+                }
+                
+                calculateCountessViability();
+            }
+
+            /**
              * Calculates viability for the Countess 3 section.
              */
             function calculateCountessViability() {
@@ -277,6 +293,21 @@
                 const total = live + dead;
                 const viability = total > 0 ? (live / total) * 100 : 0;
                 countlessViabilityInput.value = viability.toFixed(1);
+            }
+
+            /**
+             * Formats a number to scientific notation in 3.12E4 format
+             */
+            function formatToScientific(num) {
+                if (num === 0) return '0';
+                
+                const exponent = Math.floor(Math.log10(Math.abs(num)));
+                const mantissa = num / Math.pow(10, exponent);
+                
+                // Format mantissa to 2 decimal places, remove trailing zeros
+                let formattedMantissa = mantissa.toFixed(2).replace(/\.?0+$/, '');
+                
+                return `${formattedMantissa}E${exponent}`;
             }
 
             function calculateManualOutputs() {
