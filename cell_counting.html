@@ -15,6 +15,7 @@
         .read-only-field { background-color: #f3f4f6; color: #4b5563; cursor: not-allowed; border-color: #d1d5db; }
         .input-error { border-color: #ef4444; }
         .error-message { display: none; color: #ef4444; font-size: 0.875rem; margin-top: 0.5rem; }
+        .hidden-calc { visibility: hidden; }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -180,13 +181,13 @@
                 <table class="w-full text-sm text-gray-600">
                     <thead class="bg-gray-100 text-gray-700 font-semibold">
                         <tr>
-                            <th class="px-4 py-3 text-left rounded-l-lg">Sample ID</th>
+                            <th class="px-4 py-3 text-left rounded-l-lg">Action</th>
+                            <th class="px-4 py-3 text-left">Sample ID</th>
                             <th class="px-4 py-3 text-left">Total Cells Removed for Flow (Millions)</th>
                             <th class="px-4 py-3 text-left">Cells per Aliquot (Millions)</th>
                             <th class="px-4 py-3 text-left">Volume per Aliquot (mL)</th>
                             <th class="px-4 py-3 text-left">Number of Aliquots</th>
-                            <th class="px-4 py-3 text-left">CryoStor CS10 Volume (mL)</th>
-                            <th class="px-4 py-3 text-left rounded-r-lg">Action</th>
+                            <th class="px-4 py-3 text-left rounded-r-lg">CryoStor CS10 Volume (mL)</th>
                         </tr>
                     </thead>
                     <tbody id="cryoCalcTableBody">
@@ -478,13 +479,13 @@
                 newCryoRow.dataset.calcId = calcId;
                 newCryoRow.dataset.totalCells = totalCellsInMillions;
                 newCryoRow.innerHTML = `
+                    <td><button class="w-full h-full px-3 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 log-sample-btn">Calculate</button></td>
                     <td class="px-4 py-3 font-medium text-gray-800">${sampleIdInput.value}</td>
-                    <td><input type="number" min="0" class="w-full p-2 border border-gray-300 rounded-lg cryo-removed-input" placeholder="e.g., 10"></td>
-                    <td><input type="number" min="0" class="w-full p-2 border border-gray-300 rounded-lg cryo-per-aliquot-input" placeholder="e.g., 10"></td>
-                    <td><input type="number" min="0" class="w-full p-2 border border-gray-300 rounded-lg cryo-vol-aliquot-input" placeholder="e.g., 1"></td>
-                    <td><input type="text" class="w-full p-2 rounded-lg read-only-field cryo-num-aliquots-output" readonly></td>
-                    <td><input type="text" class="w-full p-2 rounded-lg read-only-field cryo-cs10-vol-output" readonly></td>
-                    <td><button class="w-full h-full px-3 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 log-sample-btn">Log This Sample</button></td>
+                    <td><input type="number" min="0" value="0" class="w-full p-2 border border-gray-300 rounded-lg cryo-removed-input" placeholder="e.g., 10"></td>
+                    <td><input type="number" min="0" value="2.5" class="w-full p-2 border border-gray-300 rounded-lg cryo-per-aliquot-input" placeholder="e.g., 10"></td>
+                    <td><input type="number" min="0" value="1" class="w-full p-2 border border-gray-300 rounded-lg cryo-vol-aliquot-input" placeholder="e.g., 1"></td>
+                    <td><input type="text" class="w-full p-2 rounded-lg read-only-field cryo-num-aliquots-output hidden-calc" readonly></td>
+                    <td><input type="text" class="w-full p-2 rounded-lg read-only-field cryo-cs10-vol-output hidden-calc" readonly></td>
                 `;
                 cryoCalcTableBody.appendChild(newCryoRow);
             }
@@ -495,6 +496,10 @@
                 const button = event.target;
                 const cryoRow = button.closest('tr');
                 const calcId = cryoRow.dataset.calcId;
+                
+                // Show calculations for this row
+                const hiddenCalcs = cryoRow.querySelectorAll('.hidden-calc');
+                hiddenCalcs.forEach(calc => calc.classList.remove('hidden-calc'));
                 
                 // --- Gather All Data for Logging ---
                 const resultRow = resultsTableBody.querySelector(`tr[data-calc-id="${calcId}"]`);
@@ -520,7 +525,7 @@
                 
                 // --- Send Data ---
                 button.disabled = true;
-                button.textContent = 'Logging...';
+                button.textContent = 'Processing...';
                 
                 try {
                     const response = await fetch(SCRIPT_URL, {
@@ -531,14 +536,14 @@
                     const result = await response.json();
                     if (result.status !== "success") throw new Error(result.message || 'Unknown error');
 
-                    button.textContent = 'Logged!';
-                    button.classList.remove('bg-green-600', 'hover:bg-green-700');
-                    button.classList.add('bg-gray-400', 'cursor-not-allowed');
+                    button.textContent = 'Done';
+                    button.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                    button.classList.add('bg-green-600', 'cursor-default');
                 
                 } catch (error) {
                     console.error('Error logging data:', error);
                     button.textContent = 'Error!';
-                    button.classList.remove('bg-green-600');
+                    button.classList.remove('bg-blue-600');
                     button.classList.add('bg-red-500');
                     alert(`Failed to log data: ${error.message}`);
                     button.disabled = false; // Allow retry
@@ -554,6 +559,11 @@
                 const volumePerAliquotInput = row.querySelector('.cryo-vol-aliquot-input');
                 const numAliquotsOutput = row.querySelector('.cryo-num-aliquots-output');
                 const cs10VolOutput = row.querySelector('.cryo-cs10-vol-output');
+
+                // Only calculate if the output fields are visible (Calculate button has been pressed)
+                if (numAliquotsOutput.classList.contains('hidden-calc')) {
+                    return;
+                }
 
                 const totalCells = parseFloat(row.dataset.totalCells);
                 const cellsRemoved = parseFloat(cellsRemovedInput.value) || 0;
