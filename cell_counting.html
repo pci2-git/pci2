@@ -35,17 +35,17 @@
                         <label for="sampleId" class="block text-sm font-medium text-gray-700 mb-1">Sample ID</label>
                         <input type="text" id="sampleId" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. PNOC020-p6v3pre">
                     </div>
-                    <div>
+                                        <div>
                         <label for="totalSampleVolume" class="block text-sm font-medium text-gray-700 mb-1">Total Sample Volume (mL)</label>
-                        <input type="number" id="totalSampleVolume" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="1">
+                        <input type="number" id="totalSampleVolume" min="0" value="1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="1">
                     </div>
                     <div>
                         <label for="trypanBlueVolume" class="block text-sm font-medium text-gray-700 mb-1">Trypan Blue Volume (µL)</label>
-                        <input type="number" id="trypanBlueVolume" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="90">
+                        <input type="number" id="trypanBlueVolume" min="0" value="90" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="90">
                     </div>
-                    <div>
+                     <div>
                         <label for="sampleVolumeMixed" class="block text-sm font-medium text-gray-700 mb-1">Sample Volume Mixed with Trypan Blue (µL)</label>
-                        <input type="number" id="sampleVolumeMixed" min="0" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="10">
+                        <input type="number" id="sampleVolumeMixed" min="0" value="10" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="10">
                     </div>
                 </div>
             </fieldset>
@@ -127,7 +127,7 @@
         
         <!-- Results Table Section -->
         <div id="tableContainer" class="hidden bg-white rounded-2xl shadow-lg p-6 md:p-8">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Results Log</h2>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Cell Calculations</h2>
             <div class="overflow-x-auto">
                 <table class="w-full text-sm text-gray-600">
                     <thead class="bg-gray-100 text-gray-700 uppercase font-semibold">
@@ -148,27 +148,34 @@
 
         <!-- Downstream Calculation Section -->
         <div id="flowCalcContainer" class="hidden bg-white rounded-2xl shadow-lg p-6 md:p-8 mt-8">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Downstream Calculations</h2>
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm text-gray-600">
-                    <thead class="bg-gray-100 text-gray-700 font-semibold">
-                        <tr>
-                            <th class="px-4 py-3 text-left rounded-l-lg">Sample ID</th>
-                            <th class="px-4 py-3 text-left">Cells Needed for Flow (Millions)</th>
-                            <th class="px-4 py-3 text-left">PBS for Resuspension (µL)</th>
-                            <th class="px-4 py-3 text-left rounded-r-lg">Volume of Cells Required (µL)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="flowCalcTableBody">
-                        <!-- Rows will be added here dynamically -->
-                    </tbody>
-                </table>
+            <div class="flex items-center justify-between cursor-pointer" id="flowCalcToggle">
+                <h2 class="text-2xl font-bold text-gray-800 mb-0">Cells for Flow</h2>
+                <svg id="flowCalcChevron" class="w-6 h-6 text-gray-600 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </div>
+            <div id="flowCalcContent" class="hidden mt-4">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-gray-600">
+                        <thead class="bg-gray-100 text-gray-700 font-semibold">
+                            <tr>
+                                <th class="px-4 py-3 text-left rounded-l-lg">Sample ID</th>
+                                <th class="px-4 py-3 text-left">Cells Needed for Flow (Millions)</th>
+                                <th class="px-4 py-3 text-left">PBS for Resuspension (µL)</th>
+                                <th class="px-4 py-3 text-left rounded-r-lg">Volume of Cells Required (µL)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="flowCalcTableBody">
+                            <!-- Rows will be added here dynamically -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
         <!-- Calculation for Cryopreservation Section -->
         <div id="cryoCalcContainer" class="hidden bg-white rounded-2xl shadow-lg p-6 md:p-8 mt-8">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Calculation for Cryopreservation</h2>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">Cells for Cryopreservation</h2>
             <div class="overflow-x-auto">
                 <table class="w-full text-sm text-gray-600">
                     <thead class="bg-gray-100 text-gray-700 font-semibold">
@@ -250,14 +257,28 @@
             countingMethodSelect.addEventListener('change', handleMethodChange);
             calculateButton.addEventListener('click', handleCalculation);
             manualCountInputs.forEach(input => input.addEventListener('input', calculateManualOutputs));
-            countlessLiveInput.addEventListener('input', handleCountlessInput);
-            countlessDeadInput.addEventListener('input', handleCountlessInput);
+            countlessLiveInput.addEventListener('blur', handleCountlessInput);
+            countlessDeadInput.addEventListener('blur', handleCountlessInput);
+            countlessLiveInput.addEventListener('input', calculateCountessViability);
+            countlessDeadInput.addEventListener('input', calculateCountessViability);
             flowCalcTableBody.addEventListener('input', handleFlowCalcInput);
             cryoCalcTableBody.addEventListener('input', handleCryoInput);
             cryoCalcTableBody.addEventListener('click', handleLogClick);
+            
+            // Flow calc section toggle
+            const flowCalcToggle = document.getElementById('flowCalcToggle');
+            const flowCalcContent = document.getElementById('flowCalcContent');
+            const flowCalcChevron = document.getElementById('flowCalcChevron');
+            flowCalcToggle.addEventListener('click', toggleFlowCalcSection);
 
 
             // --- Functions ---
+            function toggleFlowCalcSection() {
+                const isHidden = flowCalcContent.classList.contains('hidden');
+                flowCalcContent.classList.toggle('hidden');
+                flowCalcChevron.classList.toggle('rotate-180', isHidden);
+            }
+
             function handleMethodChange(event) {
                 const selectedMethod = event.target.value;
                 const showFields = (method) => {
@@ -269,7 +290,7 @@
             }
 
             /**
-             * Handles input for Countess 3 fields - formats to scientific notation and calculates viability
+             * Handles blur for Countess 3 fields - formats to scientific notation when user finishes typing
              */
             function handleCountlessInput(event) {
                 const input = event.target;
@@ -277,8 +298,10 @@
                 
                 if (value && !isNaN(parseFloat(value))) {
                     const numValue = parseFloat(value);
-                    // Format to scientific notation in 3.12E4 format
-                    input.value = formatToScientific(numValue);
+                    // Only format if the number is not already in the desired format
+                    if (!isAlreadyInDesiredFormat(value)) {
+                        input.value = formatToScientific(numValue);
+                    }
                 }
                 
                 calculateCountessViability();
@@ -293,6 +316,14 @@
                 const total = live + dead;
                 const viability = total > 0 ? (live / total) * 100 : 0;
                 countlessViabilityInput.value = viability.toFixed(1);
+            }
+
+            /**
+             * Checks if a value is already in the desired scientific notation format
+             */
+            function isAlreadyInDesiredFormat(value) {
+                // Check if it matches the pattern like 3.12E4, 3E4, etc.
+                return /^\d+(\.\d+)?E[+-]?\d+$/i.test(value);
             }
 
             /**
