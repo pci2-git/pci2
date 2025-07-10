@@ -187,7 +187,8 @@
                             <th class="px-4 py-3 text-left">Cells per Aliquot (Millions)</th>
                             <th class="px-4 py-3 text-left">Volume per Aliquot (mL)</th>
                             <th class="px-4 py-3 text-left">Number of Aliquots</th>
-                            <th class="px-4 py-3 text-left rounded-r-lg">CryoStor CS10 Volume (mL)</th>
+                            <th class="px-4 py-3 text-left">CryoStor CS10 Volume (mL)</th>
+                            <th class="px-4 py-3 text-left rounded-r-lg">Delete</th>
                         </tr>
                     </thead>
                     <tbody id="cryoCalcTableBody">
@@ -265,6 +266,7 @@
             flowCalcTableBody.addEventListener('input', handleFlowCalcInput);
             cryoCalcTableBody.addEventListener('input', handleCryoInput);
             cryoCalcTableBody.addEventListener('click', handleLogClick);
+            cryoCalcTableBody.addEventListener('click', handleDeleteClick);
             
             // Flow calc section toggle
             const flowCalcToggle = document.getElementById('flowCalcToggle');
@@ -486,8 +488,37 @@
                     <td><input type="number" min="0" value="1" class="w-full p-2 border border-gray-300 rounded-lg cryo-vol-aliquot-input" placeholder="e.g., 1"></td>
                     <td><input type="text" class="w-full p-2 rounded-lg read-only-field cryo-num-aliquots-output hidden-calc" readonly></td>
                     <td><input type="text" class="w-full p-2 rounded-lg read-only-field cryo-cs10-vol-output hidden-calc" readonly></td>
+                    <td><button class="w-full h-full px-3 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 delete-row-btn">Delete</button></td>
                 `;
                 cryoCalcTableBody.appendChild(newCryoRow);
+            }
+
+            function handleDeleteClick(event) {
+                if (!event.target.classList.contains('delete-row-btn')) return;
+                
+                const button = event.target;
+                const cryoRow = button.closest('tr');
+                const calcId = cryoRow.dataset.calcId;
+                
+                // Find and remove corresponding rows
+                const resultRow = resultsTableBody.querySelector(`tr[data-calc-id="${calcId}"]`);
+                const flowRow = flowCalcTableBody.querySelector(`tr[data-calc-id="${calcId}"]`);
+                
+                // Remove rows
+                if (resultRow) resultRow.remove();
+                if (flowRow) flowRow.remove();
+                if (cryoRow) cryoRow.remove();
+                
+                // Hide sections if no rows remain
+                if (resultsTableBody.children.length === 0) {
+                    tableContainer.classList.add('hidden');
+                }
+                if (flowCalcTableBody.children.length === 0) {
+                    flowCalcContainer.classList.add('hidden');
+                }
+                if (cryoCalcTableBody.children.length === 0) {
+                    cryoCalcContainer.classList.add('hidden');
+                }
             }
 
             async function handleLogClick(event) {
