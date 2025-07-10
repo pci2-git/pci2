@@ -183,7 +183,7 @@
                     <table class="min-w-full">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider w-1/6">Day #</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider w-20 min-w-20">Day #</th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider w-1/3">Calculated Date</th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider w-1/2">Procedure / Notes</th>
                                 <th scope="col" class="relative px-6 py-3 w-16"><span class="sr-only">Delete</span></th>
@@ -321,7 +321,7 @@
                 
                 dataRow.innerHTML = `
                     <td class="px-6 py-4 whitespace-nowrap border-b border-gray-200">
-                        <input type="number" value="${day}" class="day-input w-full p-2 border border-gray-200 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., 7">
+                        <input type="number" value="${day}" class="day-input w-full min-w-16 p-2 border border-gray-200 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., 7">
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap border-b border-gray-200">
                         <span class="date-output text-gray-700 font-medium">---</span>
