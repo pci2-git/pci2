@@ -169,9 +169,53 @@
 
         <!-- Main Control Panel -->
         <div class="bg-white p-6 rounded-xl shadow-md mb-6">
-            <div class="w-full sm:w-auto">
-                <label for="startDate" class="block text-sm font-medium text-gray-700 mb-1">Start Date (Day 0)</label>
-                <input type="date" id="startDate" class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+            <div class="flex flex-col sm:flex-row gap-4 items-end">
+                <div class="flex-1">
+                    <label for="startDate" class="block text-sm font-medium text-gray-700 mb-1">Start Date (Day 0)</label>
+                    <input type="date" id="startDate" class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                </div>
+                <div class="flex-1">
+                    <label for="experimentId" class="block text-sm font-medium text-gray-700 mb-1">Experiment ID</label>
+                    <input type="text" id="experimentId" class="w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="e.g., EXP-2024-001">
+                </div>
+                <div class="flex gap-2 w-full sm:w-auto">
+                    <button id="saveExperimentBtn" class="flex-1 sm:flex-none bg-green-600 text-white font-semibold py-3 px-4 rounded-lg shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors">
+                        Save
+                    </button>
+                    <button id="loadExperimentBtn" class="flex-1 sm:flex-none bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                        Load
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Save Experiment Modal -->
+        <div id="saveModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white rounded-xl p-6 max-w-md w-full mx-4">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Save Experiment</h3>
+                <div class="mb-4">
+                    <label for="experimentName" class="block text-sm font-medium text-gray-700 mb-1">Experiment Name</label>
+                    <input type="text" id="experimentName" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="e.g., Tumor Study Week 1">
+                </div>
+                <div class="flex gap-3">
+                    <button id="confirmSave" class="flex-1 bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700">Save</button>
+                    <button id="cancelSave" class="flex-1 bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-400">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Load Experiment Modal -->
+        <div id="loadModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white rounded-xl p-6 max-w-lg w-full mx-4 max-h-96 overflow-hidden flex flex-col">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Load Experiment</h3>
+                <div class="flex-1 overflow-y-auto">
+                    <div id="experimentList" class="space-y-2">
+                        <!-- Saved experiments will be listed here -->
+                    </div>
+                </div>
+                <div class="mt-4 pt-4 border-t">
+                    <button id="cancelLoad" class="w-full bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-400">Cancel</button>
+                </div>
             </div>
         </div>
 
@@ -284,6 +328,18 @@
             const eventDetails = document.getElementById('eventDetails');
             const eventList = document.getElementById('eventList');
             
+            // Save/Load elements
+            const saveExperimentBtn = document.getElementById('saveExperimentBtn');
+            const loadExperimentBtn = document.getElementById('loadExperimentBtn');
+            const saveModal = document.getElementById('saveModal');
+            const loadModal = document.getElementById('loadModal');
+            const experimentName = document.getElementById('experimentName');
+            const confirmSave = document.getElementById('confirmSave');
+            const cancelSave = document.getElementById('cancelSave');
+            const cancelLoad = document.getElementById('cancelLoad');
+            const experimentList = document.getElementById('experimentList');
+            const experimentIdInput = document.getElementById('experimentId');
+            
             // Calendar state
             let currentCalendarDate = new Date();
             
@@ -291,6 +347,9 @@
             const tooltip = document.createElement('div');
             tooltip.className = 'custom-tooltip';
             document.body.appendChild(tooltip);
+            
+            // Storage key for experiments
+            const STORAGE_KEY = 'savedExperiments';
 
             // --- Initial Data (reduced to 4 rows) ---
             const initialData = [
@@ -548,6 +607,125 @@
                 tooltip.style.left = Math.min(x, maxX) + 'px';
                 tooltip.style.top = Math.max(y, 10) + 'px';
             };
+            
+            /**
+             * Gets current experiment data
+             */
+            const getCurrentExperimentData = () => {
+                const rows = [];
+                timelineBody.querySelectorAll('.data-row').forEach(row => {
+                    const dayInput = row.querySelector('.day-input');
+                    const procedureInput = row.querySelector('.procedure-input');
+                    rows.push({
+                        day: dayInput.value,
+                        procedure: procedureInput.value
+                    });
+                });
+                
+                return {
+                    startDate: startDateInput.value,
+                    experimentId: experimentIdInput.value,
+                    rows: rows,
+                    savedAt: new Date().toISOString()
+                };
+            };
+            
+            /**
+             * Loads experiment data
+             */
+            const loadExperimentData = (data) => {
+                // Clear existing rows
+                timelineBody.innerHTML = '';
+                
+                // Set start date and experiment ID
+                startDateInput.value = data.startDate;
+                experimentIdInput.value = data.experimentId || '';
+                
+                // Add rows
+                data.rows.forEach(rowData => {
+                    timelineBody.appendChild(createRowFragment(rowData.day, rowData.procedure));
+                });
+                
+                // Update displays
+                updateAllDates();
+                updateCalendar();
+            };
+            
+            /**
+             * Saves experiment to localStorage
+             */
+            const saveExperiment = (name) => {
+                const experiments = getSavedExperiments();
+                const experimentData = getCurrentExperimentData();
+                experimentData.name = name;
+                
+                // Add to beginning of array
+                experiments.unshift(experimentData);
+                
+                // Keep only last 10
+                if (experiments.length > 10) {
+                    experiments.splice(10);
+                }
+                
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(experiments));
+            };
+            
+            /**
+             * Gets saved experiments from localStorage
+             */
+            const getSavedExperiments = () => {
+                try {
+                    const saved = localStorage.getItem(STORAGE_KEY);
+                    return saved ? JSON.parse(saved) : [];
+                } catch (e) {
+                    console.error('Error loading saved experiments:', e);
+                    return [];
+                }
+            };
+            
+            /**
+             * Displays saved experiments in the load modal
+             */
+            const displaySavedExperiments = () => {
+                const experiments = getSavedExperiments();
+                experimentList.innerHTML = '';
+                
+                if (experiments.length === 0) {
+                    experimentList.innerHTML = '<p class="text-gray-500 text-center py-4">No saved experiments</p>';
+                    return;
+                }
+                
+                experiments.forEach((exp, index) => {
+                    const expElement = document.createElement('div');
+                    expElement.className = 'flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer';
+                    
+                    const savedDate = new Date(exp.savedAt).toLocaleDateString();
+                    const rowCount = exp.rows.length;
+                    
+                    expElement.innerHTML = `
+                        <div class="flex-1">
+                            <div class="font-medium text-gray-900">${exp.name}</div>
+                            <div class="text-sm text-gray-500">${savedDate} • ${rowCount} procedures</div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="load-exp-btn bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700" data-index="${index}">Load</button>
+                            <button class="delete-exp-btn bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700" data-index="${index}">Delete</button>
+                        </div>
+                    `;
+                    
+                    experimentList.appendChild(expElement);
+                });
+            };
+            
+            /**
+             * Deletes a saved experiment
+             */
+            const deleteExperiment = (index) => {
+                const experiments = getSavedExperiments();
+                experiments.splice(index, 1);
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(experiments));
+                displaySavedExperiments();
+            };
 
             // --- Event Listeners ---
 
@@ -564,6 +742,83 @@
             nextMonthBtn.addEventListener('click', () => {
                 currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
                 updateCalendar();
+            });
+            
+            // Save/Load event listeners
+            saveExperimentBtn.addEventListener('click', () => {
+                // Pre-populate with experiment ID if available
+                if (experimentIdInput.value.trim()) {
+                    experimentName.value = experimentIdInput.value.trim();
+                }
+                saveModal.classList.remove('hidden');
+                experimentName.focus();
+            });
+            
+            loadExperimentBtn.addEventListener('click', () => {
+                displaySavedExperiments();
+                loadModal.classList.remove('hidden');
+            });
+            
+            confirmSave.addEventListener('click', () => {
+                const name = experimentName.value.trim();
+                if (name) {
+                    saveExperiment(name);
+                    saveModal.classList.add('hidden');
+                    experimentName.value = '';
+                    alert('Experiment saved successfully!');
+                } else {
+                    alert('Please enter an experiment name');
+                }
+            });
+            
+            cancelSave.addEventListener('click', () => {
+                saveModal.classList.add('hidden');
+                experimentName.value = '';
+            });
+            
+            cancelLoad.addEventListener('click', () => {
+                loadModal.classList.add('hidden');
+            });
+            
+            // Handle clicks on experiment list
+            experimentList.addEventListener('click', (e) => {
+                const loadBtn = e.target.closest('.load-exp-btn');
+                const deleteBtn = e.target.closest('.delete-exp-btn');
+                
+                if (loadBtn) {
+                    const index = parseInt(loadBtn.dataset.index);
+                    const experiments = getSavedExperiments();
+                    if (experiments[index]) {
+                        loadExperimentData(experiments[index]);
+                        loadModal.classList.add('hidden');
+                    }
+                } else if (deleteBtn) {
+                    const index = parseInt(deleteBtn.dataset.index);
+                    if (confirm('Are you sure you want to delete this experiment?')) {
+                        deleteExperiment(index);
+                    }
+                }
+            });
+            
+            // Close modals when clicking outside
+            saveModal.addEventListener('click', (e) => {
+                if (e.target === saveModal) {
+                    saveModal.classList.add('hidden');
+                    experimentName.value = '';
+                }
+            });
+            
+            loadModal.addEventListener('click', (e) => {
+                if (e.target === loadModal) {
+                    loadModal.classList.add('hidden');
+                }
+            });
+            
+            // Handle Enter key in save modal
+            experimentName.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    confirmSave.click();
+                }
             });
 
             timelineBody.addEventListener('input', (e) => {
