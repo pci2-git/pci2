@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survival Data Analysis Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            height: 60vh;
+            width: 100%;
+        }
+        .group-card {
+            transition: all 0.3s ease-in-out;
+        }
+        .remove-btn {
+            transition: opacity 0.2s ease-in-out;
+        }
+        tr:hover .remove-btn {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 antialiased">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-white">Survival Data Analysis Tool</h1>
+            <p class="text-lg text-gray-400 mt-2">Enter your experiment data directly to generate Kaplan-Meier survival curves.</p>
+        </header>
+
+        <!-- Data Input Section -->
+        <div class="max-w-5xl mx-auto bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-700">
+            <!-- Configuration Section -->
+            <div class="mb-8 p-4 bg-gray-700/50 rounded-lg border border-gray-600">
+                <h3 class="text-lg font-semibold text-white mb-4">Experiment Configuration</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <label for="numGroupsInput" class="block text-sm font-medium text-gray-300 mb-2">Number of Groups</label>
+                        <input type="number" id="numGroupsInput" min="1" value="2" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                    </div>
+                    <div>
+                        <label for="numCagesInput" class="block text-sm font-medium text-gray-300 mb-2">Number of Cages (per group)</label>
+                        <input type="number" id="numCagesInput" min="1" value="2" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                    </div>
+                    <div>
+                        <label for="animalsPerCageInput" class="block text-sm font-medium text-gray-300 mb-2">Animals per Cage</label>
+                        <input type="number" id="animalsPerCageInput" min="1" value="4" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                    </div>
+                </div>
+                <button id="applyConfigBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                    Apply Configuration
+                </button>
+                <button id="loadDataBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                    Load Data
+                </button>
+                <button id="exportDataBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                    Export Data
+                </button>
+                <input type="file" id="csvFileInput" accept=".csv" class="hidden">
+                <p class="text-sm text-gray-400 mt-2">This will replace all existing groups with the new configuration.</p>
+            </div>
+
+            <!-- Start Date Input -->
+            <div class="mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="experimentIdInput" class="block text-lg font-medium text-white mb-2">Experiment ID</label>
+                        <input type="text" id="experimentIdInput" placeholder="e.g., Experiment23" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                    </div>
+                    <div>
+                        <label for="startDateInput" class="block text-lg font-medium text-white mb-2">Experiment Start Date</label>
+                        <input type="text" id="startDateInput" placeholder="mm/dd/yy" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Groups Container -->
+            <div id="groupsContainer" class="space-y-6 mb-6">
+                <!-- Group cards will be dynamically inserted here -->
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-wrap gap-4">
+                <button id="addGroupBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                    Add Group
+                </button>
+                <button id="analyzeBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                    Analyze Data
+                </button>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" class="hidden mt-10">
+            <!-- Summary Stats -->
+            <div class="bg-gray-800 rounded-lg shadow-lg p-6 mb-8 border border-gray-700">
+                <h2 class="text-2xl font-bold text-white mb-4">Experiment Summary</h2>
+                <p class="text-gray-300"><strong>Experiment ID:</strong> <span id="experimentIdDisplay"></span></p>
+                <p class="text-gray-300"><strong>Start Date:</strong> <span id="startDate"></span></p>
+                <div class="mt-4">
+                    <button id="exportPrismBtn" class="bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                        Export data for Prism
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Statistical Analysis -->
+            <div class="bg-gray-800 rounded-lg shadow-lg p-6 mb-8 border border-gray-700">
+                <h2 class="text-2xl font-bold text-white mb-4">Statistical Analysis</h2>
+                <div id="statisticalResults" class="space-y-4">
+                    <!-- Statistical results will be inserted here -->
+                </div>
+            </div>
+            
+            <!-- Survival Curve Chart -->
+            <div class="bg-gray-800 rounded-lg shadow-lg p-6 mb-8 border border-gray-700">
+                <h2 class="text-2xl font-bold text-white mb-6 text-center">Kaplan-Meier Survival Curve</h2>
+                <div class="chart-container">
+                    <canvas id="survivalChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Data Tables -->
+            <div>
+                <h2 class="text-2xl font-bold text-white mb-4 text-center">Processed Group Data</h2>
+                <div id="dataTables" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+            </div>
+        </div>
+         <!-- Error Message -->
+        <div id="error-message" class="hidden mt-6 max-w-2xl mx-auto bg-red-900/50 border border-red-700 text-red-300 px-4 py-3 rounded-lg relative" role="alert">
+            <strong class="font-bold">Error:</strong>
+            <span class="block sm:inline" id="error-text"></span>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const startDateInput = document.getElementById('startDateInput');
+        const experimentIdInput = document.getElementById('experimentIdInput');
+        const groupsContainer = document.getElementById('groupsContainer');
+        const addGroupBtn = document.getElementById('addGroupBtn');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const numGroupsInput = document.getElementById('numGroupsInput');
+        const numCagesInput = document.getElementById('numCagesInput');
+        const animalsPerCageInput = document.getElementById('animalsPerCageInput');
+        const applyConfigBtn = document.getElementById('applyConfigBtn');
+        const loadDataBtn = document.getElementById('loadDataBtn');
+        const exportDataBtn = document.getElementById('exportDataBtn');
+        const csvFileInput = document.getElementById('csvFileInput');
+        const exportPrismBtn = document.getElementById('exportPrismBtn');
+        
+        const resultsSection = document.getElementById('resultsSection');
+        const startDateDisplay = document.getElementById('startDate');
+        const experimentIdDisplay = document.getElementById('experimentIdDisplay');
+        const statisticalResults = document.getElementById('statisticalResults');
+        const dataTablesContainer = document.getElementById('dataTables');
+        const survivalChartCanvas = document.getElementById('survivalChart');
+        const errorMessageDiv = document.getElementById('error-message');
+        const errorTextSpan = document.getElementById('error-text');
+
+        let survivalChart = null;
+        let groupCounter = 0;
+
+        // --- Event Listeners ---
+        addGroupBtn.addEventListener('click', addGroup);
+        analyzeBtn.addEventListener('click', parseAndAnalyzeFromDOM);
+        groupsContainer.addEventListener('click', handleGroupAction);
+        groupsContainer.addEventListener('input', handleCageIdChange);
+        applyConfigBtn.addEventListener('click', applyConfiguration);
+        loadDataBtn.addEventListener('click', loadDataFromCSV);
+        exportDataBtn.addEventListener('click', exportDataToCSV);
+        csvFileInput.addEventListener('change', handleCSVFileInput);
+        exportPrismBtn.addEventListener('click', exportDataForPrism);
+
+        // Initialize with one group
+        addGroup();
+
+        // --- Core Functions ---
+        function addGroup() {
+            groupCounter++;
+            const groupId = `group-${groupCounter}`;
+            const groupCard = document.createElement('div');
+            groupCard.className = 'group-card bg-gray-700/50 p-4 rounded-lg border border-gray-600';
+            groupCard.id = groupId;
+            groupCard.innerHTML = `
+                <div class="flex justify-between items-center mb-4">
+                    <input type="text" value="Group ${groupCounter}" class="text-xl font-bold bg-transparent text-white border-b-2 border-gray-500 focus:border-blue-500 focus:outline-none">
+                    <button data-action="remove-group" class="text-gray-400 hover:text-red-500 transition-colors">&times;</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left text-gray-400">
+                        <thead class="text-xs text-gray-300 uppercase bg-gray-700">
+                            <tr>
+                                <th scope="col" class="px-2 py-2">Cage ID</th>
+                                <th scope="col" class="px-2 py-2">Animal ID</th>
+                                <th scope="col" class="px-2 py-2">Ending Date</th>
+                                <th scope="col" class="px-2 py-2">Status</th>
+                                <th scope="col" class="px-2 py-2 w-10"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Animal rows will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+                <button data-action="add-animal" class="mt-4 bg-gray-600 hover:bg-gray-500 text-white font-semibold py-1 px-3 text-sm rounded-md transition-colors">
+                    Add Animal
+                </button>
+            `;
+            groupsContainer.appendChild(groupCard);
+            addAnimalRow(groupCard.querySelector('tbody')); // Add one animal row by default
+        }
+
+        function addAnimalRow(tbody) {
+            // Get values from the previous row if it exists
+            const previousRow = tbody.querySelector('tr:last-child');
+            let previousCageId = '';
+            let nextAnimalId = '1';
+            
+            if (previousRow) {
+                const previousInputs = previousRow.querySelectorAll('input');
+                previousCageId = previousInputs[0].value; // Previous cage ID
+                const previousAnimalId = parseInt(previousInputs[1].value) || 0;
+                nextAnimalId = (previousAnimalId + 1).toString();
+            }
+            
+            const row = document.createElement('tr');
+            row.className = 'bg-gray-800 border-b border-gray-700 hover:bg-gray-600/50';
+            row.innerHTML = `
+                <td class="p-1"><input type="text" value="${previousCageId}" class="w-full bg-gray-700 rounded p-1 border border-gray-600 focus:bg-gray-600 focus:outline-none cage-id-input"></td>
+                <td class="p-1"><input type="text" value="${nextAnimalId}" class="w-full bg-gray-700 rounded p-1 border border-gray-600 focus:bg-gray-600 focus:outline-none"></td>
+                <td class="p-1"><input type="text" placeholder="mm/dd/yy" class="w-full bg-gray-700 rounded p-1 border border-gray-600 focus:bg-gray-600 focus:outline-none"></td>
+                <td class="p-1">
+                    <select class="w-full bg-gray-700 rounded p-1 border border-gray-600 focus:bg-gray-600 focus:outline-none">
+                        <option value="0">Alive (0)</option>
+                        <option value="1">Dead (1)</option>
+                    </select>
+                </td>
+                <td class="p-1 text-center">
+                    <button data-action="remove-animal" class="text-gray-500 hover:text-red-400 remove-btn opacity-20 text-lg">&times;</button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        }
+
+        function handleGroupAction(event) {
+            const target = event.target.closest('button');
+            if (!target) return;
+
+            const action = target.dataset.action;
+            if (action === 'add-animal') {
+                const tbody = target.closest('.group-card').querySelector('tbody');
+                addAnimalRow(tbody);
+            } else if (action === 'remove-animal') {
+                target.closest('tr').remove();
+            } else if (action === 'remove-group') {
+                target.closest('.group-card').remove();
+            }
+        }
+
+        function handleCageIdChange(event) {
+            // Check if the changed input is a cage ID input
+            if (!event.target.classList.contains('cage-id-input')) return;
+            
+            const changedInput = event.target;
+            const newValue = changedInput.value;
+            
+            const groupCard = changedInput.closest('.group-card');
+            const allCageInputs = Array.from(groupCard.querySelectorAll('.cage-id-input'));
+            const changedIndex = allCageInputs.indexOf(changedInput);
+            
+            // Update all cage IDs that come after the changed one with the same value
+            for (let i = changedIndex + 1; i < allCageInputs.length; i++) {
+                const currentInput = allCageInputs[i];
+                currentInput.value = newValue;
+            }
+        }
+
+        function showError(message) {
+            errorTextSpan.textContent = message;
+            errorMessageDiv.classList.remove('hidden');
+            resultsSection.classList.add('hidden');
+        }
+
+        function hideError() {
+            errorMessageDiv.classList.add('hidden');
+        }
+
+        function applyConfiguration() {
+            const numGroups = parseInt(numGroupsInput.value) || 0;
+            const numCages = parseInt(numCagesInput.value) || 0;
+            const animalsPerCage = parseInt(animalsPerCageInput.value) || 0;
+
+            if (numGroups === 0 || numCages === 0 || animalsPerCage === 0) {
+                showError("Please enter valid numbers for groups, cages, and animals per cage.");
+                return;
+            }
+
+            // Clear existing groups
+            groupsContainer.innerHTML = '';
+            groupCounter = 0; // Reset group counter
+            hideError(); // Hide any existing errors
+
+            let globalCageCounter = 29302; // Start from 29302
+
+            // Add new groups based on configuration
+            for (let groupIndex = 0; groupIndex < numGroups; groupIndex++) {
+                addGroup();
+                const currentGroupCard = document.getElementById(`group-${groupCounter}`);
+                const tbody = currentGroupCard.querySelector('tbody');
+                
+                // Clear the default animal row that addGroup() creates
+                tbody.innerHTML = '';
+                
+                // Add animals for each cage
+                let animalCounter = 1;
+                for (let cageIndex = 1; cageIndex <= numCages; cageIndex++) {
+                    const cageId = globalCageCounter.toString();
+                    for (let animalIndex = 1; animalIndex <= animalsPerCage; animalIndex++) {
+                        const animalId = animalCounter.toString();
+                        addAnimalRowWithData(tbody, cageId, animalId);
+                        animalCounter++;
+                    }
+                    globalCageCounter++; // Increment cage number for next cage
+                }
+            }
+        }
+
+        function addAnimalRowWithData(tbody, cageId = '', animalId = '') {
+            const row = document.createElement('tr');
+            row.className = 'bg-gray-800 border-b border-gray-700 hover:bg-gray-600/50';
+            row.innerHTML = `
+                <td class="p-1"><input type="text" value="${cageId}" class="w-full bg-gray-700 rounded p-1 border border-gray-600 focus:bg-gray-600 focus:outline-none cage-id-input"></td>
+                <td class="p-1"><input type="text" value="${animalId}" class="w-full bg-gray-700 rounded p-1 border border-gray-600 focus:bg-gray-600 focus:outline-none"></td>
+                <td class="p-1"><input type="text" placeholder="mm/dd/yy" class="w-full bg-gray-700 rounded p-1 border border-gray-600 focus:bg-gray-600 focus:outline-none"></td>
+                <td class="p-1">
+                    <select class="w-full bg-gray-700 rounded p-1 border border-gray-600 focus:bg-gray-600 focus:outline-none">
+                        <option value="0">Alive (0)</option>
+                        <option value="1">Dead (1)</option>
+                    </select>
+                </td>
+                <td class="p-1 text-center">
+                    <button data-action="remove-animal" class="text-gray-500 hover:text-red-400 remove-btn opacity-20 text-lg">&times;</button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        }
+
+        function parseAndAnalyzeFromDOM() {
+            hideError();
+            
+            // --- 1. Extract and Validate Start Date ---
+            const startDateStr = startDateInput.value;
+            if (!startDateStr) {
+                showError("Please enter an experiment start date.");
+                return;
+            }
+            
+            // Parse mm/dd/yy format
+            const startDate = parseDate(startDateStr);
+            if (!startDate) {
+                showError("Invalid start date format. Please use mm/dd/yy format.");
+                return;
+            }
+            startDateDisplay.textContent = startDate.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: '2-digit' });
+
+            // Display experiment ID
+            const experimentIdValue = experimentIdInput.value.trim() || 'Not specified';
+            experimentIdDisplay.textContent = experimentIdValue;
+
+            // --- 2. Parse Animal Data from DOM ---
+            const groups = {};
+            const groupCards = groupsContainer.querySelectorAll('.group-card');
+
+            if (groupCards.length === 0) {
+                showError("Please add at least one group.");
+                return;
+            }
+
+            for (const card of groupCards) {
+                const groupName = card.querySelector('input[type="text"]').value.trim() || "Untitled Group";
+                groups[groupName] = { data: [] };
+                const rows = card.querySelectorAll('tbody tr');
+
+                for (const row of rows) {
+                    const inputs = row.querySelectorAll('input, select');
+                    const cageId = inputs[0].value;
+                    const animalId = inputs[1].value;
+                    const endingDateStr = inputs[2].value;
+                    const status = inputs[3].value;
+
+                    if (animalId && endingDateStr) {
+                        const endingDate = parseDate(endingDateStr);
+                        if (!endingDate) continue;
+
+                        const timeDiff = endingDate.getTime() - startDate.getTime();
+                        const daysSurvived = Math.round(timeDiff / (1000 * 3600 * 24));
+
+                        groups[groupName].data.push({
+                            cageId,
+                            animalId,
+                            endingDate: endingDate.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: '2-digit' }),
+                            isDead: status === '1',
+                            daysSurvived: daysSurvived >= 0 ? daysSurvived : 0,
+                        });
+                    }
+                }
+            }
+
+            // --- 3. Calculate Survival Curves (Kaplan-Meier) ---
+            const chartDatasets = [];
+            const colors = ['#34d399', '#60a5fa', '#f87171', '#fbbf24', '#a78bfa', '#f472b6'];
+            let colorIndex = 0;
+
+            for (const groupName in groups) {
+                const groupData = groups[groupName].data;
+                if (groupData.length === 0) continue;
+
+                groupData.sort((a, b) => a.daysSurvived - b.daysSurvived);
+
+                const timePoints = [...new Set(groupData.map(d => d.daysSurvived))].sort((a, b) => a - b);
+                let subjectsAtRisk = groupData.length;
+                let survivalProbability = 1.0;
+                const kmData = [{ x: 0, y: 1 }];
+
+                timePoints.forEach(time => {
+                    const deathsAtTime = groupData.filter(d => d.daysSurvived === time && d.isDead).length;
+                    if (subjectsAtRisk > 0) {
+                        survivalProbability *= (1 - deathsAtTime / subjectsAtRisk);
+                    }
+                    kmData.push({ x: time, y: survivalProbability });
+                    const subjectsLeaving = groupData.filter(d => d.daysSurvived === time).length;
+                    subjectsAtRisk -= subjectsLeaving;
+                });
+                
+                const lastDataPoint = groupData[groupData.length - 1];
+                if (lastDataPoint) {
+                    kmData.push({ x: lastDataPoint.daysSurvived, y: survivalProbability });
+                }
+
+                chartDatasets.push({
+                    label: groupName,
+                    data: kmData,
+                    borderColor: colors[colorIndex % colors.length],
+                    backgroundColor: colors[colorIndex % colors.length] + '33',
+                    stepped: 'before',
+                    fill: false,
+                    borderWidth: 2.5,
+                    pointRadius: 0,
+                    pointHoverRadius: 6,
+                });
+                colorIndex++;
+            }
+
+            // --- 4. Display Everything ---
+            if (chartDatasets.length === 0) {
+                showError("No valid data found to analyze. Please check your entries.");
+                return;
+            }
+            displayDataTables(groups);
+            performStatisticalAnalysis(groups);
+            renderSurvivalChart(chartDatasets);
+            resultsSection.classList.remove('hidden');
+            window.scrollTo({ top: resultsSection.offsetTop, behavior: 'smooth' });
+        }
+
+        function performStatisticalAnalysis(groups) {
+            const groupNames = Object.keys(groups).filter(name => groups[name].data.length > 0);
+            
+            if (groupNames.length === 0) {
+                statisticalResults.innerHTML = '<p class="text-gray-400">No data available for statistical analysis.</p>';
+                return;
+            }
+
+            let resultsHTML = '';
+
+            // Calculate median survival for each group
+            resultsHTML += '<div class="mb-6"><h3 class="text-lg font-semibold text-white mb-3">Median Survival Times</h3>';
+            resultsHTML += '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">';
+            
+            const medianSurvivalTimes = {};
+            groupNames.forEach(groupName => {
+                const groupData = groups[groupName].data;
+                const medianSurvival = calculateMedianSurvival(groupData);
+                medianSurvivalTimes[groupName] = medianSurvival;
+                
+                resultsHTML += `
+                    <div class="bg-gray-700/50 p-4 rounded-lg border border-gray-600">
+                        <h4 class="font-semibold text-white">${groupName}</h4>
+                        <p class="text-2xl font-bold text-blue-400">${medianSurvival !== null ? medianSurvival + ' days' : 'Not reached'}</p>
+                        <p class="text-sm text-gray-400">n = ${groupData.length}</p>
+                    </div>
+                `;
+            });
+            resultsHTML += '</div></div>';
+
+            // Perform pairwise log-rank tests if there are multiple groups
+            if (groupNames.length > 1) {
+                resultsHTML += '<div class="mb-6"><h3 class="text-lg font-semibold text-white mb-3">Statistical Comparisons (Log-rank Test)</h3>';
+                resultsHTML += '<div class="overflow-x-auto"><table class="w-full text-sm text-left text-gray-400">';
+                resultsHTML += '<thead class="text-xs text-gray-300 uppercase bg-gray-700"><tr><th class="px-4 py-2">Comparison</th><th class="px-4 py-2">Chi-square</th><th class="px-4 py-2">P-value</th><th class="px-4 py-2">Significance</th></tr></thead><tbody>';
+                
+                for (let i = 0; i < groupNames.length; i++) {
+                    for (let j = i + 1; j < groupNames.length; j++) {
+                        const group1 = groupNames[i];
+                        const group2 = groupNames[j];
+                        const logRankResult = performLogRankTest(groups[group1].data, groups[group2].data);
+                        
+                        const significance = logRankResult.pValue < 0.001 ? '***' : 
+                                           logRankResult.pValue < 0.01 ? '**' : 
+                                           logRankResult.pValue < 0.05 ? '*' : 
+                                           logRankResult.pValue < 0.1 ? '†' : 'NS';
+                        
+                        const significanceColor = logRankResult.pValue < 0.05 ? 'text-green-400' : 'text-gray-400';
+                        
+                        resultsHTML += `
+                            <tr class="bg-gray-800 border-b border-gray-700">
+                                <td class="px-4 py-2 font-medium">${group1} vs ${group2}</td>
+                                <td class="px-4 py-2">${logRankResult.chiSquare.toFixed(3)}</td>
+                                <td class="px-4 py-2">${logRankResult.pValue.toFixed(4)}</td>
+                                <td class="px-4 py-2 ${significanceColor} font-semibold">${significance}</td>
+                            </tr>
+                        `;
+                    }
+                }
+                resultsHTML += '</tbody></table></div>';
+                resultsHTML += '<p class="text-xs text-gray-400 mt-2">*** p < 0.001, ** p < 0.01, * p < 0.05, † p < 0.1, NS = Not Significant</p>';
+                resultsHTML += '</div>';
+            }
+
+            statisticalResults.innerHTML = resultsHTML;
+        }
+
+        function calculateMedianSurvival(groupData) {
+            if (!groupData || groupData.length === 0) return null;
+            
+            // Sort by days survived
+            const sortedData = [...groupData].sort((a, b) => a.daysSurvived - b.daysSurvived);
+            
+            // Calculate Kaplan-Meier survival probabilities
+            let subjectsAtRisk = sortedData.length;
+            let survivalProbability = 1.0;
+            
+            for (let i = 0; i < sortedData.length; i++) {
+                const currentTime = sortedData[i].daysSurvived;
+                const deathsAtTime = sortedData.filter(d => d.daysSurvived === currentTime && d.isDead).length;
+                
+                if (deathsAtTime > 0) {
+                    survivalProbability *= (1 - deathsAtTime / subjectsAtRisk);
+                }
+                
+                // Check if survival probability has dropped to 50% or below
+                if (survivalProbability <= 0.5) {
+                    return currentTime;
+                }
+                
+                // Update subjects at risk for next time point
+                const subjectsLeavingAtTime = sortedData.filter(d => d.daysSurvived === currentTime).length;
+                subjectsAtRisk -= subjectsLeavingAtTime;
+            }
+            
+            return null; // Median not reached
+        }
+
+        function performLogRankTest(group1Data, group2Data) {
+            // Combine all unique time points
+            const allTimes = [...new Set([
+                ...group1Data.map(d => d.daysSurvived),
+                ...group2Data.map(d => d.daysSurvived)
+            ])].sort((a, b) => a - b);
+            
+            let observedEvents1 = 0;
+            let expectedEvents1 = 0;
+            
+            allTimes.forEach(time => {
+                // Count subjects at risk at this time point
+                const atRisk1 = group1Data.filter(d => d.daysSurvived >= time).length;
+                const atRisk2 = group2Data.filter(d => d.daysSurvived >= time).length;
+                const totalAtRisk = atRisk1 + atRisk2;
+                
+                if (totalAtRisk === 0) return;
+                
+                // Count deaths at this time point
+                const deaths1 = group1Data.filter(d => d.daysSurvived === time && d.isDead).length;
+                const deaths2 = group2Data.filter(d => d.daysSurvived === time && d.isDead).length;
+                const totalDeaths = deaths1 + deaths2;
+                
+                if (totalDeaths > 0) {
+                    observedEvents1 += deaths1;
+                    expectedEvents1 += (atRisk1 * totalDeaths) / totalAtRisk;
+                }
+            });
+            
+            // Calculate chi-square statistic
+            const chiSquare = Math.pow(observedEvents1 - expectedEvents1, 2) / expectedEvents1;
+            
+            // Calculate p-value (approximation using chi-square distribution with 1 df)
+            const pValue = 1 - chiSquareCDF(chiSquare, 1);
+            
+            return {
+                chiSquare: chiSquare,
+                pValue: Math.max(pValue, 0.0001) // Minimum p-value for display
+            };
+        }
+
+        function chiSquareCDF(x, df) {
+            // Approximation of chi-square CDF for df=1 using error function
+            if (x <= 0) return 0;
+            if (df === 1) {
+                // For df=1, chi-square CDF = erf(sqrt(x/2))
+                return erf(Math.sqrt(x / 2));
+            }
+            return 0.5; // Fallback
+        }
+
+        function erf(x) {
+            // Approximation of error function
+            const a1 =  0.254829592;
+            const a2 = -0.284496736;
+            const a3 =  1.421413741;
+            const a4 = -1.453152027;
+            const a5 =  1.061405429;
+            const p  =  0.3275911;
+
+            const sign = x < 0 ? -1 : 1;
+            x = Math.abs(x);
+
+            const t = 1.0 / (1.0 + p * x);
+            const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+
+            return sign * y;
+        }
+
+        function displayDataTables(groups) {
+            dataTablesContainer.innerHTML = '';
+            for (const groupName in groups) {
+                const groupData = groups[groupName].data;
+                if (groupData.length === 0) continue;
+
+                const tableWrapper = document.createElement('div');
+                tableWrapper.className = 'bg-gray-800 p-4 rounded-lg border border-gray-700 shadow-md';
+                
+                let tableHTML = `<h3 class="text-xl font-semibold text-white mb-3">${groupName}</h3>
+                                <div class="overflow-x-auto max-h-80">
+                                <table class="w-full text-sm text-left text-gray-400">
+                                    <thead class="text-xs text-gray-300 uppercase bg-gray-700 sticky top-0">
+                                        <tr>
+                                            <th scope="col" class="px-4 py-2">Animal ID</th>
+                                            <th scope="col" class="px-4 py-2">Days Survived</th>
+                                            <th scope="col" class="px-4 py-2">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>`;
+                
+                groupData.forEach(animal => {
+                    tableHTML += `<tr class="bg-gray-800 border-b border-gray-700 hover:bg-gray-600/50">
+                                    <td class="px-4 py-2 font-medium text-gray-200">${animal.animalId}</td>
+                                    <td class="px-4 py-2">${animal.daysSurvived}</td>
+                                    <td class="px-4 py-2">${animal.isDead ? 
+                                        '<span class="text-red-400">Dead</span>' : 
+                                        '<span class="text-green-400">Alive</span>'}
+                                    </td>
+                                  </tr>`;
+                });
+
+                tableHTML += `</tbody></table></div>`;
+                tableWrapper.innerHTML = tableHTML;
+                dataTablesContainer.appendChild(tableWrapper);
+            }
+        }
+
+        function renderSurvivalChart(datasets) {
+            if (survivalChart) {
+                survivalChart.destroy();
+            }
+            const ctx = survivalChartCanvas.getContext('2d');
+            survivalChart = new Chart(ctx, {
+                type: 'line',
+                data: { datasets: datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            title: { display: true, text: 'Days Survived', color: '#d1d5db', font: { size: 16 } },
+                            ticks: { color: '#9ca3af' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            max: 1.05,
+                            title: { display: true, text: 'Survival Probability', color: '#d1d5db', font: { size: 16 } },
+                            ticks: { color: '#9ca3af', callback: value => (value * 100) + '%' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        }
+                    },
+                    plugins: {
+                        legend: { position: 'top', labels: { color: '#d1d5db', font: { size: 14 } } },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                title: (tooltipItems) => `Day: ${tooltipItems[0].label}`,
+                                label: (context) => {
+                                    let label = context.dataset.label || '';
+                                    if (label) { label += ': '; }
+                                    if (context.parsed.y !== null) { label += (context.parsed.y * 100).toFixed(2) + '%'; }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function parseDate(dateString) {
+            // Handle mm/dd/yy format
+            const parts = dateString.trim().split('/');
+            if (parts.length !== 3) return null;
+            
+            const month = parseInt(parts[0]);
+            const day = parseInt(parts[1]);
+            let year = parseInt(parts[2]);
+            
+            // Convert 2-digit year to 4-digit year
+            // Assume years 00-30 are 2000-2030, years 31-99 are 1931-1999
+            if (year < 31) {
+                year += 2000;
+            } else if (year < 100) {
+                year += 1900;
+            }
+            
+            // Validate the date components
+            if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+            
+            const date = new Date(year, month - 1, day); // month is 0-indexed in Date constructor
+            
+            // Check if the date is valid (handles invalid dates like Feb 30)
+            if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+                return null;
+            }
+            
+            return date;
+        }
+
+        function loadDataFromCSV() {
+            csvFileInput.click(); // Trigger file input dialog
+        }
+
+        function handleCSVFileInput(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    const csvData = e.target.result;
+                    const lines = csvData.split('\n').filter(line => line.trim());
+                    
+                    if (lines.length < 2) {
+                        showError("CSV file must contain at least a header and one data row.");
+                        return;
+                    }
+
+                    // Better CSV parsing to handle quoted fields
+                    const parseCSVLine = (line) => {
+                        const result = [];
+                        let current = '';
+                        let inQuotes = false;
+                        
+                        for (let i = 0; i < line.length; i++) {
+                            const char = line[i];
+                            if (char === '"') {
+                                inQuotes = !inQuotes;
+                            } else if (char === ',' && !inQuotes) {
+                                result.push(current.trim());
+                                current = '';
+                            } else {
+                                current += char;
+                            }
+                        }
+                        result.push(current.trim());
+                        return result;
+                    };
+
+                    const headers = parseCSVLine(lines[0]);
+                    
+                    // Clear existing data
+                    groupsContainer.innerHTML = '';
+                    groupCounter = 0;
+                    hideError();
+
+                    // Group data by Group Name
+                    const groupsData = {};
+                    let experimentStartDate = '';
+                    let experimentId = '';
+                    
+                    for (let i = 1; i < lines.length; i++) {
+                        const values = parseCSVLine(lines[i]);
+                        if (values.length < headers.length) continue;
+                        
+                        const rowData = {};
+                        headers.forEach((header, index) => {
+                            // Remove quotes from values if present
+                            let value = values[index] || '';
+                            if (value.startsWith('"') && value.endsWith('"')) {
+                                value = value.slice(1, -1);
+                            }
+                            rowData[header] = value;
+                        });
+
+                        // Get experiment start date and ID from first row
+                        if (i === 1) {
+                            experimentStartDate = rowData['Experiment Start Date'];
+                            experimentId = rowData['Experiment ID'];
+                        }
+
+                        const groupName = rowData['Group Name'] || 'Group 1';
+                        if (!groupsData[groupName]) {
+                            groupsData[groupName] = [];
+                        }
+                        groupsData[groupName].push(rowData);
+                    }
+
+                    // Set the experiment start date and ID
+                    if (experimentStartDate) {
+                        startDateInput.value = experimentStartDate;
+                    }
+                    if (experimentId) {
+                        experimentIdInput.value = experimentId;
+                    }
+
+                    // Create groups and populate data
+                    Object.keys(groupsData).forEach(groupName => {
+                        addGroup();
+                        const currentGroupCard = document.getElementById(`group-${groupCounter}`);
+                        const groupNameInput = currentGroupCard.querySelector('input[type="text"]');
+                        groupNameInput.value = groupName;
+                        
+                        const tbody = currentGroupCard.querySelector('tbody');
+                        tbody.innerHTML = ''; // Clear default row
+
+                        groupsData[groupName].forEach(rowData => {
+                            const cageId = rowData['Cage ID'] || '';
+                            const animalId = rowData['Animal ID'] || '';
+                            const endingDate = rowData['Ending Date'] || '';
+                            const status = rowData['Status'] || '0';
+
+                            // Create the row with proper data
+                            const row = document.createElement('tr');
+                            row.className = 'bg-gray-800 border-b border-gray-700 hover:bg-gray-600/50';
+                            row.innerHTML = `
+                                <td class="p-1"><input type="text" value="${cageId}" class="w-full bg-gray-700 rounded p-1 border border-gray-600 focus:bg-gray-600 focus:outline-none cage-id-input"></td>
+                                <td class="p-1"><input type="text" value="${animalId}" class="w-full bg-gray-700 rounded p-1 border border-gray-600 focus:bg-gray-600 focus:outline-none"></td>
+                                <td class="p-1"><input type="text" value="${endingDate}" placeholder="mm/dd/yy" class="w-full bg-gray-700 rounded p-1 border border-gray-600 focus:bg-gray-600 focus:outline-none"></td>
+                                <td class="p-1">
+                                    <select class="w-full bg-gray-700 rounded p-1 border border-gray-600 focus:bg-gray-600 focus:outline-none">
+                                        <option value="0" ${status === '0' ? 'selected' : ''}>Alive (0)</option>
+                                        <option value="1" ${status === '1' ? 'selected' : ''}>Dead (1)</option>
+                                    </select>
+                                </td>
+                                <td class="p-1 text-center">
+                                    <button data-action="remove-animal" class="text-gray-500 hover:text-red-400 remove-btn opacity-20 text-lg">&times;</button>
+                                </td>
+                            `;
+                            tbody.appendChild(row);
+                        });
+                    });
+
+                    // Clear file input for next use
+                    csvFileInput.value = '';
+                    
+                } catch (error) {
+                    showError(`Error loading CSV: ${error.message}`);
+                    console.error("CSV loading error:", error);
+                }
+            };
+
+            reader.readAsText(file);
+        }
+
+        function exportDataToCSV() {
+            const csvRows = [];
+            csvRows.push('Experiment ID,Experiment Start Date,Group Name,Cage ID,Animal ID,Ending Date,Status');
+
+            const groupCards = groupsContainer.querySelectorAll('.group-card');
+            
+            if (groupCards.length === 0) {
+                showError("No data to export. Please add some groups and animals first.");
+                return;
+            }
+
+            const experimentStartDate = startDateInput.value || '';
+            const experimentId = experimentIdInput.value || '';
+
+            groupCards.forEach(card => {
+                const groupName = card.querySelector('input[type="text"]').value.trim() || "Untitled Group";
+                const rows = card.querySelectorAll('tbody tr');
+
+                rows.forEach(row => {
+                    const inputs = row.querySelectorAll('input, select');
+                    const cageId = inputs[0].value || '';
+                    const animalId = inputs[1].value || '';
+                    const endingDate = inputs[2].value || '';
+                    const status = inputs[3].value || '0';
+
+                    if (animalId) { // Only export rows with animal ID
+                        csvRows.push(`"${experimentId}","${experimentStartDate}","${groupName}","${cageId}","${animalId}","${endingDate}","${status}"`);
+                    }
+                });
+            });
+
+            if (csvRows.length === 1) {
+                showError("No animal data to export.");
+                return;
+            }
+
+            const csvContent = csvRows.join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            
+            const url = URL.createObjectURL(blob);
+            const fileName = experimentId ? 
+                `survival_data_${experimentId}_${new Date().toISOString().split('T')[0]}.csv` :
+                `survival_data_${new Date().toISOString().split('T')[0]}.csv`;
+            link.setAttribute('href', url);
+            link.setAttribute('download', fileName);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        function exportDataForPrism() {
+            const groupCards = groupsContainer.querySelectorAll('.group-card');
+            
+            if (groupCards.length === 0) {
+                showError("No data to export. Please add some groups and animals first.");
+                return;
+            }
+
+            const experimentStartDate = startDateInput.value || '';
+            const experimentId = experimentIdInput.value || '';
+            
+            // Collect all data organized by groups
+            const groupsData = [];
+            const allAnimals = [];
+
+            groupCards.forEach(card => {
+                const groupName = card.querySelector('input[type="text"]').value.trim() || "Untitled Group";
+                const cleanGroupName = groupName.replace(/\s+/g, '_'); // Replace spaces with underscores
+                const rows = card.querySelectorAll('tbody tr');
+
+                const groupAnimals = [];
+                rows.forEach(row => {
+                    const inputs = row.querySelectorAll('input, select');
+                    const cageId = inputs[0].value || '';
+                    const animalId = inputs[1].value || '';
+                    const endingDate = inputs[2].value || '';
+                    const status = inputs[3].value || '0';
+
+                    if (animalId) { // Only include rows with animal ID
+                        const cleanCageId = cageId.replace(/\s+/g, '_');
+                        const cleanAnimalId = animalId.replace(/\s+/g, '_');
+                        const combinedId = `${cleanCageId}-${cleanGroupName}-${cleanAnimalId}`;
+                        
+                        const animalData = {
+                            combinedId,
+                            experimentStartDate,
+                            endingDate,
+                            status,
+                            groupName: cleanGroupName
+                        };
+                        
+                        groupAnimals.push(animalData);
+                        allAnimals.push(animalData);
+                    }
+                });
+                
+                if (groupAnimals.length > 0) {
+                    groupsData.push({
+                        groupName: cleanGroupName,
+                        animals: groupAnimals
+                    });
+                }
+            });
+
+            if (allAnimals.length === 0) {
+                showError("No animal data to export.");
+                return;
+            }
+
+            // Create header with group-specific status columns
+            const groupNames = groupsData.map(g => g.groupName);
+            const header = ['Cage_ID-Group_ID-Animal_ID', 'Start_Date', 'End_Date'];
+            groupNames.forEach(groupName => {
+                header.push(groupName);
+            });
+
+            const csvRows = [header.join(',')];
+
+            // Create data rows
+            allAnimals.forEach(animal => {
+                const row = [
+                    animal.combinedId,
+                    animal.experimentStartDate,
+                    animal.endingDate
+                ];
+                
+                // Add status for each group (only fill the appropriate group column)
+                groupNames.forEach(groupName => {
+                    if (animal.groupName === groupName) {
+                        row.push(animal.status);
+                    } else {
+                        row.push(''); // Empty for other groups
+                    }
+                });
+                
+                csvRows.push(`"${row.join('","')}"`);
+            });
+
+            const csvContent = csvRows.join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            
+            const url = URL.createObjectURL(blob);
+            const fileName = experimentId ? 
+                `prism_survival_data_${experimentId}_${new Date().toISOString().split('T')[0]}.csv` :
+                `prism_survival_data_${new Date().toISOString().split('T')[0]}.csv`;
+            link.setAttribute('href', url);
+            link.setAttribute('download', fileName);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+    </script>
+
+</body>
+</html>
