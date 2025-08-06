@@ -25,6 +25,17 @@
         tr:hover .remove-btn {
             opacity: 1;
         }
+        .empty-field {
+            background-color: #fef3c7 !important;
+        }
+        .status-alive {
+            background-color: #065f46 !important;
+            color: white !important;
+        }
+        .status-dead {
+            background-color: #7f1d1d !important;
+            color: white !important;
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-200 antialiased">
@@ -39,33 +50,43 @@
         <!-- Data Input Section -->
         <div class="max-w-5xl mx-auto bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-700">
             <!-- Configuration Section -->
-            <div class="mb-8 p-4 bg-gray-700/50 rounded-lg border border-gray-600">
-                <h3 class="text-lg font-semibold text-white mb-4">Experiment Configuration</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div class="mb-6 p-4 bg-gray-700/50 rounded-lg border border-gray-600">
+                <h3 class="text-lg font-semibold text-white mb-4">Create New Experiment</h3>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 items-end">
                     <div>
                         <label for="numGroupsInput" class="block text-sm font-medium text-gray-300 mb-2">Number of Groups</label>
-                        <input type="number" id="numGroupsInput" min="1" value="2" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                        <input type="number" id="numGroupsInput" min="1" value="2" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2">
                     </div>
                     <div>
                         <label for="numCagesInput" class="block text-sm font-medium text-gray-300 mb-2">Number of Cages (per group)</label>
-                        <input type="number" id="numCagesInput" min="1" value="2" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                        <input type="number" id="numCagesInput" min="1" value="2" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2">
                     </div>
                     <div>
                         <label for="animalsPerCageInput" class="block text-sm font-medium text-gray-300 mb-2">Animals per Cage</label>
-                        <input type="number" id="animalsPerCageInput" min="1" value="4" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                        <input type="number" id="animalsPerCageInput" min="1" value="4" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2">
+                    </div>
+                    <div>
+                        <button id="applyConfigBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-colors w-full">
+                            Apply Configuration
+                        </button>
                     </div>
                 </div>
-                <button id="applyConfigBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
-                    Apply Configuration
-                </button>
-                <button id="loadDataBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
-                    Load Data
-                </button>
-                <button id="exportDataBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
-                    Export Data
-                </button>
-                <input type="file" id="csvFileInput" accept=".csv" class="hidden">
                 <p class="text-sm text-gray-400 mt-2">This will replace all existing groups with the new configuration.</p>
+            </div>
+
+            <!-- Load Previous Experiment Section -->
+            <div class="mb-8 p-4 bg-gray-700/50 rounded-lg border border-gray-600">
+                <h3 class="text-lg font-semibold text-white mb-4">Load Previous Experiment</h3>
+                <div class="flex flex-wrap gap-4">
+                    <button id="loadDataBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                        Load Data
+                    </button>
+                    <button id="exportDataBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                        Export Data
+                    </button>
+                    <input type="file" id="csvFileInput" accept=".csv" class="hidden">
+                </div>
+                <p class="text-sm text-gray-400 mt-2">Load existing data from CSV or export current data for backup.</p>
             </div>
 
             <!-- Start Date Input -->
@@ -174,6 +195,8 @@
         analyzeBtn.addEventListener('click', parseAndAnalyzeFromDOM);
         groupsContainer.addEventListener('click', handleGroupAction);
         groupsContainer.addEventListener('input', handleCageIdChange);
+        groupsContainer.addEventListener('input', handleFieldBackgroundChange);
+        groupsContainer.addEventListener('change', handleStatusColorChange);
         applyConfigBtn.addEventListener('click', applyConfiguration);
         loadDataBtn.addEventListener('click', loadDataFromCSV);
         exportDataBtn.addEventListener('click', exportDataToCSV);
@@ -235,11 +258,11 @@
             const row = document.createElement('tr');
             row.className = 'bg-gray-800 border-b border-gray-700 hover:bg-gray-600/50';
             row.innerHTML = `
-                <td class="p-1"><input type="text" value="${previousCageId}" class="w-full bg-gray-700 rounded p-1 border border-gray-600 focus:bg-gray-600 focus:outline-none cage-id-input"></td>
+                <td class="p-1"><input type="text" value="${previousCageId}" class="w-full ${previousCageId ? 'bg-gray-700' : 'empty-field'} rounded p-1 border border-gray-600 focus:bg-gray-600 focus:outline-none cage-id-input"></td>
                 <td class="p-1"><input type="text" value="${nextAnimalId}" class="w-full bg-gray-700 rounded p-1 border border-gray-600 focus:bg-gray-600 focus:outline-none"></td>
-                <td class="p-1"><input type="text" placeholder="mm/dd/yy" class="w-full bg-gray-700 rounded p-1 border border-gray-600 focus:bg-gray-600 focus:outline-none"></td>
+                <td class="p-1"><input type="text" placeholder="mm/dd/yy" class="w-full empty-field rounded p-1 border border-gray-600 focus:bg-gray-600 focus:outline-none"></td>
                 <td class="p-1">
-                    <select class="w-full bg-gray-700 rounded p-1 border border-gray-600 focus:bg-gray-600 focus:outline-none">
+                    <select class="w-full rounded p-1 border border-gray-600 focus:bg-gray-600 focus:outline-none status-alive">
                         <option value="0">Alive (0)</option>
                         <option value="1">Dead (1)</option>
                     </select>
@@ -281,6 +304,37 @@
             for (let i = changedIndex + 1; i < allCageInputs.length; i++) {
                 const currentInput = allCageInputs[i];
                 currentInput.value = newValue;
+            }
+        }
+
+        function handleFieldBackgroundChange(event) {
+            const target = event.target;
+            
+            // Handle cage ID and ending date fields
+            if (target.classList.contains('cage-id-input') || target.placeholder === 'mm/dd/yy') {
+                if (target.value.trim() === '') {
+                    target.classList.remove('bg-gray-700');
+                    target.classList.add('empty-field');
+                } else {
+                    target.classList.remove('empty-field');
+                    target.classList.add('bg-gray-700');
+                }
+            }
+        }
+
+        function handleStatusColorChange(event) {
+            const target = event.target;
+            
+            // Handle status select elements
+            if (target.tagName === 'SELECT' && target.closest('td')) {
+                const value = target.value;
+                target.classList.remove('status-alive', 'status-dead');
+                
+                if (value === '0') {
+                    target.classList.add('status-alive');
+                } else if (value === '1') {
+                    target.classList.add('status-dead');
+                }
             }
         }
 
@@ -338,11 +392,11 @@
             const row = document.createElement('tr');
             row.className = 'bg-gray-800 border-b border-gray-700 hover:bg-gray-600/50';
             row.innerHTML = `
-                <td class="p-1"><input type="text" value="${cageId}" class="w-full bg-gray-700 rounded p-1 border border-gray-600 focus:bg-gray-600 focus:outline-none cage-id-input"></td>
+                <td class="p-1"><input type="text" value="${cageId}" class="w-full ${cageId ? 'bg-gray-700' : 'empty-field'} rounded p-1 border border-gray-600 focus:bg-gray-600 focus:outline-none cage-id-input"></td>
                 <td class="p-1"><input type="text" value="${animalId}" class="w-full bg-gray-700 rounded p-1 border border-gray-600 focus:bg-gray-600 focus:outline-none"></td>
-                <td class="p-1"><input type="text" placeholder="mm/dd/yy" class="w-full bg-gray-700 rounded p-1 border border-gray-600 focus:bg-gray-600 focus:outline-none"></td>
+                <td class="p-1"><input type="text" placeholder="mm/dd/yy" class="w-full empty-field rounded p-1 border border-gray-600 focus:bg-gray-600 focus:outline-none"></td>
                 <td class="p-1">
-                    <select class="w-full bg-gray-700 rounded p-1 border border-gray-600 focus:bg-gray-600 focus:outline-none">
+                    <select class="w-full rounded p-1 border border-gray-600 focus:bg-gray-600 focus:outline-none status-alive">
                         <option value="0">Alive (0)</option>
                         <option value="1">Dead (1)</option>
                     </select>
@@ -466,8 +520,8 @@
                 return;
             }
             displayDataTables(groups);
-            performStatisticalAnalysis(groups);
-            renderSurvivalChart(chartDatasets);
+            const statisticalData = performStatisticalAnalysis(groups);
+            renderSurvivalChart(chartDatasets, statisticalData);
             resultsSection.classList.remove('hidden');
             window.scrollTo({ top: resultsSection.offsetTop, behavior: 'smooth' });
         }
@@ -477,10 +531,11 @@
             
             if (groupNames.length === 0) {
                 statisticalResults.innerHTML = '<p class="text-gray-400">No data available for statistical analysis.</p>';
-                return;
+                return { comparisons: [] };
             }
 
             let resultsHTML = '';
+            const comparisonResults = [];
 
             // Calculate median survival for each group
             resultsHTML += '<div class="mb-6"><h3 class="text-lg font-semibold text-white mb-3">Median Survival Times</h3>';
@@ -506,13 +561,15 @@
             if (groupNames.length > 1) {
                 resultsHTML += '<div class="mb-6"><h3 class="text-lg font-semibold text-white mb-3">Statistical Comparisons (Log-rank Test)</h3>';
                 resultsHTML += '<div class="overflow-x-auto"><table class="w-full text-sm text-left text-gray-400">';
-                resultsHTML += '<thead class="text-xs text-gray-300 uppercase bg-gray-700"><tr><th class="px-4 py-2">Comparison</th><th class="px-4 py-2">Chi-square</th><th class="px-4 py-2">P-value</th><th class="px-4 py-2">Significance</th></tr></thead><tbody>';
+                resultsHTML += '<thead class="text-xs text-gray-300 uppercase bg-gray-700"><tr><th class="px-4 py-2">Comparison</th><th class="px-4 py-2">n</th><th class="px-4 py-2">Chi-square</th><th class="px-4 py-2">P-value</th><th class="px-4 py-2">Significance</th></tr></thead><tbody>';
                 
                 for (let i = 0; i < groupNames.length; i++) {
                     for (let j = i + 1; j < groupNames.length; j++) {
                         const group1 = groupNames[i];
                         const group2 = groupNames[j];
-                        const logRankResult = performLogRankTest(groups[group1].data, groups[group2].data);
+                        const group1Data = groups[group1].data;
+                        const group2Data = groups[group2].data;
+                        const logRankResult = performLogRankTest(group1Data, group2Data);
                         
                         const significance = logRankResult.pValue < 0.001 ? '***' : 
                                            logRankResult.pValue < 0.01 ? '**' : 
@@ -520,10 +577,21 @@
                                            logRankResult.pValue < 0.1 ? '†' : 'NS';
                         
                         const significanceColor = logRankResult.pValue < 0.05 ? 'text-green-400' : 'text-gray-400';
+                        const totalN = group1Data.length + group2Data.length;
+                        
+                        // Store comparison result
+                        comparisonResults.push({
+                            group1,
+                            group2,
+                            pValue: logRankResult.pValue,
+                            significance,
+                            significant: logRankResult.pValue < 0.05
+                        });
                         
                         resultsHTML += `
                             <tr class="bg-gray-800 border-b border-gray-700">
                                 <td class="px-4 py-2 font-medium">${group1} vs ${group2}</td>
+                                <td class="px-4 py-2">${totalN} (${group1Data.length}+${group2Data.length})</td>
                                 <td class="px-4 py-2">${logRankResult.chiSquare.toFixed(3)}</td>
                                 <td class="px-4 py-2">${logRankResult.pValue.toFixed(4)}</td>
                                 <td class="px-4 py-2 ${significanceColor} font-semibold">${significance}</td>
@@ -537,6 +605,7 @@
             }
 
             statisticalResults.innerHTML = resultsHTML;
+            return { comparisons: comparisonResults };
         }
 
         function calculateMedianSurvival(groupData) {
@@ -677,10 +746,11 @@
             }
         }
 
-        function renderSurvivalChart(datasets) {
+        function renderSurvivalChart(datasets, statisticalData = { comparisons: [] }) {
             if (survivalChart) {
                 survivalChart.destroy();
             }
+            
             const ctx = survivalChartCanvas.getContext('2d');
             survivalChart = new Chart(ctx, {
                 type: 'line',
@@ -704,7 +774,19 @@
                         }
                     },
                     plugins: {
-                        legend: { position: 'top', labels: { color: '#d1d5db', font: { size: 14 } } },
+                        legend: { 
+                            position: 'right',
+                            align: 'start',
+                            labels: { 
+                                color: '#d1d5db', 
+                                font: { size: 14 },
+                                usePointStyle: true,
+                                pointStyle: 'line',
+                                boxWidth: 20,
+                                boxHeight: 2,
+                                padding: 15
+                            }
+                        },
                         tooltip: {
                             mode: 'index',
                             intersect: false,
@@ -861,11 +943,11 @@
                             const row = document.createElement('tr');
                             row.className = 'bg-gray-800 border-b border-gray-700 hover:bg-gray-600/50';
                             row.innerHTML = `
-                                <td class="p-1"><input type="text" value="${cageId}" class="w-full bg-gray-700 rounded p-1 border border-gray-600 focus:bg-gray-600 focus:outline-none cage-id-input"></td>
+                                <td class="p-1"><input type="text" value="${cageId}" class="w-full ${cageId ? 'bg-gray-700' : 'empty-field'} rounded p-1 border border-gray-600 focus:bg-gray-600 focus:outline-none cage-id-input"></td>
                                 <td class="p-1"><input type="text" value="${animalId}" class="w-full bg-gray-700 rounded p-1 border border-gray-600 focus:bg-gray-600 focus:outline-none"></td>
-                                <td class="p-1"><input type="text" value="${endingDate}" placeholder="mm/dd/yy" class="w-full bg-gray-700 rounded p-1 border border-gray-600 focus:bg-gray-600 focus:outline-none"></td>
+                                <td class="p-1"><input type="text" value="${endingDate}" placeholder="mm/dd/yy" class="w-full ${endingDate ? 'bg-gray-700' : 'empty-field'} rounded p-1 border border-gray-600 focus:bg-gray-600 focus:outline-none"></td>
                                 <td class="p-1">
-                                    <select class="w-full bg-gray-700 rounded p-1 border border-gray-600 focus:bg-gray-600 focus:outline-none">
+                                    <select class="w-full rounded p-1 border border-gray-600 focus:bg-gray-600 focus:outline-none ${status === '1' ? 'status-dead' : 'status-alive'}">
                                         <option value="0" ${status === '0' ? 'selected' : ''}>Alive (0)</option>
                                         <option value="1" ${status === '1' ? 'selected' : ''}>Dead (1)</option>
                                     </select>
