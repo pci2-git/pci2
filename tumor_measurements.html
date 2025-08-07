@@ -32,8 +32,12 @@
             background-color: #dcfce7 !important; /* Green background for calculated volumes */
         }
         
-        .volume-input {
-            background-color: #f0fdf4 !important; /* Light green background for volume fields */
+        .volume-input.bg-gray-600 {
+            background-color: #fef3c7 !important; /* Yellow background for empty volume fields - same as empty size fields */
+        }
+        
+        .volume-input.bg-gray-700 {
+            background-color: #374151 !important; /* Darker gray background for calculated volume fields */
         }
         
         .size-validation-error {
@@ -345,9 +349,16 @@
 
         let measurementDateCounter = 0;
         let groupNames = [];
+        
+        // Auto-save functionality
+        const AUTOSAVE_KEY = 'tumor_measurements_autosave';
+        let autoSaveTimeout;
 
         // --- Event Listeners ---
-        addMeasurementDateBtn.addEventListener('click', addMeasurementDate);
+        addMeasurementDateBtn.addEventListener('click', () => {
+            addMeasurementDate();
+            autoSaveData(); // Auto-save after adding measurement date
+        });
         analyzeDataBtn.addEventListener('click', analyzeData);
         measurementDatesContainer.addEventListener('click', handleActions);
         measurementDatesContainer.addEventListener('input', handleCageIdChange);
@@ -357,16 +368,250 @@
         measurementDatesContainer.addEventListener('input', handleAnimalIdAutoIncrement);
         measurementDatesContainer.addEventListener('input', handleDateFieldBackgroundChange);
         measurementDatesContainer.addEventListener('input', handleGroupNameSync);
+        measurementDatesContainer.addEventListener('input', autoSaveData); // Auto-save on any input
         startDateInput.addEventListener('input', updateAllDayLabels);
         startDateInput.addEventListener('input', handleDateFieldBackgroundChange);
+        startDateInput.addEventListener('input', autoSaveData); // Auto-save on start date change
+        experimentIdInput.addEventListener('input', autoSaveData); // Auto-save on experiment ID change
         applyConfigBtn.addEventListener('click', applyConfiguration);
         loadDataBtn.addEventListener('click', loadDataFromCSV);
         exportDataBtn.addEventListener('click', exportDataToCSV);
         csvFileInput.addEventListener('change', handleCSVFileInput);
         hideAnalysisBtn.addEventListener('click', () => analysisSection.classList.add('hidden'));
 
-        // Initialize with one measurement date
-        addMeasurementDate();
+        // Auto-save and restore functions
+        function autoSaveData() {
+            // Debounce the save operation
+            clearTimeout(autoSaveTimeout);
+            autoSaveTimeout = setTimeout(() => {
+                try {
+                    const data = {
+                        experimentId: experimentIdInput.value,
+                        startDate: startDateInput.value,
+                        measurementDateCounter: measurementDateCounter,
+                        groupNames: groupNames,
+                        measurementDates: []
+                    };
+
+                    // Collect all measurement date sections
+                    const measurementDateSections = measurementDatesContainer.querySelectorAll('.measurement-date-section');
+                    measurementDateSections.forEach(section => {
+                        const measurementDate = section.querySelector('.measurement-date-input').value;
+                        const groups = [];
+                        
+                        const groupCards = section.querySelectorAll('.group-card');
+                        groupCards.forEach(card => {
+                            const groupName = card.querySelector('.group-name-input').value;
+                            const animals = [];
+                            
+                            const rows = card.querySelectorAll('tbody tr:not(.add-spacer)');
+                            rows.forEach(row => {
+                                const inputs = row.querySelectorAll('input');
+                                if (inputs.length >= 6) {
+                                    animals.push({
+                                        cageId: inputs[0].value,
+                                        animalId: inputs[1].value,
+                                        tumorNumber: inputs[2].value,
+                                        largeSize: inputs[3].value,
+                                        smallSize: inputs[4].value,
+                                        volume: inputs[5].value
+                                    });
+                                }
+                            });
+                            
+                            groups.push({
+                                groupName: groupName,
+                                animals: animals
+                            });
+                        });
+                        
+                        data.measurementDates.push({
+                            measurementDate: measurementDate,
+                            groups: groups
+                        });
+                    });
+
+                    localStorage.setItem(AUTOSAVE_KEY, JSON.stringify(data));
+                    console.log('Data auto-saved to localStorage');
+                } catch (error) {
+                    console.error('Auto-save failed:', error);
+                }
+            }, 1000); // Save after 1 second of inactivity
+        }
+
+        function autoRestoreData() {
+            try {
+                const savedData = localStorage.getItem(AUTOSAVE_KEY);
+                if (!savedData) return false;
+
+                const data = JSON.parse(savedData);
+                
+                // Clear existing data
+                measurementDatesContainer.innerHTML = '';
+                measurementDateCounter = 0;
+                
+                // Restore experiment metadata
+                if (data.experimentId) {
+                    experimentIdInput.value = data.experimentId;
+                }
+                if (data.startDate) {
+                    startDateInput.value = data.startDate;
+                    startDateInput.classList.remove('empty-date-field');
+                    startDateInput.classList.add('bg-gray-700');
+                }
+                
+                // Restore global settings
+                measurementDateCounter = data.measurementDateCounter || 0;
+                groupNames = data.groupNames || [];
+                
+                // Restore measurement dates
+                if (data.measurementDates && data.measurementDates.length > 0) {
+                    data.measurementDates.forEach(dateData => {
+                        addMeasurementDate();
+                        const currentSection = measurementDatesContainer.querySelector('.measurement-date-section:last-child');
+                        
+                        // Set measurement date
+                        const dateInput = currentSection.querySelector('.measurement-date-input');
+                        dateInput.value = dateData.measurementDate;
+                        dateInput.classList.remove('empty-date-field');
+                        dateInput.classList.add('bg-gray-700');
+                        
+                        // Update day label
+                        const dayLabelSpan = currentSection.querySelector('.day-label');
+                        if (dayLabelSpan) {
+                            updateDayLabel(dateInput, dayLabelSpan);
+                        }
+                        
+                        // Clear default groups and restore saved groups
+                        const groupsContainer = currentSection.querySelector('[data-groups-container]');
+                        groupsContainer.innerHTML = '';
+                        
+                        dateData.groups.forEach(groupData => {
+                            // Create group card
+                            const groupCard = document.createElement('div');
+                            groupCard.className = 'group-card bg-gray-700/50 p-4 rounded-lg border border-gray-600 flex-shrink-0';
+                            groupCard.style.width = '600px';
+                            
+                            groupCard.innerHTML = `
+                                <div class="mb-4">
+                                    <input type="text" value="${groupData.groupName}" class="text-lg font-semibold text-white text-center bg-transparent border-b-2 border-transparent hover:border-gray-500 focus:border-blue-500 focus:outline-none w-full group-name-input">
+                                </div>
+                                <div></div>
+                            `;
+                            
+                            const tableContainer = groupCard.querySelector('div:last-child');
+                            
+                            // Group animals by cage ID
+                            const cageGroups = {};
+                            groupData.animals.forEach(animal => {
+                                const cageId = animal.cageId || '';
+                                if (!cageGroups[cageId]) {
+                                    cageGroups[cageId] = [];
+                                }
+                                cageGroups[cageId].push(animal);
+                            });
+                            
+                            // Create cage groups
+                            Object.keys(cageGroups).forEach(cageId => {
+                                const cageAnimals = cageGroups[cageId];
+                                
+                                const cageGroup = document.createElement('div');
+                                cageGroup.className = 'cage-group';
+                                
+                                const cageHeader = document.createElement('div');
+                                cageHeader.className = 'cage-header';
+                                cageHeader.textContent = cageId && cageId.trim() !== '' ? `Cage ${cageId}` : 'Default Cage';
+                                cageGroup.appendChild(cageHeader);
+                                
+                                const cageTable = document.createElement('table');
+                                cageTable.className = 'w-full text-sm text-left text-gray-400 table-fixed';
+                                cageTable.innerHTML = `
+                                    <thead class="text-xs text-gray-300 uppercase bg-gray-700">
+                                        <tr>
+                                            <th scope="col" class="px-3 py-3 text-center">Cage ID</th>
+                                            <th scope="col" class="px-3 py-3 text-center">Animal ID</th>
+                                            <th scope="col" class="px-3 py-3 text-center">Tumor Number</th>
+                                            <th scope="col" class="px-3 py-3 text-center">Large Size (mm)</th>
+                                            <th scope="col" class="px-3 py-3 text-center">Small Size (mm)</th>
+                                            <th scope="col" class="px-3 py-3 text-center">Volume (mm³)</th>
+                                            <th scope="col" class="px-3 py-3 w-8"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                `;
+                                cageGroup.appendChild(cageTable);
+                                
+                                const tbody = cageTable.querySelector('tbody');
+                                cageAnimals.forEach(animal => {
+                                    const row = document.createElement('tr');
+                                    row.className = 'bg-gray-800 border-b border-gray-700 hover:bg-gray-600/50';
+                                    
+                                    // Determine styling for each field
+                                    const cageIdClass = animal.cageId === '' ? 'empty-cage-id' : 'bg-gray-700';
+                                    const largeSizeClass = animal.largeSize === '' ? 'empty-field' : 'bg-gray-700';
+                                    const smallSizeClass = animal.smallSize === '' ? 'empty-field' : 'bg-gray-700';
+                                    const volumeClass = animal.volume === '' ? 'bg-gray-600' : 'bg-gray-700';
+                                    
+                                    row.innerHTML = `
+                                        <td class="px-3 py-3"><input type="text" value="${animal.cageId}" placeholder="-" class="w-full text-sm ${cageIdClass} rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none cage-id-input"></td>
+                                        <td class="px-3 py-3"><input type="text" value="${animal.animalId}" class="w-full text-sm bg-gray-700 rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none animal-id-input"></td>
+                                        <td class="px-3 py-3"><input type="text" value="${animal.tumorNumber}" class="w-full text-sm bg-gray-700 rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none tumor-number-input"></td>
+                                        <td class="px-3 py-3"><input type="number" step="0.1" value="${animal.largeSize}" class="w-full text-sm ${largeSizeClass} rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none large-size-input"></td>
+                                        <td class="px-3 py-3"><input type="number" step="0.1" value="${animal.smallSize}" class="w-full text-sm ${smallSizeClass} rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none small-size-input"></td>
+                                        <td class="px-3 py-3"><input type="text" readonly value="${animal.volume}" class="w-full text-sm volume-input ${volumeClass} rounded p-2 border border-gray-600 focus:outline-none text-gray-300"></td>
+                                        <td class="px-3 py-3 text-center">
+                                            <button data-action="remove-animal" class="text-gray-500 hover:text-red-400 remove-btn opacity-20 text-lg">&times;</button>
+                                        </td>
+                                    `;
+                                    tbody.appendChild(row);
+                                    
+                                    // Add spacer
+                                    const spacer = document.createElement('tr');
+                                    spacer.className = 'add-spacer';
+                                    spacer.innerHTML = `
+                                        <td colspan="7" class="add-spacer" style="height: 12px; position: relative;">
+                                            <button class="add-tumor-btn" data-action="add-tumor-after">+</button>
+                                            <button class="add-animal-btn" data-action="add-animal-after">+</button>
+                                        </td>
+                                    `;
+                                    tbody.appendChild(spacer);
+                                });
+                                
+                                tableContainer.appendChild(cageGroup);
+                            });
+                            
+                            groupsContainer.appendChild(groupCard);
+                        });
+                    });
+                    
+                    // Validate all loaded data for size input errors
+                    validateAllSizeInputs();
+                    
+                    console.log('Data auto-restored from localStorage');
+                    return true;
+                } else {
+                    // No saved measurement dates, create default one
+                    addMeasurementDate();
+                    return false;
+                }
+            } catch (error) {
+                console.error('Auto-restore failed:', error);
+                // Fallback to default initialization
+                addMeasurementDate();
+                return false;
+            }
+        }
+
+        // Clear auto-saved data function
+        function clearAutoSave() {
+            localStorage.removeItem(AUTOSAVE_KEY);
+            console.log('Auto-saved data cleared');
+        }
+
+        // Initialize - try to restore data, otherwise create default
+        if (!autoRestoreData()) {
+            addMeasurementDate();
+        }
 
         // --- Core Functions ---
         function addMeasurementDate() {
@@ -529,8 +774,8 @@
                                 <td class="px-3 py-3"><input type="text" value="${cageId}" class="w-full text-sm bg-gray-700 rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none cage-id-input"></td>
                                 <td class="px-3 py-3"><input type="text" value="${animalId}" class="w-full text-sm bg-gray-700 rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none animal-id-input"></td>
                                 <td class="px-3 py-3"><input type="text" value="${tumorNumber}" class="w-full text-sm bg-gray-700 rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none tumor-number-input"></td>
-                                <td class="px-3 py-3"><input type="number" step="0.1" placeholder="0.0" class="w-full text-sm empty-field rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none large-size-input"></td>
-                                <td class="px-3 py-3"><input type="number" step="0.1" placeholder="0.0" class="w-full text-sm empty-field rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none small-size-input"></td>
+                                <td class="px-3 py-3"><input type="number" step="0.1" placeholder="" class="w-full text-sm empty-field rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none large-size-input"></td>
+                                <td class="px-3 py-3"><input type="number" step="0.1" placeholder="" class="w-full text-sm empty-field rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none small-size-input"></td>
                                 <td class="px-3 py-3"><input type="text" readonly class="w-full text-sm bg-gray-600 rounded p-2 border border-gray-600 focus:outline-none volume-input text-gray-300"></td>
                                 <td class="px-3 py-3 text-center">
                                     <button data-action="remove-animal" class="text-gray-500 hover:text-red-400 remove-btn opacity-20 text-lg">&times;</button>
@@ -576,8 +821,8 @@
                 <td class="px-3 py-3"><input type="text" value="${cageId}" placeholder="-" class="w-full text-sm ${cageId === '' ? 'empty-cage-id' : 'bg-gray-700'} rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none cage-id-input"></td>
                 <td class="px-3 py-3"><input type="text" value="${nextAnimalId}" class="w-full text-sm bg-gray-700 rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none animal-id-input"></td>
                 <td class="px-3 py-3"><input type="text" value="Tumor 1" class="w-full text-sm bg-gray-700 rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none tumor-number-input"></td>
-                <td class="px-3 py-3"><input type="number" step="0.1" placeholder="0.0" class="w-full text-sm empty-field rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none large-size-input"></td>
-                <td class="px-3 py-3"><input type="number" step="0.1" placeholder="0.0" class="w-full text-sm empty-field rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none small-size-input"></td>
+                <td class="px-3 py-3"><input type="number" step="0.1" placeholder="" class="w-full text-sm empty-field rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none large-size-input"></td>
+                <td class="px-3 py-3"><input type="number" step="0.1" placeholder="" class="w-full text-sm empty-field rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none small-size-input"></td>
                 <td class="px-3 py-3"><input type="text" readonly class="w-full text-sm bg-gray-600 rounded p-2 border border-gray-600 focus:outline-none volume-input text-gray-300"></td>
                 <td class="px-3 py-3 text-center">
                     <button data-action="remove-animal" class="text-gray-500 hover:text-red-400 remove-btn opacity-20 text-lg">&times;</button>
@@ -612,8 +857,8 @@
                 <td class="px-3 py-3"><input type="text" value="${cageId}" placeholder="-" class="w-full text-sm ${cageId === '' ? 'empty-cage-id' : 'bg-gray-700'} rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none cage-id-input"></td>
                 <td class="px-3 py-3"><input type="text" value="-" class="w-full text-sm bg-gray-700 rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none animal-id-input"></td>
                 <td class="px-3 py-3"><input type="text" value="Tumor 1" class="w-full text-sm bg-gray-700 rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none tumor-number-input"></td>
-                <td class="px-3 py-3"><input type="number" step="0.1" placeholder="0.0" class="w-full text-sm empty-field rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none large-size-input"></td>
-                <td class="px-3 py-3"><input type="number" step="0.1" placeholder="0.0" class="w-full text-sm empty-field rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none small-size-input"></td>
+                <td class="px-3 py-3"><input type="number" step="0.1" placeholder="" class="w-full text-sm empty-field rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none large-size-input"></td>
+                <td class="px-3 py-3"><input type="number" step="0.1" placeholder="" class="w-full text-sm empty-field rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none small-size-input"></td>
                 <td class="px-3 py-3"><input type="text" readonly class="w-full text-sm bg-gray-600 rounded p-2 border border-gray-600 focus:outline-none volume-input text-gray-300"></td>
                 <td class="px-3 py-3 text-center">
                     <button data-action="remove-animal" class="text-gray-500 hover:text-red-400 remove-btn opacity-20 text-lg">&times;</button>
@@ -667,8 +912,8 @@
                 <td class="px-3 py-3"><input type="text" value="${cageId}" class="w-full text-sm bg-gray-700 rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none cage-id-input"></td>
                 <td class="px-3 py-3"><input type="text" value="${animalId}" class="w-full text-sm bg-gray-700 rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none animal-id-input"></td>
                 <td class="px-3 py-3"><input type="text" value="Tumor ${tumorCount}" class="w-full text-sm bg-gray-700 rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none tumor-number-input"></td>
-                <td class="px-3 py-3"><input type="number" step="0.1" placeholder="0.0" class="w-full text-sm empty-field rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none large-size-input"></td>
-                <td class="px-3 py-3"><input type="number" step="0.1" placeholder="0.0" class="w-full text-sm empty-field rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none small-size-input"></td>
+                <td class="px-3 py-3"><input type="number" step="0.1" placeholder="" class="w-full text-sm empty-field rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none large-size-input"></td>
+                <td class="px-3 py-3"><input type="number" step="0.1" placeholder="" class="w-full text-sm empty-field rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none small-size-input"></td>
                 <td class="px-3 py-3"><input type="text" readonly class="w-full text-sm bg-gray-600 rounded p-2 border border-gray-600 focus:outline-none volume-input text-gray-300"></td>
                 <td class="px-3 py-3 text-center">
                     <button data-action="remove-animal" class="text-gray-500 hover:text-red-400 remove-btn opacity-20 text-lg">&times;</button>
@@ -699,10 +944,12 @@
                 const spacerRow = target.closest('tr.add-spacer');
                 const tbody = target.closest('tbody');
                 addAnimalRowAfter(tbody, spacerRow);
+                autoSaveData(); // Auto-save after adding animal
             } else if (action === 'add-tumor-after') {
                 const spacerRow = target.closest('tr.add-spacer');
                 const tbody = target.closest('tbody');
                 addTumorRowAfter(tbody, spacerRow);
+                autoSaveData(); // Auto-save after adding tumor
             } else if (action === 'remove-animal') {
                 const row = target.closest('tr');
                 // Also remove the following spacer if it exists
@@ -711,8 +958,10 @@
                     nextSibling.remove();
                 }
                 row.remove();
+                autoSaveData(); // Auto-save after removing animal
             } else if (action === 'remove-measurement-date') {
                 target.closest('.measurement-date-section').remove();
+                autoSaveData(); // Auto-save after removing measurement date
             }
         }
 
@@ -743,6 +992,14 @@
             const cageInputs = Array.from(cageGroup.querySelectorAll('.cage-id-input'));
             cageInputs.forEach(input => {
                 input.value = newValue;
+                // Update background styling for each input
+                if (newValue.trim() === '') {
+                    input.classList.remove('bg-gray-700');
+                    input.classList.add('empty-cage-id');
+                } else {
+                    input.classList.remove('empty-cage-id');
+                    input.classList.add('bg-gray-700');
+                }
             });
             
             // Update the cage header
@@ -940,13 +1197,17 @@
                 // Validate size inputs
                 const isValid = validateSizeInputs(row);
                 
-                if (large > 0 && small > 0 && isValid) {
+                if ((large > 0 && small > 0 && isValid) || (large === 0 && small === 0)) {
                     const volume = (large * Math.pow(small, 2)) / 2;
                     volumeInput.value = volume.toFixed(2);
-                    // Volume fields always keep light green background
+                    // Make volume field gray when it has calculated data
+                    volumeInput.classList.remove('bg-gray-600');
+                    volumeInput.classList.add('bg-gray-700');
                 } else {
                     volumeInput.value = '';
-                    // Volume fields always keep light green background
+                    // Reset volume field to original background when empty
+                    volumeInput.classList.remove('bg-gray-700');
+                    volumeInput.classList.add('bg-gray-600');
                 }
             }
         }
@@ -1120,6 +1381,10 @@
                     tableContainer.appendChild(cageGroup);
                 }
             });
+            
+            // Clear auto-save and start fresh since we applied new configuration
+            clearAutoSave();
+            autoSaveData();
         }
 
         function addAnimalRowWithData(tbody, cageId = '', animalId = '', tumorNumber = 'Tumor 1') {
@@ -1129,8 +1394,8 @@
                 <td class="px-3 py-3"><input type="text" value="${cageId}" placeholder="-" class="w-full text-sm ${cageId === '' ? 'empty-cage-id' : 'bg-gray-700'} rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none cage-id-input"></td>
                 <td class="px-3 py-3"><input type="text" value="${animalId}" class="w-full text-sm bg-gray-700 rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none animal-id-input"></td>
                 <td class="px-3 py-3"><input type="text" value="${tumorNumber}" class="w-full text-sm bg-gray-700 rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none tumor-number-input"></td>
-                <td class="px-3 py-3"><input type="number" step="0.1" placeholder="0.0" class="w-full text-sm empty-field rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none large-size-input"></td>
-                <td class="px-3 py-3"><input type="number" step="0.1" placeholder="0.0" class="w-full text-sm empty-field rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none small-size-input"></td>
+                <td class="px-3 py-3"><input type="number" step="0.1" placeholder="" class="w-full text-sm empty-field rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none large-size-input"></td>
+                <td class="px-3 py-3"><input type="number" step="0.1" placeholder="" class="w-full text-sm empty-field rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none small-size-input"></td>
                 <td class="px-3 py-3"><input type="text" readonly class="w-full text-sm bg-gray-600 rounded p-2 border border-gray-600 focus:outline-none volume-input text-gray-300"></td>
                 <td class="px-3 py-3 text-center">
                     <button data-action="remove-animal" class="text-gray-500 hover:text-red-400 remove-btn opacity-20 text-lg">&times;</button>
@@ -2388,7 +2653,7 @@
                                         <td class="px-3 py-3"><input type="text" value="${tumorNumber}" class="w-full text-sm bg-gray-700 rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none tumor-number-input"></td>
                                         <td class="px-3 py-3"><input type="number" step="0.1" value="${largeSize}" class="w-full text-sm ${largeSize === '' ? 'empty-field' : 'bg-gray-700'} rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none large-size-input"></td>
                                         <td class="px-3 py-3"><input type="number" step="0.1" value="${smallSize}" class="w-full text-sm ${smallSize === '' ? 'empty-field' : 'bg-gray-700'} rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none small-size-input"></td>
-                                        <td class="px-3 py-3"><input type="text" readonly value="${volume}" class="w-full text-sm volume-input rounded p-2 border border-gray-600 focus:outline-none text-gray-800"></td>
+                                        <td class="px-3 py-3"><input type="text" readonly value="${volume}" class="w-full text-sm volume-input ${volume !== '' ? 'bg-gray-700' : 'bg-gray-600'} rounded p-2 border border-gray-600 focus:outline-none text-gray-300"></td>
                                         <td class="px-3 py-3 text-center">
                                             <button data-action="remove-animal" class="text-gray-500 hover:text-red-400 remove-btn opacity-20 text-lg">&times;</button>
                                         </td>
@@ -2419,6 +2684,10 @@
                     
                     // Validate all loaded data for size input errors
                     validateAllSizeInputs();
+                    
+                    // Clear auto-save since we loaded fresh data from CSV
+                    clearAutoSave();
+                    autoSaveData(); // Start auto-saving the new data
                     
                 } catch (error) {
                     showError(`Error loading CSV: ${error.message}`);
