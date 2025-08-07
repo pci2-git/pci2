@@ -848,11 +848,17 @@
             const cageGroup = tbody.closest('.cage-group');
             const cageHeader = cageGroup ? cageGroup.querySelector('.cage-header') : null;
             
-            // Cage ID starts empty with placeholder
+            // Get cage ID from existing animals in this cage, or start empty
             let cageId = '';
+            const existingAnimalRows = tbody.querySelectorAll('tr:not(.add-spacer)');
+            if (existingAnimalRows.length > 0) {
+                const firstAnimalCageInput = existingAnimalRows[0].querySelector('.cage-id-input');
+                if (firstAnimalCageInput) {
+                    cageId = firstAnimalCageInput.value || '';
+                }
+            }
             
             // Count existing animal rows (not spacers) in this cage to determine next animal ID
-            const existingAnimalRows = tbody.querySelectorAll('tr:not(.add-spacer)');
             const nextAnimalId = (existingAnimalRows.length + 1).toString();
             
                 const row = document.createElement('tr');
@@ -887,8 +893,15 @@
             const cageGroup = tbody.closest('.cage-group');
             const cageHeader = cageGroup ? cageGroup.querySelector('.cage-header') : null;
             
-            // Cage ID starts empty with placeholder
+            // Get cage ID from existing animals in this cage, or start empty
             let cageId = '';
+            const existingAnimalRows = tbody.querySelectorAll('tr:not(.add-spacer)');
+            if (existingAnimalRows.length > 0) {
+                const firstAnimalCageInput = existingAnimalRows[0].querySelector('.cage-id-input');
+                if (firstAnimalCageInput) {
+                    cageId = firstAnimalCageInput.value || '';
+                }
+            }
             
             // Create the new animal row
             const row = document.createElement('tr');
@@ -925,8 +938,15 @@
             const cageGroup = tbody.closest('.cage-group');
             const cageHeader = cageGroup ? cageGroup.querySelector('.cage-header') : null;
             
-            // Cage ID starts empty with placeholder
+            // Get cage ID from existing animals in this cage, or start empty
             let cageId = '';
+            const existingAnimalRows = tbody.querySelectorAll('tr:not(.add-spacer)');
+            if (existingAnimalRows.length > 0) {
+                const firstAnimalCageInput = existingAnimalRows[0].querySelector('.cage-id-input');
+                if (firstAnimalCageInput) {
+                    cageId = firstAnimalCageInput.value || '';
+                }
+            }
             
             // Get animal ID from the previous row (the row that the spacer belongs to)
             let animalId = '';
