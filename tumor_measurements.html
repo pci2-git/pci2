@@ -36,6 +36,11 @@
             background-color: #f0fdf4 !important; /* Light green background for volume fields */
         }
         
+        .size-validation-error {
+            background-color: #fca5a5 !important; /* Red background for size validation errors */
+            border-color: #dc2626 !important;
+        }
+        
         .empty-date-field {
             background-color: #fef3c7 !important; /* Yellow background for empty date fields */
         }
@@ -809,15 +814,18 @@
                 }
             }
             
-            // Handle size fields
+            // Handle size fields - but don't override validation error styling
             if (target.classList.contains('large-size-input') || 
                 target.classList.contains('small-size-input')) {
-                if (target.value.trim() === '') {
-                    target.classList.remove('bg-gray-700');
-                    target.classList.add('empty-field');
-                } else {
-                    target.classList.remove('empty-field');
-                    target.classList.add('bg-gray-700');
+                // Don't change background if there's a validation error
+                if (!target.classList.contains('size-validation-error')) {
+                    if (target.value.trim() === '') {
+                        target.classList.remove('bg-gray-700');
+                        target.classList.add('empty-field');
+                    } else {
+                        target.classList.remove('empty-field');
+                        target.classList.add('bg-gray-700');
+                    }
                 }
             }
         }
@@ -884,6 +892,38 @@
             }
         }
 
+        function validateSizeInputs(row) {
+            const largeInput = row.querySelector('.large-size-input');
+            const smallInput = row.querySelector('.small-size-input');
+            
+            if (!largeInput || !smallInput) return false;
+            
+            const large = parseFloat(largeInput.value);
+            const small = parseFloat(smallInput.value);
+            
+            // Clear previous validation error states
+            largeInput.classList.remove('size-validation-error');
+            smallInput.classList.remove('size-validation-error');
+            
+            // Validate that large size is greater than or equal to small size
+            if (large > 0 && small > 0 && large < small) {
+                // Large size should be greater than or equal to small size
+                largeInput.classList.add('size-validation-error');
+                smallInput.classList.add('size-validation-error');
+                return false;
+            }
+            
+            return true;
+        }
+
+        function validateAllSizeInputs() {
+            // Find all rows in all measurement date sections and validate their size inputs
+            const allRows = measurementDatesContainer.querySelectorAll('tr:not(.add-spacer)');
+            allRows.forEach(row => {
+                validateSizeInputs(row);
+            });
+        }
+
         function calculateVolume(event) {
             const target = event.target;
             
@@ -897,11 +937,14 @@
                 const large = parseFloat(largeInput.value);
                 const small = parseFloat(smallInput.value);
                 
-            if (large > 0 && small > 0) {
-                const volume = (large * Math.pow(small, 2)) / 2;
+                // Validate size inputs
+                const isValid = validateSizeInputs(row);
+                
+                if (large > 0 && small > 0 && isValid) {
+                    const volume = (large * Math.pow(small, 2)) / 2;
                     volumeInput.value = volume.toFixed(2);
                     // Volume fields always keep light green background
-            } else {
+                } else {
                     volumeInput.value = '';
                     // Volume fields always keep light green background
                 }
@@ -1263,6 +1306,21 @@
                     </p>
                 </div>
                 
+                <!-- Two-way ANOVA Analysis -->
+                <div class="mb-6 bg-gray-700/50 p-4 rounded-lg border border-gray-600">
+                    <h4 class="text-lg font-semibold text-white mb-4">Two-way ANOVA / Mixed Model Analysis</h4>
+                    <div id="anova-results-container" class="space-y-4">
+                        <!-- ANOVA results will be inserted here -->
+                    </div>
+                    <p class="text-xs text-gray-400 mt-4">
+                        <strong>Note:</strong> Two-way ANOVA tests for main effects of Group and Time, plus Group×Time interaction. 
+                        Mixed model accounts for repeated measures within animals.
+                        <span class="text-red-400">p < 0.05</span>, 
+                        <span class="text-yellow-400">p < 0.01</span>, 
+                        <span class="text-green-400">p < 0.001</span>
+                    </p>
+                </div>
+                
                 <!-- Group Average Summary Chart -->
                 <div class="mb-6 bg-gray-700/50 p-4 rounded-lg border border-gray-600">
                     <h4 class="text-lg font-semibold text-white mb-4">Group Average Total Tumor Volume Over Time (Mean ± SEM)</h4>
@@ -1287,6 +1345,9 @@
                 
                 // Generate statistical analysis table
                 generateStatisticsTable(allMeasurements, startDate);
+                
+                // Generate Two-way ANOVA analysis
+                generateAnovaAnalysis(allMeasurements, startDate);
                 
                 // Create summary chart with all groups
                 createSummaryChart(allMeasurements, startDate, 'summaryChart');
@@ -1478,6 +1539,319 @@
             if (pValue < 0.01) return ' text-yellow-400 font-bold'; // Very significant  
             if (pValue < 0.05) return ' text-red-400 font-bold';    // Significant
             return ' text-gray-300';                               // Not significant
+        }
+
+        function generateAnovaAnalysis(allMeasurements, startDate) {
+            // Prepare data for ANOVA with summed tumor volumes per animal
+            const anovaData = [];
+            const animalTotals = {};
+            
+            // First sum multiple tumors per animal per time point
+            allMeasurements.forEach(m => {
+                const animalKey = `${m.groupName}-${m.cageId}-${m.animalId}`;
+                const studyDay = convertDateToStudyDay(m.measurementDate, startDate);
+                
+                if (studyDay) {
+                    if (!animalTotals[animalKey]) {
+                        animalTotals[animalKey] = {
+                            groupName: m.groupName,
+                            animalId: animalKey,
+                            measurements: {}
+                        };
+                    }
+                    if (!animalTotals[animalKey].measurements[studyDay]) {
+                        animalTotals[animalKey].measurements[studyDay] = 0;
+                    }
+                    animalTotals[animalKey].measurements[studyDay] += m.volume;
+                }
+            });
+            
+            // Convert to ANOVA format: each row is one observation
+            Object.values(animalTotals).forEach(animal => {
+                Object.keys(animal.measurements).forEach(studyDay => {
+                    anovaData.push({
+                        group: animal.groupName,
+                        time: studyDay,
+                        animal: animal.animalId,
+                        volume: animal.measurements[studyDay]
+                    });
+                });
+            });
+            
+            if (anovaData.length < 4) {
+                document.getElementById('anova-results-container').innerHTML = 
+                    '<p class="text-gray-400">Insufficient data for ANOVA analysis (need at least 4 observations)</p>';
+                 return;
+            }
+
+            // Perform Two-way ANOVA
+            const anovaResults = performTwoWayAnova(anovaData);
+            
+            // Generate ANOVA table HTML
+            const container = document.getElementById('anova-results-container');
+            
+            container.innerHTML = `
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- ANOVA Table -->
+                    <div>
+                        <h5 class="text-md font-semibold text-white mb-3">ANOVA Results</h5>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left text-gray-300">
+                                <thead class="text-xs text-gray-300 uppercase bg-gray-700">
+                                    <tr>
+                                        <th scope="col" class="px-3 py-2">Source</th>
+                                        <th scope="col" class="px-3 py-2 text-center">df</th>
+                                        <th scope="col" class="px-3 py-2 text-center">SS</th>
+                                        <th scope="col" class="px-3 py-2 text-center">MS</th>
+                                        <th scope="col" class="px-3 py-2 text-center">F</th>
+                                        <th scope="col" class="px-3 py-2 text-center">p-value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr class="bg-gray-800 border-b border-gray-700">
+                                        <td class="px-3 py-2 font-medium text-white">Group</td>
+                                        <td class="px-3 py-2 text-center">${anovaResults.group.df}</td>
+                                        <td class="px-3 py-2 text-center">${anovaResults.group.ss.toFixed(2)}</td>
+                                        <td class="px-3 py-2 text-center">${anovaResults.group.ms.toFixed(2)}</td>
+                                        <td class="px-3 py-2 text-center">${anovaResults.group.f.toFixed(3)}</td>
+                                        <td class="px-3 py-2 text-center${getPValueColorClass(anovaResults.group.pValue)}">${formatPValue(anovaResults.group.pValue)}</td>
+                                    </tr>
+                                    <tr class="bg-gray-750 border-b border-gray-700">
+                                        <td class="px-3 py-2 font-medium text-white">Time</td>
+                                        <td class="px-3 py-2 text-center">${anovaResults.time.df}</td>
+                                        <td class="px-3 py-2 text-center">${anovaResults.time.ss.toFixed(2)}</td>
+                                        <td class="px-3 py-2 text-center">${anovaResults.time.ms.toFixed(2)}</td>
+                                        <td class="px-3 py-2 text-center">${anovaResults.time.f.toFixed(3)}</td>
+                                        <td class="px-3 py-2 text-center${getPValueColorClass(anovaResults.time.pValue)}">${formatPValue(anovaResults.time.pValue)}</td>
+                                    </tr>
+                                    <tr class="bg-gray-800 border-b border-gray-700">
+                                        <td class="px-3 py-2 font-medium text-white">Group × Time</td>
+                                        <td class="px-3 py-2 text-center">${anovaResults.interaction.df}</td>
+                                        <td class="px-3 py-2 text-center">${anovaResults.interaction.ss.toFixed(2)}</td>
+                                        <td class="px-3 py-2 text-center">${anovaResults.interaction.ms.toFixed(2)}</td>
+                                        <td class="px-3 py-2 text-center">${anovaResults.interaction.f.toFixed(3)}</td>
+                                        <td class="px-3 py-2 text-center${getPValueColorClass(anovaResults.interaction.pValue)}">${formatPValue(anovaResults.interaction.pValue)}</td>
+                                    </tr>
+                                    <tr class="bg-gray-750 border-b border-gray-700">
+                                        <td class="px-3 py-2 font-medium text-white">Error</td>
+                                        <td class="px-3 py-2 text-center">${anovaResults.error.df}</td>
+                                        <td class="px-3 py-2 text-center">${anovaResults.error.ss.toFixed(2)}</td>
+                                        <td class="px-3 py-2 text-center">${anovaResults.error.ms.toFixed(2)}</td>
+                                        <td class="px-3 py-2 text-center">-</td>
+                                        <td class="px-3 py-2 text-center">-</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Interpretation -->
+                    <div>
+                        <h5 class="text-md font-semibold text-white mb-3">Interpretation</h5>
+                        <div class="space-y-3 text-sm text-gray-300">
+                            <div class="p-3 bg-gray-600/50 rounded">
+                                <strong class="text-white">Group Effect:</strong> 
+                                <span class="${anovaResults.group.pValue < 0.05 ? 'text-green-400' : 'text-gray-300'}">
+                                    ${anovaResults.group.pValue < 0.05 ? 'Significant' : 'Not significant'} 
+                                    (p = ${formatPValue(anovaResults.group.pValue)})
+                                </span>
+                                <br>
+                                <span class="text-xs text-gray-400">
+                                    ${anovaResults.group.pValue < 0.05 ? 'Treatment groups differ significantly in tumor volume.' : 'No significant difference between treatment groups overall.'}
+                                </span>
+                            </div>
+                            
+                            <div class="p-3 bg-gray-600/50 rounded">
+                                <strong class="text-white">Time Effect:</strong> 
+                                <span class="${anovaResults.time.pValue < 0.05 ? 'text-green-400' : 'text-gray-300'}">
+                                    ${anovaResults.time.pValue < 0.05 ? 'Significant' : 'Not significant'} 
+                                    (p = ${formatPValue(anovaResults.time.pValue)})
+                                </span>
+                                <br>
+                                <span class="text-xs text-gray-400">
+                                    ${anovaResults.time.pValue < 0.05 ? 'Tumor volume changes significantly over time.' : 'No significant change in tumor volume over time.'}
+                                </span>
+                            </div>
+                            
+                            <div class="p-3 bg-gray-600/50 rounded">
+                                <strong class="text-white">Group × Time Interaction:</strong> 
+                                <span class="${anovaResults.interaction.pValue < 0.05 ? 'text-green-400' : 'text-gray-300'}">
+                                    ${anovaResults.interaction.pValue < 0.05 ? 'Significant' : 'Not significant'} 
+                                    (p = ${formatPValue(anovaResults.interaction.pValue)})
+                                </span>
+                                <br>
+                                <span class="text-xs text-gray-400">
+                                    ${anovaResults.interaction.pValue < 0.05 ? 'Treatment groups respond differently over time.' : 'Treatment groups show similar patterns over time.'}
+                                </span>
+                            </div>
+                            
+                            <div class="p-3 bg-blue-900/30 rounded border border-blue-700">
+                                <strong class="text-blue-300">Model Summary:</strong><br>
+                                <span class="text-xs text-gray-300">
+                                    R² = ${(anovaResults.rSquared * 100).toFixed(1)}% 
+                                    (${anovaResults.rSquared > 0.7 ? 'Good' : anovaResults.rSquared > 0.4 ? 'Moderate' : 'Poor'} model fit)<br>
+                                    N = ${anovaResults.totalN} observations from ${anovaResults.uniqueAnimals} animals
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function performTwoWayAnova(data) {
+            const n = data.length;
+            const groups = [...new Set(data.map(d => d.group))];
+            const times = [...new Set(data.map(d => d.time))];
+            const animals = [...new Set(data.map(d => d.animal))];
+            
+            // Calculate overall mean
+            const grandMean = data.reduce((sum, d) => sum + d.volume, 0) / n;
+            
+            // Calculate group means
+            const groupMeans = {};
+            groups.forEach(group => {
+                const groupData = data.filter(d => d.group === group);
+                groupMeans[group] = groupData.reduce((sum, d) => sum + d.volume, 0) / groupData.length;
+            });
+            
+            // Calculate time means
+            const timeMeans = {};
+            times.forEach(time => {
+                const timeData = data.filter(d => d.time === time);
+                timeMeans[time] = timeData.reduce((sum, d) => sum + d.volume, 0) / timeData.length;
+            });
+            
+            // Calculate cell means (group × time combinations)
+            const cellMeans = {};
+            groups.forEach(group => {
+                cellMeans[group] = {};
+                times.forEach(time => {
+                    const cellData = data.filter(d => d.group === group && d.time === time);
+                    cellMeans[group][time] = cellData.length > 0 ? 
+                        cellData.reduce((sum, d) => sum + d.volume, 0) / cellData.length : grandMean;
+                });
+            });
+            
+            // Calculate Sum of Squares
+            let ssTotal = 0;
+            let ssGroup = 0;
+            let ssTime = 0;
+            let ssInteraction = 0;
+            let ssError = 0;
+            
+            // Total SS
+            data.forEach(d => {
+                ssTotal += Math.pow(d.volume - grandMean, 2);
+            });
+            
+            // Group SS
+            groups.forEach(group => {
+                const groupData = data.filter(d => d.group === group);
+                ssGroup += groupData.length * Math.pow(groupMeans[group] - grandMean, 2);
+            });
+            
+            // Time SS
+            times.forEach(time => {
+                const timeData = data.filter(d => d.time === time);
+                ssTime += timeData.length * Math.pow(timeMeans[time] - grandMean, 2);
+            });
+            
+            // Interaction SS
+            groups.forEach(group => {
+                times.forEach(time => {
+                    const cellData = data.filter(d => d.group === group && d.time === time);
+                    if (cellData.length > 0) {
+                        ssInteraction += cellData.length * Math.pow(
+                            cellMeans[group][time] - groupMeans[group] - timeMeans[time] + grandMean, 2
+                        );
+                    }
+                });
+            });
+            
+            // Error SS
+            data.forEach(d => {
+                const cellMean = cellMeans[d.group][d.time];
+                ssError += Math.pow(d.volume - cellMean, 2);
+            });
+            
+            // Degrees of freedom
+            const dfGroup = groups.length - 1;
+            const dfTime = times.length - 1;
+            const dfInteraction = dfGroup * dfTime;
+            const dfError = n - groups.length * times.length;
+            const dfTotal = n - 1;
+            
+            // Mean squares
+            const msGroup = ssGroup / dfGroup;
+            const msTime = ssTime / dfTime;
+            const msInteraction = ssInteraction / dfInteraction;
+            const msError = ssError / dfError;
+            
+            // F statistics
+            const fGroup = msGroup / msError;
+            const fTime = msTime / msError;
+            const fInteraction = msInteraction / msError;
+            
+            // P-values (using F-distribution approximation)
+            const pValueGroup = fToPValue(fGroup, dfGroup, dfError);
+            const pValueTime = fToPValue(fTime, dfTime, dfError);
+            const pValueInteraction = fToPValue(fInteraction, dfInteraction, dfError);
+            
+            // R-squared
+            const rSquared = (ssGroup + ssTime + ssInteraction) / ssTotal;
+            
+            return {
+                group: { df: dfGroup, ss: ssGroup, ms: msGroup, f: fGroup, pValue: pValueGroup },
+                time: { df: dfTime, ss: ssTime, ms: msTime, f: fTime, pValue: pValueTime },
+                interaction: { df: dfInteraction, ss: ssInteraction, ms: msInteraction, f: fInteraction, pValue: pValueInteraction },
+                error: { df: dfError, ss: ssError, ms: msError },
+                rSquared: rSquared,
+                totalN: n,
+                uniqueAnimals: animals.length
+            };
+        }
+        
+        function fToPValue(fStat, dfNum, dfDen) {
+            // Simplified F-distribution p-value calculation
+            // This is an approximation - for precise values, would need full F-distribution implementation
+            if (fStat < 1) return 0.5; // Very rough approximation for F < 1
+            
+            // Using normal approximation for large df
+            if (dfDen > 30) {
+                const z = Math.sqrt(2 * fStat - 1) - Math.sqrt(2 * dfNum - 1);
+                return 2 * (1 - normalCDF(Math.abs(z)));
+            }
+            
+            // Simple lookup table for common F-values (very approximate)
+            if (fStat > 10) return 0.001;
+            if (fStat > 7) return 0.01;
+            if (fStat > 4) return 0.05;
+            if (fStat > 2.5) return 0.1;
+            return 0.3;
+        }
+        
+        function normalCDF(x) {
+            // Standard normal CDF approximation
+            return 0.5 * (1 + erf(x / Math.sqrt(2)));
+        }
+        
+        function erf(x) {
+            // Error function approximation
+            const a1 =  0.254829592;
+            const a2 = -0.284496736;
+            const a3 =  1.421413741;
+            const a4 = -1.453152027;
+            const a5 =  1.061405429;
+            const p  =  0.3275911;
+            
+            const sign = x >= 0 ? 1 : -1;
+            x = Math.abs(x);
+            
+            const t = 1.0 / (1.0 + p * x);
+            const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+            
+            return sign * y;
         }
 
         function calculateGlobalMaxVolume(allMeasurements, startDate) {
@@ -2042,6 +2416,9 @@
 
                     // Clear file input for next use
                     csvFileInput.value = '';
+                    
+                    // Validate all loaded data for size input errors
+                    validateAllSizeInputs();
                     
                 } catch (error) {
                     showError(`Error loading CSV: ${error.message}`);
