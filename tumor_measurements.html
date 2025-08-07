@@ -135,6 +135,103 @@
             transform: scale(1.1);
         }
         
+        /* Group management buttons */
+        .group-remove-btn {
+            background: #dc2626;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            position: absolute;
+            top: 8px;
+            right: 8px;
+        }
+        
+        .group-remove-btn:hover {
+            opacity: 1;
+            background: #b91c1c;
+            transform: scale(1.1);
+        }
+        
+        .add-group-card {
+            background: rgba(59, 130, 246, 0.1);
+            border: 2px dashed #3b82f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+        
+        .add-group-card:hover {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: #2563eb;
+        }
+        
+        .add-group-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+        
+        .add-group-btn:hover {
+            background: #2563eb;
+            transform: scale(1.1);
+        }
+        
+        .add-cage-btn {
+            background: #22c55e;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 12px;
+            width: 100%;
+        }
+        
+        .add-cage-btn:hover {
+            background: #16a34a;
+            transform: translateY(-1px);
+        }
+        
+        /* Make Large Size and Small Size columns wider for 4-digit numbers */
+        .table-fixed th:nth-child(4),
+        .table-fixed th:nth-child(5) {
+            width: 80px !important;
+        }
+        
+        .table-fixed td:nth-child(4),
+        .table-fixed td:nth-child(5) {
+            width: 80px !important;
+        }
+        
         /* Hide number input spinners */
         .large-size-input::-webkit-outer-spin-button,
         .large-size-input::-webkit-inner-spin-button,
@@ -164,16 +261,15 @@
         /* Animal button (blue) */
         .add-animal-btn {
             position: absolute;
-            left: 24%;
+            left: 65%;
             top: 50%;
             transform: translate(-50%, -50%);
             background: #3b82f6;
             color: white;
             border: none;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            font-size: 14px;
+            border-radius: 6px;
+            padding: 2px 8px;
+            font-size: 10px;
             font-weight: bold;
             cursor: pointer;
             opacity: 0.3;
@@ -183,21 +279,21 @@
             justify-content: center;
             line-height: 1;
             z-index: 10;
+            white-space: nowrap;
         }
         
         /* Tumor button (green) */
         .add-tumor-btn {
             position: absolute;
-            left: 40%;
+            left: 35%;
             top: 50%;
             transform: translate(-50%, -50%);
             background: #22c55e;
             color: white;
             border: none;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            font-size: 14px;
+            border-radius: 6px;
+            padding: 2px 8px;
+            font-size: 10px;
             font-weight: bold;
             cursor: pointer;
             opacity: 0.3;
@@ -207,6 +303,7 @@
             justify-content: center;
             line-height: 1;
             z-index: 10;
+            white-space: nowrap;
         }
         
         .add-spacer:hover .add-animal-btn,
@@ -494,7 +591,7 @@
                 // Restore measurement dates
                 if (data.measurementDates && data.measurementDates.length > 0) {
                     data.measurementDates.forEach(dateData => {
-                        addMeasurementDate();
+        addMeasurementDate();
                         const currentSection = measurementDatesContainer.querySelector('.measurement-date-section:last-child');
                         
                         // Set measurement date
@@ -516,10 +613,11 @@
                         dateData.groups.forEach(groupData => {
                             // Create group card
                             const groupCard = document.createElement('div');
-                            groupCard.className = 'group-card bg-gray-700/50 p-4 rounded-lg border border-gray-600 flex-shrink-0';
-                            groupCard.style.width = '600px';
+                                        groupCard.className = 'group-card bg-gray-700/50 p-4 rounded-lg border border-gray-600 flex-shrink-0 relative';
+            groupCard.style.width = '600px';
                             
                             groupCard.innerHTML = `
+                                <button class="group-remove-btn" data-action="remove-group">&times;</button>
                                 <div class="mb-4">
                                     <input type="text" value="${groupData.groupName}" class="text-lg font-semibold text-white text-center bg-transparent border-b-2 border-transparent hover:border-gray-500 focus:border-blue-500 focus:outline-none w-full group-name-input">
                                 </div>
@@ -601,8 +699,8 @@
                                     spacer.className = 'add-spacer';
                                     spacer.innerHTML = `
                                         <td colspan="7" class="add-spacer" style="height: 12px; position: relative;">
-                                            <button class="add-tumor-btn" data-action="add-tumor-after">+</button>
-                                            <button class="add-animal-btn" data-action="add-animal-after">+</button>
+                                            <button class="add-tumor-btn" data-action="add-tumor-after">add tumor</button>
+                                            <button class="add-animal-btn" data-action="add-animal-after">add mouse</button>
                                         </td>
                                     `;
                                     tbody.appendChild(spacer);
@@ -611,8 +709,24 @@
                                 tableContainer.appendChild(cageGroup);
                             });
                             
+                            // Add the add cage button to each group
+                            const addCageBtn = document.createElement('button');
+                            addCageBtn.className = 'add-cage-btn';
+                            addCageBtn.setAttribute('data-action', 'add-cage');
+                            addCageBtn.textContent = '+ Add Cage';
+                            tableContainer.appendChild(addCageBtn);
+                            
                             groupsContainer.appendChild(groupCard);
                         });
+                        
+                        // Add the "Add Group" card at the end of each measurement date
+                        const addGroupCard = document.createElement('div');
+                        addGroupCard.className = 'add-group-card rounded-lg flex-shrink-0';
+                        addGroupCard.style.width = '200px';
+                        addGroupCard.innerHTML = `
+                            <button class="add-group-btn" data-action="add-group">+</button>
+                        `;
+                        groupsContainer.appendChild(addGroupCard);
                     });
                     
                     // Validate all loaded data for size input errors
@@ -699,9 +813,10 @@
             
             groupsToCreate.forEach((groupName, index) => {
                 const groupCard = document.createElement('div');
-                groupCard.className = 'group-card bg-gray-700/50 p-4 rounded-lg border border-gray-600 flex-shrink-0';
+                            groupCard.className = 'group-card bg-gray-700/50 p-4 rounded-lg border border-gray-600 flex-shrink-0 relative';
                 groupCard.style.width = '600px'; // Much wider for better text spacing
                 groupCard.innerHTML = `
+                    <button class="group-remove-btn" data-action="remove-group">&times;</button>
                     <div class="mb-4">
                         <input type="text" value="${groupName}" class="text-lg font-semibold text-white text-center bg-transparent border-b-2 border-transparent hover:border-gray-500 focus:border-blue-500 focus:outline-none w-full group-name-input">
                     </div>
@@ -729,11 +844,21 @@
                                 </tbody>
                             </table>
                         </div>
+                        <button class="add-cage-btn" data-action="add-cage">+ Add Cage</button>
                     </div>
                 `;
                 groupsContainer.appendChild(groupCard);
                 addAnimalRow(groupCard.querySelector('tbody')); // Add one animal row by default
             });
+            
+            // Add the "Add Group" card at the end
+            const addGroupCard = document.createElement('div');
+            addGroupCard.className = 'add-group-card rounded-lg flex-shrink-0';
+            addGroupCard.style.width = '200px';
+            addGroupCard.innerHTML = `
+                <button class="add-group-btn" data-action="add-group">+</button>
+            `;
+            groupsContainer.appendChild(addGroupCard);
         }
 
         function copyGroupsFromPreviousDate(newMeasurementDateSection, previousMeasurementDateSection) {
@@ -750,6 +875,7 @@
                 const groupName = previousGroupCard.querySelector('.group-name-input').value.trim();
                 
                 newGroupCard.innerHTML = `
+                    <button class="group-remove-btn" data-action="remove-group">&times;</button>
                     <div class="mb-4">
                         <input type="text" value="${groupName}" class="text-lg font-semibold text-white text-center bg-transparent border-b-2 border-transparent hover:border-gray-500 focus:border-blue-500 focus:outline-none w-full group-name-input">
                     </div>
@@ -839,8 +965,24 @@
                     newTableContainer.appendChild(newCageGroup);
                 });
                 
+                // Add the add cage button
+                const addCageBtn = document.createElement('button');
+                addCageBtn.className = 'add-cage-btn';
+                addCageBtn.setAttribute('data-action', 'add-cage');
+                addCageBtn.textContent = '+ Add Cage';
+                newTableContainer.appendChild(addCageBtn);
+                
                 newGroupsContainer.appendChild(newGroupCard);
             });
+            
+            // Add the "Add Group" card at the end
+            const addGroupCard = document.createElement('div');
+            addGroupCard.className = 'add-group-card rounded-lg flex-shrink-0';
+            addGroupCard.style.width = '200px';
+            addGroupCard.innerHTML = `
+                <button class="add-group-btn" data-action="add-group">+</button>
+            `;
+            newGroupsContainer.appendChild(addGroupCard);
         }
 
         function addAnimalRow(tbody) {
@@ -881,8 +1023,8 @@
             spacer.className = 'add-spacer';
             spacer.innerHTML = `
                 <td colspan="7" class="add-spacer" style="height: 12px; position: relative;">
-                    <button class="add-tumor-btn" data-action="add-tumor-after">+</button>
-                    <button class="add-animal-btn" data-action="add-animal-after">+</button>
+                    <button class="add-tumor-btn" data-action="add-tumor-after">add tumor</button>
+                    <button class="add-animal-btn" data-action="add-animal-after">add mouse</button>
                 </td>
             `;
             tbody.appendChild(spacer);
@@ -923,8 +1065,8 @@
             spacer.className = 'add-spacer';
             spacer.innerHTML = `
                 <td colspan="7" class="add-spacer" style="height: 12px; position: relative;">
-                    <button class="add-tumor-btn" data-action="add-tumor-after">+</button>
-                    <button class="add-animal-btn" data-action="add-animal-after">+</button>
+                    <button class="add-tumor-btn" data-action="add-tumor-after">add tumor</button>
+                    <button class="add-animal-btn" data-action="add-animal-after">add mouse</button>
                 </td>
             `;
             
@@ -985,8 +1127,8 @@
             spacer.className = 'add-spacer';
             spacer.innerHTML = `
                 <td colspan="7" class="add-spacer" style="height: 12px; position: relative;">
-                    <button class="add-tumor-btn" data-action="add-tumor-after">+</button>
-                    <button class="add-animal-btn" data-action="add-animal-after">+</button>
+                    <button class="add-tumor-btn" data-action="add-tumor-after">add tumor</button>
+                    <button class="add-animal-btn" data-action="add-animal-after">add mouse</button>
                 </td>
             `;
             
@@ -1028,6 +1170,174 @@
                     cageGroup.remove();
                     autoSaveData(); // Auto-save after removing cage
                 }
+            } else if (action === 'remove-group') {
+                const groupCard = target.closest('.group-card');
+                const groupsContainer = target.closest('[data-groups-container]');
+                const groupCards = groupsContainer.querySelectorAll('.group-card');
+                
+                // Only allow removal if there are more than 1 group
+                if (groupCards.length > 1 && groupCard) {
+                    groupCard.remove();
+                    autoSaveData(); // Auto-save after removing group
+                }
+            } else if (action === 'add-group') {
+                const groupsContainer = target.closest('[data-groups-container]');
+                const addGroupCard = target.closest('.add-group-card');
+                const existingGroupCards = groupsContainer.querySelectorAll('.group-card');
+                const newGroupNumber = existingGroupCards.length + 1;
+                
+                // Create new group card
+                const newGroupCard = document.createElement('div');
+                newGroupCard.className = 'group-card bg-gray-700/50 p-4 rounded-lg border border-gray-600 flex-shrink-0 relative';
+                newGroupCard.style.width = '600px';
+                newGroupCard.innerHTML = `
+                    <button class="group-remove-btn" data-action="remove-group">&times;</button>
+                    <div class="mb-4">
+                        <input type="text" value="Group ${newGroupNumber}" class="text-lg font-semibold text-white text-center bg-transparent border-b-2 border-transparent hover:border-gray-500 focus:border-blue-500 focus:outline-none w-full group-name-input">
+                    </div>
+                    <div>
+                        <button class="add-cage-btn" data-action="add-cage">+ Add Cage</button>
+                    </div>
+                `;
+                
+                // Insert before the add group card
+                groupsContainer.insertBefore(newGroupCard, addGroupCard);
+                
+                // Copy structure from the last existing group
+                if (existingGroupCards.length > 0) {
+                    const lastGroup = existingGroupCards[existingGroupCards.length - 1];
+                    const lastGroupCages = lastGroup.querySelectorAll('.cage-group');
+                    const tableContainer = newGroupCard.querySelector('div:last-child');
+                    const addCageBtn = tableContainer.querySelector('.add-cage-btn');
+                    
+                    // Copy each cage from the last group
+                    lastGroupCages.forEach(lastCage => {
+                        // Count animals in this cage (excluding spacer rows)
+                        const animalRows = lastCage.querySelectorAll('tbody tr:not(.add-spacer)');
+                        const animalCount = animalRows.length;
+                        
+                        // Create new cage with same structure
+                        const newCageGroup = document.createElement('div');
+                        newCageGroup.className = 'cage-group';
+                        newCageGroup.innerHTML = `
+                            <div class="cage-header">
+                                <span>Default Cage</span>
+                                <button class="cage-remove-btn" data-action="remove-cage">&times;</button>
+                            </div>
+                            <table class="w-full text-sm text-left text-gray-400 table-fixed">
+                                <thead class="text-xs text-gray-300 uppercase bg-gray-700">
+                                    <tr>
+                                        <th scope="col" class="px-3 py-3 text-center">Cage ID</th>
+                                        <th scope="col" class="px-3 py-3 text-center">Animal ID</th>
+                                        <th scope="col" class="px-3 py-3 text-center">Tumor Number</th>
+                                        <th scope="col" class="px-3 py-3 text-center">Large Size (mm)</th>
+                                        <th scope="col" class="px-3 py-3 text-center">Small Size (mm)</th>
+                                        <th scope="col" class="px-3 py-3 text-center">Volume (mm³)</th>
+                                        <th scope="col" class="px-3 py-3 w-8"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Animal rows will be inserted here -->
+                                </tbody>
+                            </table>
+                        `;
+                        
+                        // Insert before the add cage button
+                        tableContainer.insertBefore(newCageGroup, addCageBtn);
+                        
+                        // Add the same number of animals as the original cage
+                        const tbody = newCageGroup.querySelector('tbody');
+                        for (let i = 0; i < animalCount; i++) {
+                            addAnimalRow(tbody);
+                        }
+                    });
+                } else {
+                    // No existing groups, create default structure
+                    const tableContainer = newGroupCard.querySelector('div:last-child');
+                    const addCageBtn = tableContainer.querySelector('.add-cage-btn');
+                    
+                    const defaultCageGroup = document.createElement('div');
+                    defaultCageGroup.className = 'cage-group';
+                    defaultCageGroup.innerHTML = `
+                        <div class="cage-header">
+                            <span>Default Cage</span>
+                            <button class="cage-remove-btn" data-action="remove-cage">&times;</button>
+                        </div>
+                        <table class="w-full text-sm text-left text-gray-400 table-fixed">
+                            <thead class="text-xs text-gray-300 uppercase bg-gray-700">
+                                <tr>
+                                    <th scope="col" class="px-3 py-3 text-center">Cage ID</th>
+                                    <th scope="col" class="px-3 py-3 text-center">Animal ID</th>
+                                    <th scope="col" class="px-3 py-3 text-center">Tumor Number</th>
+                                    <th scope="col" class="px-3 py-3 text-center">Large Size (mm)</th>
+                                    <th scope="col" class="px-3 py-3 text-center">Small Size (mm)</th>
+                                    <th scope="col" class="px-3 py-3 text-center">Volume (mm³)</th>
+                                    <th scope="col" class="px-3 py-3 w-8"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Animal rows will be inserted here -->
+                            </tbody>
+                        </table>
+                    `;
+                    
+                    tableContainer.insertBefore(defaultCageGroup, addCageBtn);
+                    addAnimalRow(defaultCageGroup.querySelector('tbody'));
+                }
+                
+                autoSaveData(); // Auto-save after adding group
+            } else if (action === 'add-cage') {
+                const groupCard = target.closest('.group-card');
+                const cagesContainer = groupCard.querySelector('div:last-child');
+                const addCageBtn = target;
+                
+                // Find the previous cage to determine how many animals to add
+                const existingCages = groupCard.querySelectorAll('.cage-group');
+                let animalCount = 1; // Default to 1 animal
+                
+                if (existingCages.length > 0) {
+                    // Get the last cage and count its animals (excluding spacer rows)
+                    const lastCage = existingCages[existingCages.length - 1];
+                    const animalRows = lastCage.querySelectorAll('tbody tr:not(.add-spacer)');
+                    animalCount = animalRows.length;
+                }
+                
+                // Create new cage
+                const newCageGroup = document.createElement('div');
+                newCageGroup.className = 'cage-group';
+                newCageGroup.innerHTML = `
+                    <div class="cage-header">
+                        <span>Default Cage</span>
+                        <button class="cage-remove-btn" data-action="remove-cage">&times;</button>
+                    </div>
+                    <table class="w-full text-sm text-left text-gray-400 table-fixed">
+                        <thead class="text-xs text-gray-300 uppercase bg-gray-700">
+                            <tr>
+                                <th scope="col" class="px-3 py-3 text-center">Cage ID</th>
+                                <th scope="col" class="px-3 py-3 text-center">Animal ID</th>
+                                <th scope="col" class="px-3 py-3 text-center">Tumor Number</th>
+                                <th scope="col" class="px-3 py-3 text-center">Large Size (mm)</th>
+                                <th scope="col" class="px-3 py-3 text-center">Small Size (mm)</th>
+                                <th scope="col" class="px-3 py-3 text-center">Volume (mm³)</th>
+                                <th scope="col" class="px-3 py-3 w-8"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Animal rows will be inserted here -->
+                        </tbody>
+                    </table>
+                `;
+                
+                // Insert before the add cage button
+                cagesContainer.insertBefore(newCageGroup, addCageBtn);
+                
+                // Add the same number of animals as the previous cage
+                const tbody = newCageGroup.querySelector('tbody');
+                for (let i = 0; i < animalCount; i++) {
+                    addAnimalRow(tbody);
+                }
+                
+                autoSaveData(); // Auto-save after adding cage
             }
         }
 
@@ -1081,9 +1391,9 @@
                 } else {
                     // Fallback for old format headers
                     if (newValue && newValue.trim() !== '') {
-                        cageHeader.textContent = `Cage ${newValue}`;
+                cageHeader.textContent = `Cage ${newValue}`;
                     } else {
-                        cageHeader.textContent = 'Default Cage';
+                cageHeader.textContent = 'Default Cage';
                     }
                 }
             }
@@ -1154,12 +1464,12 @@
                 target.classList.contains('small-size-input')) {
                 // Don't change background if there's a validation error
                 if (!target.classList.contains('size-validation-error')) {
-                    if (target.value.trim() === '') {
-                        target.classList.remove('bg-gray-700');
-                        target.classList.add('empty-field');
-                    } else {
-                        target.classList.remove('empty-field');
-                        target.classList.add('bg-gray-700');
+                if (target.value.trim() === '') {
+                    target.classList.remove('bg-gray-700');
+                    target.classList.add('empty-field');
+                } else {
+                    target.classList.remove('empty-field');
+                    target.classList.add('bg-gray-700');
                     }
                 }
             }
@@ -1276,12 +1586,12 @@
                 const isValid = validateSizeInputs(row);
                 
                 if ((large > 0 && small > 0 && isValid) || (large === 0 && small === 0)) {
-                    const volume = (large * Math.pow(small, 2)) / 2;
+                const volume = (large * Math.pow(small, 2)) / 2;
                     volumeInput.value = volume.toFixed(2);
                     // Make volume field gray when it has calculated data
                     volumeInput.classList.remove('bg-gray-600');
                     volumeInput.classList.add('bg-gray-700');
-                } else {
+            } else {
                     volumeInput.value = '';
                     // Reset volume field to original background when empty
                     volumeInput.classList.remove('bg-gray-700');
@@ -1461,6 +1771,13 @@
                     
                     tableContainer.appendChild(cageGroup);
                 }
+                
+                // Add the add cage button after all cages
+                const addCageBtn = document.createElement('button');
+                addCageBtn.className = 'add-cage-btn';
+                addCageBtn.setAttribute('data-action', 'add-cage');
+                addCageBtn.textContent = '+ Add Cage';
+                tableContainer.appendChild(addCageBtn);
             });
             
             // Clear auto-save and start fresh since we applied new configuration
@@ -1489,8 +1806,8 @@
             spacer.className = 'add-spacer';
             spacer.innerHTML = `
                 <td colspan="7" class="add-spacer" style="height: 12px; position: relative;">
-                    <button class="add-tumor-btn" data-action="add-tumor-after">+</button>
-                    <button class="add-animal-btn" data-action="add-animal-after">+</button>
+                    <button class="add-tumor-btn" data-action="add-tumor-after">add tumor</button>
+                    <button class="add-animal-btn" data-action="add-animal-after">add mouse</button>
                 </td>
             `;
             tbody.appendChild(spacer);
@@ -2666,7 +2983,7 @@
                             
                             // Create group card
                             const groupCard = document.createElement('div');
-                            groupCard.className = 'group-card bg-gray-700/50 p-4 rounded-lg border border-gray-600 flex-shrink-0';
+                                        groupCard.className = 'group-card bg-gray-700/50 p-4 rounded-lg border border-gray-600 flex-shrink-0 relative';
                             groupCard.style.width = '600px';
                             
                             // Group by cage ID
@@ -2746,36 +3063,36 @@
                                     
                                     // Add each tumor as a separate row
                                     animalTumors.forEach(rowData => {
-                                        const tumorNumber = rowData['Tumor Number'] || rowData['tumorNumber'] || 'Tumor 1';
-                                        const largeSize = rowData['Large Size'] || rowData['largeSize'] || '';
-                                        const smallSize = rowData['Small Size'] || rowData['smallSize'] || '';
-                                        const volume = rowData['Volume'] || rowData['volume'] || '';
-                                        
-                                        const row = document.createElement('tr');
-                                        row.className = 'bg-gray-800 border-b border-gray-700 hover:bg-gray-600/50';
-                                        row.innerHTML = `
-                                            <td class="px-3 py-3"><input type="text" value="${cageId}" placeholder="-" class="w-full text-sm ${cageId === '' ? 'empty-cage-id' : 'bg-gray-700'} rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none cage-id-input"></td>
-                                            <td class="px-3 py-3"><input type="text" value="${animalId}" class="w-full text-sm bg-gray-700 rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none animal-id-input"></td>
-                                            <td class="px-3 py-3"><input type="text" value="${tumorNumber}" class="w-full text-sm bg-gray-700 rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none tumor-number-input"></td>
-                                            <td class="px-3 py-3"><input type="number" step="0.1" value="${largeSize}" class="w-full text-sm ${largeSize === '' ? 'empty-field' : 'bg-gray-700'} rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none large-size-input"></td>
-                                            <td class="px-3 py-3"><input type="number" step="0.1" value="${smallSize}" class="w-full text-sm ${smallSize === '' ? 'empty-field' : 'bg-gray-700'} rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none small-size-input"></td>
+                                    const tumorNumber = rowData['Tumor Number'] || rowData['tumorNumber'] || 'Tumor 1';
+                                    const largeSize = rowData['Large Size'] || rowData['largeSize'] || '';
+                                    const smallSize = rowData['Small Size'] || rowData['smallSize'] || '';
+                                    const volume = rowData['Volume'] || rowData['volume'] || '';
+                                    
+                                    const row = document.createElement('tr');
+                                    row.className = 'bg-gray-800 border-b border-gray-700 hover:bg-gray-600/50';
+                                    row.innerHTML = `
+                                        <td class="px-3 py-3"><input type="text" value="${cageId}" placeholder="-" class="w-full text-sm ${cageId === '' ? 'empty-cage-id' : 'bg-gray-700'} rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none cage-id-input"></td>
+                                        <td class="px-3 py-3"><input type="text" value="${animalId}" class="w-full text-sm bg-gray-700 rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none animal-id-input"></td>
+                                        <td class="px-3 py-3"><input type="text" value="${tumorNumber}" class="w-full text-sm bg-gray-700 rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none tumor-number-input"></td>
+                                        <td class="px-3 py-3"><input type="number" step="0.1" value="${largeSize}" class="w-full text-sm ${largeSize === '' ? 'empty-field' : 'bg-gray-700'} rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none large-size-input"></td>
+                                        <td class="px-3 py-3"><input type="number" step="0.1" value="${smallSize}" class="w-full text-sm ${smallSize === '' ? 'empty-field' : 'bg-gray-700'} rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none small-size-input"></td>
                                             <td class="px-3 py-3"><input type="text" readonly value="${volume}" class="w-full text-sm volume-input ${volume !== '' ? 'bg-gray-700' : 'bg-gray-600'} rounded p-2 border border-gray-600 focus:outline-none text-gray-300"></td>
-                                            <td class="px-3 py-3 text-center">
-                                                <button data-action="remove-animal" class="text-gray-500 hover:text-red-400 remove-btn opacity-20 text-lg">&times;</button>
-                                            </td>
-                                        `;
-                                        tbody.appendChild(row);
-                                        
-                                        // Add combined spacer with both buttons
-                                        const spacer = document.createElement('tr');
-                                        spacer.className = 'add-spacer';
-                                        spacer.innerHTML = `
-                                            <td colspan="7" class="add-spacer" style="height: 12px; position: relative;">
-                                                <button class="add-tumor-btn" data-action="add-tumor-after">+</button>
-                                                <button class="add-animal-btn" data-action="add-animal-after">+</button>
-                                            </td>
-                                        `;
-                                        tbody.appendChild(spacer);
+                                        <td class="px-3 py-3 text-center">
+                                            <button data-action="remove-animal" class="text-gray-500 hover:text-red-400 remove-btn opacity-20 text-lg">&times;</button>
+                                        </td>
+                                    `;
+                                    tbody.appendChild(row);
+                                    
+                                    // Add combined spacer with both buttons
+                                    const spacer = document.createElement('tr');
+                                    spacer.className = 'add-spacer';
+                                    spacer.innerHTML = `
+                                        <td colspan="7" class="add-spacer" style="height: 12px; position: relative;">
+                                            <button class="add-tumor-btn" data-action="add-tumor-after">add tumor</button>
+                                            <button class="add-animal-btn" data-action="add-animal-after">add mouse</button>
+                                        </td>
+                                    `;
+                                    tbody.appendChild(spacer);
                                     });
                                 });
                                 
