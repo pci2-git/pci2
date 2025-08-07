@@ -2992,8 +2992,8 @@
                 
                 allGroupNames.forEach(groupName => {
                     animalsByGroup[groupName].forEach(animalKey => {
-                        const volume = dateGroups[measurementDate][groupName]?.[animalKey] || '';
-                        dataRow.push(volume);
+                        const volume = dateGroups[measurementDate][groupName]?.[animalKey];
+                        dataRow.push(volume !== undefined ? volume : '');
                     });
                 });
                 
