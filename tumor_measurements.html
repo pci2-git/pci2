@@ -106,6 +106,33 @@
             text-align: center;
             padding: 4px 8px;
             border-radius: 4px 4px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .cage-remove-btn {
+            background: #dc2626;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            font-size: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+        }
+        
+        .cage-remove-btn:hover {
+            opacity: 1;
+            background: #b91c1c;
+            transform: scale(1.1);
         }
         
         /* Hide number input spinners */
@@ -520,7 +547,11 @@
                                 
                                 const cageHeader = document.createElement('div');
                                 cageHeader.className = 'cage-header';
-                                cageHeader.textContent = cageId && cageId.trim() !== '' ? `Cage ${cageId}` : 'Default Cage';
+                                const headerText = cageId && cageId.trim() !== '' ? `Cage ${cageId}` : 'Default Cage';
+                                cageHeader.innerHTML = `
+                                    <span>${headerText}</span>
+                                    <button class="cage-remove-btn" data-action="remove-cage">&times;</button>
+                                `;
                                 cageGroup.appendChild(cageHeader);
                                 
                                 const cageTable = document.createElement('table');
@@ -677,7 +708,10 @@
                     <div>
                         <!-- Cage groups will be inserted here -->
                         <div class="cage-group">
-                            <div class="cage-header">Default Cage</div>
+                            <div class="cage-header">
+                                <span>Default Cage</span>
+                                <button class="cage-remove-btn" data-action="remove-cage">&times;</button>
+                            </div>
                             <table class="w-full text-sm text-left text-gray-400 table-fixed">
                                 <thead class="text-xs text-gray-300 uppercase bg-gray-700">
                                     <tr>
@@ -734,7 +768,13 @@
                     const previousCageHeader = previousCageGroup.querySelector('.cage-header');
                     const newCageHeader = document.createElement('div');
                     newCageHeader.className = 'cage-header';
-                    newCageHeader.textContent = previousCageHeader.textContent;
+                    const headerText = previousCageHeader.querySelector('span') ? 
+                        previousCageHeader.querySelector('span').textContent : 
+                        previousCageHeader.textContent;
+                    newCageHeader.innerHTML = `
+                        <span>${headerText}</span>
+                        <button class="cage-remove-btn" data-action="remove-cage">&times;</button>
+                    `;
                     newCageGroup.appendChild(newCageHeader);
                     
                     // Create table structure
@@ -962,6 +1002,12 @@
             } else if (action === 'remove-measurement-date') {
                 target.closest('.measurement-date-section').remove();
                 autoSaveData(); // Auto-save after removing measurement date
+            } else if (action === 'remove-cage') {
+                const cageGroup = target.closest('.cage-group');
+                if (cageGroup) {
+                    cageGroup.remove();
+                    autoSaveData(); // Auto-save after removing cage
+                }
             }
         }
 
@@ -1004,10 +1050,22 @@
             
             // Update the cage header
             const cageHeader = cageGroup.querySelector('.cage-header');
-            if (cageHeader && newValue && newValue.trim() !== '') {
-                cageHeader.textContent = `Cage ${newValue}`;
-            } else if (cageHeader) {
-                cageHeader.textContent = 'Default Cage';
+            if (cageHeader) {
+                const headerSpan = cageHeader.querySelector('span');
+                if (headerSpan) {
+                    if (newValue && newValue.trim() !== '') {
+                        headerSpan.textContent = `Cage ${newValue}`;
+                    } else {
+                        headerSpan.textContent = 'Default Cage';
+                    }
+                } else {
+                    // Fallback for old format headers
+                    if (newValue && newValue.trim() !== '') {
+                        cageHeader.textContent = `Cage ${newValue}`;
+                    } else {
+                        cageHeader.textContent = 'Default Cage';
+                    }
+                }
             }
         }
 
@@ -1349,7 +1407,10 @@
                     // Add cage header
                     const cageHeader = document.createElement('div');
                     cageHeader.className = 'cage-header';
-                    cageHeader.textContent = 'Default Cage';
+                    cageHeader.innerHTML = `
+                        <span>Default Cage</span>
+                        <button class="cage-remove-btn" data-action="remove-cage">&times;</button>
+                    `;
                     cageGroup.appendChild(cageHeader);
                     
                     // Create table for this cage
@@ -1460,7 +1521,7 @@
                             const smallSize = parseFloat(inputs[4].value) || 0;
                             const volume = parseFloat(inputs[5].value) || 0;
                             
-                            if (cageId && cageId.trim() !== '' && animalId && animalId !== '-' && largeSize > 0 && smallSize > 0) {
+                            if (cageId && cageId.trim() !== '' && animalId && animalId !== '-' && (largeSize >= 0 && smallSize >= 0)) {
                                 allMeasurements.push({
                                     experimentId,
                                     startDate,
@@ -2616,7 +2677,11 @@
                                 
                                 const cageHeader = document.createElement('div');
                                 cageHeader.className = 'cage-header';
-                                cageHeader.textContent = cageId && cageId.trim() !== '' ? `Cage ${cageId}` : 'Default Cage';
+                                const headerText = cageId && cageId.trim() !== '' ? `Cage ${cageId}` : 'Default Cage';
+                                cageHeader.innerHTML = `
+                                    <span>${headerText}</span>
+                                    <button class="cage-remove-btn" data-action="remove-cage">&times;</button>
+                                `;
                                 cageGroup.appendChild(cageHeader);
                                 
                                 const cageTable = document.createElement('table');
@@ -2638,38 +2703,60 @@
                                 cageGroup.appendChild(cageTable);
                                 
                                 const tbody = cageTable.querySelector('tbody');
+                                // Group cage animals by Animal ID to keep multiple tumors together
+                                const animalGroups = {};
                                 cageAnimals.forEach(rowData => {
                                     const animalId = rowData['Animal ID'] || rowData['animalId'] || '';
-                                    const tumorNumber = rowData['Tumor Number'] || rowData['tumorNumber'] || 'Tumor 1';
-                                    const largeSize = rowData['Large Size'] || rowData['largeSize'] || '';
-                                    const smallSize = rowData['Small Size'] || rowData['smallSize'] || '';
-                                    const volume = rowData['Volume'] || rowData['volume'] || '';
+                                    if (!animalGroups[animalId]) {
+                                        animalGroups[animalId] = [];
+                                    }
+                                    animalGroups[animalId].push(rowData);
+                                });
+                                
+                                // Process each animal and their tumors
+                                Object.keys(animalGroups).forEach(animalId => {
+                                    const animalTumors = animalGroups[animalId];
                                     
-                                    const row = document.createElement('tr');
-                                    row.className = 'bg-gray-800 border-b border-gray-700 hover:bg-gray-600/50';
-                                    row.innerHTML = `
-                                        <td class="px-3 py-3"><input type="text" value="${cageId}" placeholder="-" class="w-full text-sm ${cageId === '' ? 'empty-cage-id' : 'bg-gray-700'} rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none cage-id-input"></td>
-                                        <td class="px-3 py-3"><input type="text" value="${animalId}" class="w-full text-sm bg-gray-700 rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none animal-id-input"></td>
-                                        <td class="px-3 py-3"><input type="text" value="${tumorNumber}" class="w-full text-sm bg-gray-700 rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none tumor-number-input"></td>
-                                        <td class="px-3 py-3"><input type="number" step="0.1" value="${largeSize}" class="w-full text-sm ${largeSize === '' ? 'empty-field' : 'bg-gray-700'} rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none large-size-input"></td>
-                                        <td class="px-3 py-3"><input type="number" step="0.1" value="${smallSize}" class="w-full text-sm ${smallSize === '' ? 'empty-field' : 'bg-gray-700'} rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none small-size-input"></td>
-                                        <td class="px-3 py-3"><input type="text" readonly value="${volume}" class="w-full text-sm volume-input ${volume !== '' ? 'bg-gray-700' : 'bg-gray-600'} rounded p-2 border border-gray-600 focus:outline-none text-gray-300"></td>
-                                        <td class="px-3 py-3 text-center">
-                                            <button data-action="remove-animal" class="text-gray-500 hover:text-red-400 remove-btn opacity-20 text-lg">&times;</button>
-                                        </td>
-                                    `;
-                                    tbody.appendChild(row);
+                                    // Sort tumors by tumor number for consistent ordering
+                                    animalTumors.sort((a, b) => {
+                                        const tumorA = a['Tumor Number'] || a['tumorNumber'] || 'Tumor 1';
+                                        const tumorB = b['Tumor Number'] || b['tumorNumber'] || 'Tumor 1';
+                                        return tumorA.localeCompare(tumorB);
+                                    });
                                     
-                                    // Add combined spacer with both buttons
-                                    const spacer = document.createElement('tr');
-                                    spacer.className = 'add-spacer';
-                                    spacer.innerHTML = `
-                                        <td colspan="7" class="add-spacer" style="height: 12px; position: relative;">
-                                            <button class="add-tumor-btn" data-action="add-tumor-after">+</button>
-                                            <button class="add-animal-btn" data-action="add-animal-after">+</button>
-                                        </td>
-                                    `;
-                                    tbody.appendChild(spacer);
+                                    // Add each tumor as a separate row
+                                    animalTumors.forEach(rowData => {
+                                        const tumorNumber = rowData['Tumor Number'] || rowData['tumorNumber'] || 'Tumor 1';
+                                        const largeSize = rowData['Large Size'] || rowData['largeSize'] || '';
+                                        const smallSize = rowData['Small Size'] || rowData['smallSize'] || '';
+                                        const volume = rowData['Volume'] || rowData['volume'] || '';
+                                        
+                                        const row = document.createElement('tr');
+                                        row.className = 'bg-gray-800 border-b border-gray-700 hover:bg-gray-600/50';
+                                        row.innerHTML = `
+                                            <td class="px-3 py-3"><input type="text" value="${cageId}" placeholder="-" class="w-full text-sm ${cageId === '' ? 'empty-cage-id' : 'bg-gray-700'} rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none cage-id-input"></td>
+                                            <td class="px-3 py-3"><input type="text" value="${animalId}" class="w-full text-sm bg-gray-700 rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none animal-id-input"></td>
+                                            <td class="px-3 py-3"><input type="text" value="${tumorNumber}" class="w-full text-sm bg-gray-700 rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none tumor-number-input"></td>
+                                            <td class="px-3 py-3"><input type="number" step="0.1" value="${largeSize}" class="w-full text-sm ${largeSize === '' ? 'empty-field' : 'bg-gray-700'} rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none large-size-input"></td>
+                                            <td class="px-3 py-3"><input type="number" step="0.1" value="${smallSize}" class="w-full text-sm ${smallSize === '' ? 'empty-field' : 'bg-gray-700'} rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none small-size-input"></td>
+                                            <td class="px-3 py-3"><input type="text" readonly value="${volume}" class="w-full text-sm volume-input ${volume !== '' ? 'bg-gray-700' : 'bg-gray-600'} rounded p-2 border border-gray-600 focus:outline-none text-gray-300"></td>
+                                            <td class="px-3 py-3 text-center">
+                                                <button data-action="remove-animal" class="text-gray-500 hover:text-red-400 remove-btn opacity-20 text-lg">&times;</button>
+                                            </td>
+                                        `;
+                                        tbody.appendChild(row);
+                                        
+                                        // Add combined spacer with both buttons
+                                        const spacer = document.createElement('tr');
+                                        spacer.className = 'add-spacer';
+                                        spacer.innerHTML = `
+                                            <td colspan="7" class="add-spacer" style="height: 12px; position: relative;">
+                                                <button class="add-tumor-btn" data-action="add-tumor-after">+</button>
+                                                <button class="add-animal-btn" data-action="add-animal-after">+</button>
+                                            </td>
+                                        `;
+                                        tbody.appendChild(spacer);
+                                    });
                                 });
                                 
                                 tableContainer.appendChild(cageGroup);
