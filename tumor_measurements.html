@@ -413,6 +413,9 @@
                 <button id="analyzeDataBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
                     Analyze Data
                 </button>
+                <button id="exportPrismBtn" class="bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                    Export Data to Prism
+                </button>
             </div>
         </div>
 
@@ -456,6 +459,7 @@
         const measurementDatesContainer = document.getElementById('measurementDatesContainer');
         const addMeasurementDateBtn = document.getElementById('addMeasurementDateBtn');
         const analyzeDataBtn = document.getElementById('analyzeDataBtn');
+        const exportPrismBtn = document.getElementById('exportPrismBtn');
         const numGroupsInput = document.getElementById('numGroupsInput');
         const numCagesInput = document.getElementById('numCagesInput');
         const animalsPerCageInput = document.getElementById('animalsPerCageInput');
@@ -484,6 +488,7 @@
             autoSaveData(); // Auto-save after adding measurement date
         });
         analyzeDataBtn.addEventListener('click', analyzeData);
+        exportPrismBtn.addEventListener('click', exportDataForPrism);
         measurementDatesContainer.addEventListener('click', handleActions);
         measurementDatesContainer.addEventListener('input', handleCageIdChange);
         measurementDatesContainer.addEventListener('input', handleFieldBackgroundChange);
@@ -2858,7 +2863,154 @@
             });
         }
 
+        function exportDataForPrism() {
+            hideError();
+            
+            // Get experiment metadata
+            const experimentId = experimentIdInput.value.trim();
+            const startDate = startDateInput.value.trim();
+            
+            if (!experimentId || !startDate) {
+                showError("Please fill in experiment ID and start date before exporting.");
+                return;
+            }
 
+            // Collect all data from all measurement date sections
+            const allMeasurements = [];
+            const measurementDateSections = measurementDatesContainer.querySelectorAll('.measurement-date-section');
+            
+            if (measurementDateSections.length === 0) {
+                showError("Please add at least one measurement date.");
+                return;
+            }
+
+            // Collect all measurements
+            for (const section of measurementDateSections) {
+                const measurementDate = section.querySelector('.measurement-date-input').value.trim();
+                if (!measurementDate) continue;
+
+                const groupCards = section.querySelectorAll('.group-card');
+                for (const groupCard of groupCards) {
+                    const groupName = groupCard.querySelector('.group-name-input').value.trim();
+                    if (!groupName) continue;
+
+                    const cageGroups = groupCard.querySelectorAll('.cage-group');
+                    for (const cageGroup of cageGroups) {
+                        const rows = cageGroup.querySelectorAll('tbody tr:not(.add-spacer)');
+                        for (const row of rows) {
+                            const cageId = row.querySelector('.cage-id-input')?.value?.trim() || '';
+                            const animalId = row.querySelector('.animal-id-input')?.value?.trim() || '';
+                            const tumorNumber = row.querySelector('.tumor-number-input')?.value?.trim() || '';
+                            const largeSize = parseFloat(row.querySelector('.large-size-input')?.value) || 0;
+                            const smallSize = parseFloat(row.querySelector('.small-size-input')?.value) || 0;
+                            const volume = parseFloat(row.querySelector('.volume-input')?.value) || 0;
+
+                            if (animalId && (largeSize >= 0 && smallSize >= 0)) {
+                                allMeasurements.push({
+                                    measurementDate,
+                                    groupName,
+                                    cageId,
+                                    animalId,
+                                    tumorNumber,
+                                    largeSize,
+                                    smallSize,
+                                    volume
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (allMeasurements.length === 0) {
+                showError("No valid measurements found to export. Please fill in the required fields.");
+                return;
+            }
+
+            // Group by measurement date and prepare Prism format
+            const dateGroups = {};
+            allMeasurements.forEach(m => {
+                if (!dateGroups[m.measurementDate]) {
+                    dateGroups[m.measurementDate] = {};
+                }
+                if (!dateGroups[m.measurementDate][m.groupName]) {
+                    dateGroups[m.measurementDate][m.groupName] = {};
+                }
+                
+                // Sum volumes for multiple tumors per animal
+                const animalKey = `${m.cageId}-${m.animalId}`;
+                if (!dateGroups[m.measurementDate][m.groupName][animalKey]) {
+                    dateGroups[m.measurementDate][m.groupName][animalKey] = 0;
+                }
+                dateGroups[m.measurementDate][m.groupName][animalKey] += m.volume;
+            });
+
+            // Get sorted measurement dates
+            const sortedDates = Object.keys(dateGroups).sort((a, b) => {
+                const dateA = parseDate(a);
+                const dateB = parseDate(b);
+                return dateA - dateB;
+            });
+
+            // Get all group names
+            const allGroupNames = [...new Set(allMeasurements.map(m => m.groupName))].sort();
+            
+            // Get all unique animals per group to create consistent columns
+            const animalsByGroup = {};
+            allGroupNames.forEach(groupName => {
+                animalsByGroup[groupName] = new Set();
+            });
+            
+            Object.values(dateGroups).forEach(dateData => {
+                Object.keys(dateData).forEach(groupName => {
+                    Object.keys(dateData[groupName]).forEach(animalKey => {
+                        animalsByGroup[groupName].add(animalKey);
+                    });
+                });
+            });
+
+            // Convert to sorted arrays
+            Object.keys(animalsByGroup).forEach(groupName => {
+                animalsByGroup[groupName] = Array.from(animalsByGroup[groupName]).sort();
+            });
+
+            // Build CSV content
+            let csvContent = '';
+            
+            // First row: actual start date in first column, then group names repeated for each animal
+            let headerRow = [startDate]; // Use actual start date value
+            allGroupNames.forEach(groupName => {
+                animalsByGroup[groupName].forEach(animalKey => {
+                    headerRow.push(groupName); // Just the group name, repeated for each animal
+                });
+            });
+            csvContent += headerRow.join(',') + '\n';
+
+            // Data rows: one per measurement date
+            sortedDates.forEach(measurementDate => {
+                let dataRow = [measurementDate];
+                
+                allGroupNames.forEach(groupName => {
+                    animalsByGroup[groupName].forEach(animalKey => {
+                        const volume = dateGroups[measurementDate][groupName]?.[animalKey] || '';
+                        dataRow.push(volume);
+                    });
+                });
+                
+                csvContent += dataRow.join(',') + '\n';
+            });
+
+            // Create and download file
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `${experimentId}_prism_export_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
 
         function loadDataFromCSV() {
             csvFileInput.click(); // Trigger file input dialog
