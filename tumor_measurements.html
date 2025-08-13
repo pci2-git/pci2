@@ -2255,14 +2255,17 @@
             // Perform Two-way ANOVA
             const anovaResults = performTwoWayAnova(anovaData);
             
+            // Perform post-hoc analysis for group comparisons
+            const postHocResults = performPostHocAnalysis(anovaData);
+            
             // Generate ANOVA table HTML
             const container = document.getElementById('anova-results-container');
             
             container.innerHTML = `
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="space-y-6">
                     <!-- ANOVA Table -->
-                    <div>
-                        <h5 class="text-md font-semibold text-white mb-3">ANOVA Results</h5>
+                    <div class="bg-gray-700/30 p-4 rounded-lg border border-gray-600">
+                        <h5 class="text-md font-semibold text-white mb-3">Two-Way ANOVA Results</h5>
                         <div class="overflow-x-auto">
                             <table class="w-full text-sm text-left text-gray-300">
                                 <thead class="text-xs text-gray-300 uppercase bg-gray-700">
@@ -2273,6 +2276,7 @@
                                         <th scope="col" class="px-3 py-2 text-center">MS</th>
                                         <th scope="col" class="px-3 py-2 text-center">F</th>
                                         <th scope="col" class="px-3 py-2 text-center">p-value</th>
+                                        <th scope="col" class="px-3 py-2 text-center">Effect Size (η²)</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -2283,6 +2287,7 @@
                                         <td class="px-3 py-2 text-center">${anovaResults.group.ms.toFixed(2)}</td>
                                         <td class="px-3 py-2 text-center">${anovaResults.group.f.toFixed(3)}</td>
                                         <td class="px-3 py-2 text-center${getPValueColorClass(anovaResults.group.pValue)}">${formatPValue(anovaResults.group.pValue)}</td>
+                                        <td class="px-3 py-2 text-center">${(anovaResults.group.etaSquared * 100).toFixed(1)}%</td>
                                     </tr>
                                     <tr class="bg-gray-750 border-b border-gray-700">
                                         <td class="px-3 py-2 font-medium text-white">Time</td>
@@ -2291,6 +2296,7 @@
                                         <td class="px-3 py-2 text-center">${anovaResults.time.ms.toFixed(2)}</td>
                                         <td class="px-3 py-2 text-center">${anovaResults.time.f.toFixed(3)}</td>
                                         <td class="px-3 py-2 text-center${getPValueColorClass(anovaResults.time.pValue)}">${formatPValue(anovaResults.time.pValue)}</td>
+                                        <td class="px-3 py-2 text-center">${(anovaResults.time.etaSquared * 100).toFixed(1)}%</td>
                                     </tr>
                                     <tr class="bg-gray-800 border-b border-gray-700">
                                         <td class="px-3 py-2 font-medium text-white">Group × Time</td>
@@ -2299,6 +2305,7 @@
                                         <td class="px-3 py-2 text-center">${anovaResults.interaction.ms.toFixed(2)}</td>
                                         <td class="px-3 py-2 text-center">${anovaResults.interaction.f.toFixed(3)}</td>
                                         <td class="px-3 py-2 text-center${getPValueColorClass(anovaResults.interaction.pValue)}">${formatPValue(anovaResults.interaction.pValue)}</td>
+                                        <td class="px-3 py-2 text-center">${(anovaResults.interaction.etaSquared * 100).toFixed(1)}%</td>
                                     </tr>
                                     <tr class="bg-gray-750 border-b border-gray-700">
                                         <td class="px-3 py-2 font-medium text-white">Error</td>
@@ -2307,59 +2314,173 @@
                                         <td class="px-3 py-2 text-center">${anovaResults.error.ms.toFixed(2)}</td>
                                         <td class="px-3 py-2 text-center">-</td>
                                         <td class="px-3 py-2 text-center">-</td>
+                                        <td class="px-3 py-2 text-center">-</td>
+                                    </tr>
+                                    <tr class="bg-gray-800 border-b border-gray-700">
+                                        <td class="px-3 py-2 font-medium text-white">Total</td>
+                                        <td class="px-3 py-2 text-center">${anovaResults.total.df}</td>
+                                        <td class="px-3 py-2 text-center">${anovaResults.total.ss.toFixed(2)}</td>
+                                        <td class="px-3 py-2 text-center">-</td>
+                                        <td class="px-3 py-2 text-center">-</td>
+                                        <td class="px-3 py-2 text-center">-</td>
+                                        <td class="px-3 py-2 text-center">-</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
                     
+                    <!-- Post-Hoc Analysis -->
+                    <div class="bg-gray-700/30 p-4 rounded-lg border border-gray-600">
+                        <h5 class="text-md font-semibold text-white mb-3">Post-Hoc Analysis - Group Comparisons</h5>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left text-gray-300">
+                                <thead class="text-xs text-gray-300 uppercase bg-gray-700">
+                                    <tr>
+                                        <th scope="col" class="px-3 py-2">Group Comparison</th>
+                                        <th scope="col" class="px-3 py-2 text-center">Mean Difference</th>
+                                        <th scope="col" class="px-3 py-2 text-center">SE</th>
+                                        <th scope="col" class="px-3 py-2 text-center">t-value</th>
+                                        <th scope="col" class="px-3 py-2 text-center">p-value</th>
+                                        <th scope="col" class="px-3 py-2 text-center">95% CI</th>
+                                        <th scope="col" class="px-3 py-2 text-center">Significance</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${postHocResults.map((result, index) => `
+                                        <tr class="${index % 2 === 0 ? 'bg-gray-800' : 'bg-gray-750'} border-b border-gray-700">
+                                            <td class="px-3 py-2 font-medium text-white">${result.comparison}</td>
+                                            <td class="px-3 py-2 text-center">${result.meanDiff.toFixed(2)}</td>
+                                            <td class="px-3 py-2 text-center">${result.se.toFixed(2)}</td>
+                                            <td class="px-3 py-2 text-center">${result.tValue.toFixed(3)}</td>
+                                            <td class="px-3 py-2 text-center${getPValueColorClass(result.pValue)}">${formatPValue(result.pValue)}</td>
+                                            <td class="px-3 py-2 text-center text-xs">[${result.ci95.lower.toFixed(2)}, ${result.ci95.upper.toFixed(2)}]</td>
+                                            <td class="px-3 py-2 text-center">
+                                                <span class="px-2 py-1 rounded text-xs font-bold ${getSignificanceClass(result.pValue)}">
+                                                    ${getSignificanceText(result.pValue)}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-2">
+                            <strong>Note:</strong> Bonferroni-corrected p-values for multiple comparisons. 
+                            <span class="text-red-400">p < 0.05</span>, 
+                            <span class="text-yellow-400">p < 0.01</span>, 
+                            <span class="text-green-400">p < 0.001</span>
+                        </p>
+                    </div>
+                    
+                    <!-- Descriptive Statistics -->
+                    <div class="bg-gray-700/30 p-4 rounded-lg border border-gray-600">
+                        <h5 class="text-md font-semibold text-white mb-3">Descriptive Statistics by Group</h5>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm text-left text-gray-300">
+                                <thead class="text-xs text-gray-300 uppercase bg-gray-700">
+                                    <tr>
+                                        <th scope="col" class="px-3 py-2">Group</th>
+                                        <th scope="col" class="px-3 py-2 text-center">N</th>
+                                        <th scope="col" class="px-3 py-2 text-center">Mean ± SEM</th>
+                                        <th scope="col" class="px-3 py-2 text-center">Median</th>
+                                        <th scope="col" class="px-3 py-2 text-center">Std Dev</th>
+                                        <th scope="col" class="px-3 py-2 text-center">Min</th>
+                                        <th scope="col" class="px-3 py-2 text-center">Max</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${generateDescriptiveStatsTable(anovaData)}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
                     <!-- Interpretation -->
-                    <div>
-                        <h5 class="text-md font-semibold text-white mb-3">Interpretation</h5>
-                        <div class="space-y-3 text-sm text-gray-300">
-                            <div class="p-3 bg-gray-600/50 rounded">
-                                <strong class="text-white">Group Effect:</strong> 
-                                <span class="${anovaResults.group.pValue < 0.05 ? 'text-green-400' : 'text-gray-300'}">
-                                    ${anovaResults.group.pValue < 0.05 ? 'Significant' : 'Not significant'} 
-                                    (p = ${formatPValue(anovaResults.group.pValue)})
-                                </span>
-                                <br>
-                                <span class="text-xs text-gray-400">
-                                    ${anovaResults.group.pValue < 0.05 ? 'Treatment groups differ significantly in tumor volume.' : 'No significant difference between treatment groups overall.'}
-                                </span>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div>
+                            <h5 class="text-md font-semibold text-white mb-3">Statistical Interpretation</h5>
+                            <div class="space-y-3 text-sm text-gray-300">
+                                <div class="p-3 bg-gray-600/50 rounded">
+                                    <strong class="text-white">Group Effect:</strong> 
+                                    <span class="${anovaResults.group.pValue < 0.05 ? 'text-green-400' : 'text-gray-300'}">
+                                        ${anovaResults.group.pValue < 0.05 ? 'Significant' : 'Not significant'} 
+                                        (p = ${formatPValue(anovaResults.group.pValue)})
+                                    </span>
+                                    <br>
+                                    <span class="text-xs text-gray-400">
+                                        ${anovaResults.group.pValue < 0.05 ? 'Treatment groups differ significantly in tumor volume.' : 'No significant difference between treatment groups overall.'}
+                                    </span>
+                                    <br>
+                                    <span class="text-xs text-blue-400">
+                                        Effect size: ${(anovaResults.group.etaSquared * 100).toFixed(1)}% of variance explained
+                                    </span>
+                                </div>
+                                
+                                <div class="p-3 bg-gray-600/50 rounded">
+                                    <strong class="text-white">Time Effect:</strong> 
+                                    <span class="${anovaResults.time.pValue < 0.05 ? 'text-green-400' : 'text-gray-300'}">
+                                        ${anovaResults.time.pValue < 0.05 ? 'Significant' : 'Not significant'} 
+                                        (p = ${formatPValue(anovaResults.time.pValue)})
+                                    </span>
+                                    <br>
+                                    <span class="text-xs text-gray-400">
+                                        ${anovaResults.time.pValue < 0.05 ? 'Tumor volume changes significantly over time.' : 'No significant change in tumor volume over time.'}
+                                    </span>
+                                    <br>
+                                    <span class="text-xs text-blue-400">
+                                        Effect size: ${(anovaResults.time.etaSquared * 100).toFixed(1)}% of variance explained
+                                    </span>
+                                </div>
+                                
+                                <div class="p-3 bg-gray-600/50 rounded">
+                                    <strong class="text-white">Group × Time Interaction:</strong> 
+                                    <span class="${anovaResults.interaction.pValue < 0.05 ? 'text-green-400' : 'text-gray-300'}">
+                                        ${anovaResults.interaction.pValue < 0.05 ? 'Significant' : 'Not significant'} 
+                                        (p = ${formatPValue(anovaResults.interaction.pValue)})
+                                    </span>
+                                    <br>
+                                    <span class="text-xs text-gray-400">
+                                        ${anovaResults.interaction.pValue < 0.05 ? 'Treatment groups respond differently over time.' : 'Treatment groups show similar patterns over time.'}
+                                    </span>
+                                    <br>
+                                    <span class="text-xs text-blue-400">
+                                        Effect size: ${(anovaResults.interaction.etaSquared * 100).toFixed(1)}% of variance explained
+                                    </span>
+                                </div>
                             </div>
-                            
-                            <div class="p-3 bg-gray-600/50 rounded">
-                                <strong class="text-white">Time Effect:</strong> 
-                                <span class="${anovaResults.time.pValue < 0.05 ? 'text-green-400' : 'text-gray-300'}">
-                                    ${anovaResults.time.pValue < 0.05 ? 'Significant' : 'Not significant'} 
-                                    (p = ${formatPValue(anovaResults.time.pValue)})
-                                </span>
-                                <br>
-                                <span class="text-xs text-gray-400">
-                                    ${anovaResults.time.pValue < 0.05 ? 'Tumor volume changes significantly over time.' : 'No significant change in tumor volume over time.'}
-                                </span>
-                            </div>
-                            
-                            <div class="p-3 bg-gray-600/50 rounded">
-                                <strong class="text-white">Group × Time Interaction:</strong> 
-                                <span class="${anovaResults.interaction.pValue < 0.05 ? 'text-green-400' : 'text-gray-300'}">
-                                    ${anovaResults.interaction.pValue < 0.05 ? 'Significant' : 'Not significant'} 
-                                    (p = ${formatPValue(anovaResults.interaction.pValue)})
-                                </span>
-                                <br>
-                                <span class="text-xs text-gray-400">
-                                    ${anovaResults.interaction.pValue < 0.05 ? 'Treatment groups respond differently over time.' : 'Treatment groups show similar patterns over time.'}
-                                </span>
-                            </div>
-                            
-                            <div class="p-3 bg-blue-900/30 rounded border border-blue-700">
-                                <strong class="text-blue-300">Model Summary:</strong><br>
-                                <span class="text-xs text-gray-300">
-                                    R² = ${(anovaResults.rSquared * 100).toFixed(1)}% 
-                                    (${anovaResults.rSquared > 0.7 ? 'Good' : anovaResults.rSquared > 0.4 ? 'Moderate' : 'Poor'} model fit)<br>
-                                    N = ${anovaResults.totalN} observations from ${anovaResults.uniqueAnimals} animals
-                                </span>
+                        </div>
+                        
+                        <div>
+                            <h5 class="text-md font-semibold text-white mb-3">Model Summary & Power</h5>
+                            <div class="space-y-3 text-sm text-gray-300">
+                                <div class="p-3 bg-blue-900/30 rounded border border-blue-700">
+                                    <strong class="text-blue-300">Model Summary:</strong><br>
+                                    <span class="text-xs text-gray-300">
+                                        R² = ${(anovaResults.rSquared * 100).toFixed(1)}% 
+                                        (${anovaResults.rSquared > 0.7 ? 'Good' : anovaResults.rSquared > 0.4 ? 'Moderate' : 'Poor'} model fit)<br>
+                                        N = ${anovaResults.totalN} observations from ${anovaResults.uniqueAnimals} animals<br>
+                                        Total SS = ${anovaResults.total.ss.toFixed(2)}
+                                    </span>
+                                </div>
+                                
+                                <div class="p-3 bg-green-900/30 rounded border border-green-700">
+                                    <strong class="text-green-300">Post-Hoc Results:</strong><br>
+                                    <span class="text-xs text-gray-300">
+                                        ${postHocResults.filter(r => r.pValue < 0.05).length} of ${postHocResults.length} group comparisons significant<br>
+                                        ${postHocResults.filter(r => r.pValue < 0.001).length} highly significant (p < 0.001)<br>
+                                        ${postHocResults.filter(r => r.pValue < 0.01 && r.pValue >= 0.001).length} very significant (p < 0.01)
+                                    </span>
+                                </div>
+                                
+                                <div class="p-3 bg-purple-900/30 rounded border border-purple-700">
+                                    <strong class="text-purple-300">Effect Sizes:</strong><br>
+                                    <span class="text-xs text-gray-300">
+                                        Group: ${(anovaResults.group.etaSquared * 100).toFixed(1)}% (${getEffectSizeDescription(anovaResults.group.etaSquared)})<br>
+                                        Time: ${(anovaResults.time.etaSquared * 100).toFixed(1)}% (${getEffectSizeDescription(anovaResults.time.etaSquared)})<br>
+                                        Interaction: ${(anovaResults.interaction.etaSquared * 100).toFixed(1)}% (${getEffectSizeDescription(anovaResults.interaction.etaSquared)})
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -2469,11 +2590,38 @@
             // R-squared
             const rSquared = (ssGroup + ssTime + ssInteraction) / ssTotal;
             
+            // Calculate effect sizes (eta-squared)
+            const etaSquaredGroup = ssGroup / ssTotal;
+            const etaSquaredTime = ssTime / ssTotal;
+            const etaSquaredInteraction = ssInteraction / ssTotal;
+            
             return {
-                group: { df: dfGroup, ss: ssGroup, ms: msGroup, f: fGroup, pValue: pValueGroup },
-                time: { df: dfTime, ss: ssTime, ms: msTime, f: fTime, pValue: pValueTime },
-                interaction: { df: dfInteraction, ss: ssInteraction, ms: msInteraction, f: fInteraction, pValue: pValueInteraction },
+                group: { 
+                    df: dfGroup, 
+                    ss: ssGroup, 
+                    ms: msGroup, 
+                    f: fGroup, 
+                    pValue: pValueGroup,
+                    etaSquared: etaSquaredGroup
+                },
+                time: { 
+                    df: dfTime, 
+                    ss: ssTime, 
+                    ms: msTime, 
+                    f: fTime, 
+                    pValue: pValueTime,
+                    etaSquared: etaSquaredTime
+                },
+                interaction: { 
+                    df: dfInteraction, 
+                    ss: ssInteraction, 
+                    ms: msInteraction, 
+                    f: fInteraction, 
+                    pValue: pValueInteraction,
+                    etaSquared: etaSquaredInteraction
+                },
                 error: { df: dfError, ss: ssError, ms: msError },
+                total: { df: dfTotal, ss: ssTotal },
                 rSquared: rSquared,
                 totalN: n,
                 uniqueAnimals: animals.length
@@ -2497,6 +2645,190 @@
             if (fStat > 4) return 0.05;
             if (fStat > 2.5) return 0.1;
             return 0.3;
+        }
+
+        function performPostHocAnalysis(data) {
+            // Group data by group and calculate group statistics
+            const groupStats = {};
+            const groups = [...new Set(data.map(d => d.group))];
+            
+            groups.forEach(group => {
+                const groupData = data.filter(d => d.group === group);
+                const volumes = groupData.map(d => d.volume);
+                const mean = volumes.reduce((sum, val) => sum + val, 0) / volumes.length;
+                const variance = volumes.reduce((sq, n) => sq + Math.pow(n - mean, 2), 0) / (volumes.length - 1);
+                const se = Math.sqrt(variance / volumes.length);
+                
+                groupStats[group] = {
+                    n: volumes.length,
+                    mean: mean,
+                    variance: variance,
+                    se: se
+                };
+            });
+            
+            // Generate all pairwise comparisons
+            const comparisons = [];
+            for (let i = 0; i < groups.length; i++) {
+                for (let j = i + 1; j < groups.length; j++) {
+                    const group1 = groups[i];
+                    const group2 = groups[j];
+                    
+                    const stats1 = groupStats[group1];
+                    const stats2 = groupStats[group2];
+                    
+                    // Calculate pooled standard error
+                    const pooledVariance = ((stats1.n - 1) * stats1.variance + (stats2.n - 1) * stats2.variance) / (stats1.n + stats2.n - 2);
+                    const pooledSE = Math.sqrt(pooledVariance * (1/stats1.n + 1/stats2.n));
+                    
+                    // Calculate t-statistic
+                    const meanDiff = stats1.mean - stats2.mean;
+                    const tValue = meanDiff / pooledSE;
+                    
+                    // Calculate degrees of freedom
+                    const df = stats1.n + stats2.n - 2;
+                    
+                    // Calculate p-value (two-tailed)
+                    const pValue = 2 * (1 - studentTCDF(Math.abs(tValue), df));
+                    
+                    // Calculate 95% confidence interval
+                    const tCritical = getTCriticalValue(0.025, df); // Two-tailed 95% CI
+                    const marginOfError = tCritical * pooledSE;
+                    const ci95 = {
+                        lower: meanDiff - marginOfError,
+                        upper: meanDiff + marginOfError
+                    };
+                    
+                    comparisons.push({
+                        comparison: `${group1} vs ${group2}`,
+                        meanDiff: meanDiff,
+                        se: pooledSE,
+                        tValue: tValue,
+                        pValue: pValue,
+                        ci95: ci95,
+                        df: df
+                    });
+                }
+            }
+            
+            // Apply Bonferroni correction for multiple comparisons
+            const numComparisons = comparisons.length;
+            comparisons.forEach(comp => {
+                comp.pValue = Math.min(1, comp.pValue * numComparisons);
+            });
+            
+            // Sort by p-value
+            comparisons.sort((a, b) => a.pValue - b.pValue);
+            
+            return comparisons;
+        }
+
+        function getTCriticalValue(alpha, df) {
+            // Simplified t-critical value lookup
+            // For more accuracy, would need full t-distribution implementation
+            if (df >= 120) {
+                // Normal approximation for large df
+                if (alpha === 0.025) return 1.96;
+                if (alpha === 0.05) return 1.645;
+                if (alpha === 0.01) return 2.326;
+            }
+            
+            // Simple lookup table for common df values
+            const lookup = {
+                0.025: { 10: 2.228, 20: 2.086, 30: 2.042, 40: 2.021, 60: 2.000, 120: 1.98 },
+                0.05: { 10: 1.812, 20: 1.725, 30: 1.697, 40: 1.684, 60: 1.671, 120: 1.658 },
+                0.01: { 10: 2.764, 20: 2.528, 30: 2.457, 40: 2.423, 60: 2.390, 120: 2.358 }
+            };
+            
+            // Find closest df value
+            const availableDF = Object.keys(lookup[alpha]).map(Number).sort((a, b) => a - b);
+            let closestDF = availableDF[0];
+            
+            for (const dfVal of availableDF) {
+                if (dfVal <= df) {
+                    closestDF = dfVal;
+                } else {
+                    break;
+                }
+            }
+            
+            return lookup[alpha][closestDF];
+        }
+
+        function generateDescriptiveStatsTable(data) {
+            // Group data by group
+            const groupStats = {};
+            const groups = [...new Set(data.map(d => d.group))];
+            
+            groups.forEach(group => {
+                const groupData = data.filter(d => d.group === group);
+                const volumes = groupData.map(d => d.volume);
+                
+                // Calculate statistics
+                const n = volumes.length;
+                const mean = volumes.reduce((sum, val) => sum + val, 0) / n;
+                const variance = volumes.reduce((sq, n) => sq + Math.pow(n - mean, 2), 0) / (n - 1);
+                const stdDev = Math.sqrt(variance);
+                const sem = stdDev / Math.sqrt(n);
+                
+                // Calculate median
+                const sortedVolumes = [...volumes].sort((a, b) => a - b);
+                const median = n % 2 === 0 ? 
+                    (sortedVolumes[n/2 - 1] + sortedVolumes[n/2]) / 2 : 
+                    sortedVolumes[Math.floor(n/2)];
+                
+                groupStats[group] = {
+                    n: n,
+                    mean: mean,
+                    sem: sem,
+                    median: median,
+                    stdDev: stdDev,
+                    min: Math.min(...volumes),
+                    max: Math.max(...volumes)
+                };
+            });
+            
+            // Generate HTML table rows
+            let tableRows = '';
+            groups.forEach((group, index) => {
+                const stats = groupStats[group];
+                const rowClass = index % 2 === 0 ? 'bg-gray-800' : 'bg-gray-750';
+                
+                tableRows += `
+                    <tr class="${rowClass} border-b border-gray-700">
+                        <td class="px-3 py-2 font-medium text-white">${group}</td>
+                        <td class="px-3 py-2 text-center">${stats.n}</td>
+                        <td class="px-3 py-2 text-center">${stats.mean.toFixed(2)} ± ${stats.sem.toFixed(2)}</td>
+                        <td class="px-3 py-2 text-center">${stats.median.toFixed(2)}</td>
+                        <td class="px-3 py-2 text-center">${stats.stdDev.toFixed(2)}</td>
+                        <td class="px-3 py-2 text-center">${stats.min.toFixed(2)}</td>
+                        <td class="px-3 py-2 text-center">${stats.max.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+            
+            return tableRows;
+        }
+
+        function getSignificanceClass(pValue) {
+            if (pValue < 0.001) return 'bg-green-600 text-white';
+            if (pValue < 0.01) return 'bg-yellow-600 text-white';
+            if (pValue < 0.05) return 'bg-red-600 text-white';
+            return 'bg-gray-600 text-gray-300';
+        }
+
+        function getSignificanceText(pValue) {
+            if (pValue < 0.001) return '***';
+            if (pValue < 0.01) return '**';
+            if (pValue < 0.05) return '*';
+            return 'ns';
+        }
+
+        function getEffectSizeDescription(etaSquared) {
+            if (etaSquared >= 0.14) return 'Large';
+            if (etaSquared >= 0.06) return 'Medium';
+            if (etaSquared >= 0.01) return 'Small';
+            return 'Negligible';
         }
         
         function normalCDF(x) {
