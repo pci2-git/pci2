@@ -1960,12 +1960,48 @@
                 
                 <!-- Statistical Analysis Table -->
                 <div class="mb-6 bg-gray-700/50 p-4 rounded-lg border border-gray-600">
-                    <h4 class="text-lg font-semibold text-white mb-4">Statistical Analysis - T-Test P-Values Between Groups</h4>
+                    <div class="flex justify-between items-center mb-4">
+                        <h4 class="text-lg font-semibold text-white">Statistical Analysis - T-Test P-Values Between Groups</h4>
+                        <button class="text-gray-400 hover:text-blue-400 transition-colors text-sm" onclick="toggleSection('t-test-methodology')">
+                            <span id="t-test-methodology-toggle-text">Show Methodology</span> ▼
+                        </button>
+                    </div>
+                    
+                    <!-- Collapsible methodology section -->
+                    <div id="t-test-methodology" class="hidden mb-4">
+                        <p class="text-sm text-gray-300 mb-4 leading-relaxed">
+                            This analysis performs pairwise comparisons between treatment groups at each time point using <strong>Welch's t-test</strong>, 
+                            which accounts for potentially unequal variances between groups. For each study day, we compare the total tumor volume 
+                            (summed across multiple tumors per animal) between all possible group pairs. The test is appropriate for comparing 
+                            two independent groups and provides p-values indicating the statistical significance of observed differences. 
+                            Multiple tumors per animal are summed to provide a single volume measurement per animal per time point.
+                        </p>
+                        
+                        <p class="text-sm text-gray-300 mb-4 leading-relaxed">
+                            <strong>T-Test Methodology:</strong> We employ <strong>Welch's t-test</strong> (also known as the unequal variances t-test) 
+                            rather than Student's t-test because it doesn't assume equal population variances between groups. This is particularly 
+                            important in biological experiments where treatment effects may alter both means and variances. The test statistic 
+                            is calculated as t = (x̄₁ - x̄₂) / √(s₁²/n₁ + s₂²/n₂), where x̄ and s² represent sample means and variances, 
+                            and n represents sample sizes. Degrees of freedom are calculated using the Welch-Satterthwaite equation: 
+                            df = (s₁²/n₁ + s₂²/n₂)² / [(s₁²/n₁)²/(n₁-1) + (s₂²/n₂)²/(n₂-1)].
+                        </p>
+                        
+                        <p class="text-sm text-gray-300 mb-4 leading-relaxed">
+                            <strong>Multiple Comparison Considerations:</strong> Since we perform multiple t-tests across time points and group pairs, 
+                            there is potential for Type I error inflation. However, we present uncorrected p-values here to allow researchers 
+                            to apply their preferred correction method (e.g., Bonferroni, False Discovery Rate, or Holm's method) based on 
+                            their specific experimental design and statistical requirements. Each comparison is independent and tests a specific 
+                            hypothesis about group differences at a particular time point.
+                        </p>
+                    </div>
+                    
+                    <!-- Always visible results section -->
                     <div class="overflow-x-auto">
                         <div id="statistics-table-container">
                             <!-- Statistics table will be inserted here -->
                         </div>
                     </div>
+                    
                     <p class="text-xs text-gray-400 mt-2">
                         <strong>Note:</strong> Two-sample t-test (assuming unequal variances). 
                         <span class="text-red-400">p < 0.05</span>, 
@@ -1976,15 +2012,53 @@
                 
                 <!-- Two-way ANOVA Analysis -->
                 <div class="mb-6 bg-gray-700/50 p-4 rounded-lg border border-gray-600">
-                    <h4 class="text-lg font-semibold text-white mb-4">Two-way ANOVA / Mixed Model Analysis</h4>
+                    <div class="flex justify-between items-center mb-4">
+                        <h4 class="text-lg font-semibold text-white">Two-way ANOVA / Mixed Model Analysis</h4>
+                        <button class="text-gray-400 hover:text-blue-400 transition-colors text-sm" onclick="toggleSection('anova-methodology')">
+                            <span id="anova-methodology-toggle-text">Show Methodology</span> ▼
+                        </button>
+                    </div>
+                    
+                    <!-- Collapsible methodology section -->
+                    <div id="anova-methodology" class="hidden mb-4">
+                        <p class="text-sm text-gray-300 mb-4 leading-relaxed">
+                            This analysis employs a <strong>two-way analysis of variance (ANOVA)</strong> to simultaneously test for the effects of 
+                            treatment group and time on tumor volume, plus their interaction. The model treats each animal as a repeated measure 
+                            across time points, accounting for the correlated nature of longitudinal data. We test three hypotheses: (1) 
+                            <strong>Group effect</strong> - whether treatment groups differ in overall tumor volume, (2) <strong>Time effect</strong> - 
+                            whether tumor volume changes over time, and (3) <strong>Group×Time interaction</strong> - whether treatment groups 
+                            respond differently over time. Effect sizes (η²) quantify the proportion of variance explained by each factor.
+                        </p>
+                        
+                        <p class="text-sm text-gray-300 mb-4 leading-relaxed">
+                            <strong>Multiple Comparison Correction:</strong> For post-hoc analysis, we apply <strong>Bonferroni correction</strong> 
+                            to control for Type I error inflation due to multiple pairwise comparisons. This method multiplies each raw p-value 
+                            by the number of comparisons (k), where k = g(g-1)/2 for g groups. While Bonferroni is conservative and may reduce 
+                            statistical power, it provides strong control of the family-wise error rate (FWER) at α = 0.05. Alternative methods 
+                            like Tukey's HSD (Honestly Significant Difference) or Šidák correction could be considered for less conservative 
+                            control, but Bonferroni ensures robust protection against false positives in exploratory analyses.
+                        </p>
+                        
+                        <p class="text-sm text-gray-300 mb-4 leading-relaxed">
+                            <strong>Post-Hoc Analysis Details:</strong> Following significant main effects or interactions, we perform all pairwise 
+                            group comparisons using <strong>independent samples t-tests</strong> with pooled standard errors. Each comparison 
+                            calculates: mean difference, pooled standard error, t-statistic, degrees of freedom, and 95% confidence intervals. 
+                            The Bonferroni-adjusted p-values are compared against α = 0.05, with significance levels indicated as: *** (p < 0.001), 
+                            ** (p < 0.01), * (p < 0.05), or ns (not significant). This approach provides comprehensive group comparison while 
+                            maintaining statistical rigor.
+                        </p>
+                    </div>
+                    
+                    <!-- Always visible results section -->
                     <div id="anova-results-container" class="space-y-4">
                         <!-- ANOVA results will be inserted here -->
                     </div>
+                    
                     <p class="text-xs text-gray-400 mt-4">
                         <strong>Note:</strong> Two-way ANOVA tests for main effects of Group and Time, plus Group×Time interaction. 
                         Mixed model accounts for repeated measures within animals.
                         <span class="text-red-400">p < 0.05</span>, 
-                        <span class="text-yellow-400">p < 0.01</span>, 
+                        <span class="text-red-400">p < 0.01</span>, 
                         <span class="text-green-400">p < 0.001</span>
                     </p>
                 </div>
@@ -3673,6 +3747,20 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Dates start empty to show yellow background
         });
+
+        // Function to toggle collapsible sections
+        function toggleSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            const toggleText = document.getElementById(sectionId + '-toggle-text');
+            
+            if (section.classList.contains('hidden')) {
+                section.classList.remove('hidden');
+                toggleText.textContent = 'Hide Details';
+            } else {
+                section.classList.add('hidden');
+                toggleText.textContent = 'Show Details';
+            }
+        }
     </script>
 
 </body>
