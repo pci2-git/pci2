@@ -333,6 +333,8 @@
         .group-name-input:focus {
             border-bottom-color: #3b82f6 !important;
         }
+        
+
     </style>
 </head>
 <body class="bg-gray-900 text-gray-200 antialiased">
@@ -401,8 +403,18 @@
             </div>
 
             <!-- Measurement Dates Container -->
-            <div id="measurementDatesContainer" class="mb-6">
-                <!-- Measurement date sections will be dynamically inserted here -->
+            <div class="mb-6">
+                <div class="overflow-x-auto">
+                    <div class="flex items-center gap-2 mb-2 text-sm text-gray-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18"></path>
+                        </svg>
+                        <span>Scroll horizontally in any measurement date to view all groups across all dates simultaneously</span>
+                    </div>
+                    <div id="measurementDatesContainer">
+                        <!-- Measurement date sections will be dynamically inserted here -->
+                    </div>
+                </div>
             </div>
 
             <!-- Action Buttons -->
@@ -477,6 +489,7 @@
 
         let measurementDateCounter = 0;
         let groupNames = [];
+        let isSyncingHorizontalScroll = false; // guards synchronized scroll
         
         // Auto-save functionality
         const AUTOSAVE_KEY = 'tumor_measurements_autosave';
@@ -737,8 +750,13 @@
                     // Validate all loaded data for size input errors
                     validateAllSizeInputs();
                     
+                    // Setup synchronized scrolling for restored measurement dates
+                    setTimeout(() => {
+                        setupSynchronizedScrolling();
+                    }, 100);
+                    
                     console.log('Data auto-restored from localStorage');
-                    return true;
+                    return true
                 } else {
                     // No saved measurement dates, create default one
                     addMeasurementDate();
@@ -782,7 +800,7 @@
                     </div>
                     <button data-action="remove-measurement-date" class="text-gray-400 hover:text-red-500 transition-colors text-xl">&times;</button>
                 </div>
-                <div class="overflow-x-auto">
+                <div class="overflow-x-auto" data-horizontal-scroll>
                     <div class="flex gap-6 pb-4" data-groups-container style="min-width: max-content;">
                         <!-- Groups will be inserted here in a horizontal scrollable row -->
                     </div>
@@ -808,6 +826,9 @@
             if (measurementDateInput && dayLabelSpan) {
                 updateDayLabel(measurementDateInput, dayLabelSpan);
             }
+            
+            // Setup synchronized scrolling for the new measurement date
+            setupSynchronizedScrolling();
         }
         
         function createGroupsForMeasurementDate(measurementDateSection) {
@@ -3746,6 +3767,11 @@
         // Initialize the page - dates start empty with yellow background
         document.addEventListener('DOMContentLoaded', function() {
             // Dates start empty to show yellow background
+            
+            // Setup synchronized scrolling for any existing measurement dates
+            setTimeout(() => {
+                setupSynchronizedScrolling();
+            }, 100);
         });
 
         // Function to toggle collapsible sections
@@ -3761,6 +3787,44 @@
                 toggleText.textContent = 'Show Details';
             }
         }
+
+        // Function to synchronize horizontal scrolling across all measurement dates
+        function setupSynchronizedScrolling() {
+            // Listen on the actual scrollable wrappers, not the inner flex rows
+            const scrollWrappers = document.querySelectorAll('[data-horizontal-scroll]');
+            const wrappersArray = Array.from(scrollWrappers);
+            console.log('Setting up synchronized scrolling for', wrappersArray.length, 'wrappers');
+            
+            if (wrappersArray.length === 0) {
+                console.warn('No scroll containers found!');
+                return;
+            }
+            
+            // Clear any existing synchronized scrolling
+            wrappersArray.forEach(wrapper => {
+                if (wrapper._syncScrollHandler) {
+                    wrapper.removeEventListener('scroll', wrapper._syncScrollHandler, { passive: true });
+                }
+            });
+            
+            wrappersArray.forEach((wrapper, index) => {
+                const scrollHandler = function(e) {
+                    if (isSyncingHorizontalScroll) return;
+                    isSyncingHorizontalScroll = true;
+                    const left = e.target.scrollLeft;
+                    wrappersArray.forEach(other => {
+                        if (other !== e.target) {
+                            other.scrollLeft = left;
+                        }
+                    });
+                    isSyncingHorizontalScroll = false;
+                };
+                wrapper._syncScrollHandler = scrollHandler;
+                wrapper.addEventListener('scroll', scrollHandler, { passive: true });
+            });
+        }
+        
+        // (Removed test function for production)
     </script>
 
 </body>
