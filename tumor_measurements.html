@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,81 +12,126 @@
         body {
             font-family: 'Inter', sans-serif;
         }
+
         .group-card {
             transition: all 0.3s ease-in-out;
         }
+
         .remove-btn {
             transition: opacity 0.2s ease-in-out;
         }
+
         tr:hover .remove-btn {
             opacity: 1;
         }
+
         .empty-field {
             background-color: #fef3c7 !important;
         }
-        
+
         .empty-cage-id {
-            background-color: #fef3c7 !important; /* Yellow background for empty cage IDs */
+            background-color: #fef3c7 !important;
+            /* Yellow background for empty cage IDs */
         }
-        
+
         .calculated-volume {
-            background-color: #dcfce7 !important; /* Green background for calculated volumes */
+            background-color: #dcfce7 !important;
+            /* Green background for calculated volumes */
         }
-        
+
         .volume-input.bg-gray-600 {
-            background-color: #fef3c7 !important; /* Yellow background for empty volume fields - same as empty size fields */
+            background-color: #fef3c7 !important;
+            /* Yellow background for empty volume fields - same as empty size fields */
         }
-        
+
         .volume-input.bg-gray-700 {
-            background-color: #374151 !important; /* Darker gray background for calculated volume fields */
+            background-color: #374151 !important;
+            /* Darker gray background for calculated volume fields */
         }
-        
+
         .size-validation-error {
-            background-color: #fca5a5 !important; /* Red background for size validation errors */
+            background-color: #fca5a5 !important;
+            /* Red background for size validation errors */
             border-color: #dc2626 !important;
         }
-        
+
         .empty-date-field {
-            background-color: #fef3c7 !important; /* Yellow background for empty date fields */
+            background-color: #fef3c7 !important;
+            /* Yellow background for empty date fields */
         }
-        
+
         /* Custom scrollbar for horizontal scrolling */
         .overflow-x-auto {
             scrollbar-width: thin;
             scrollbar-color: #6b7280 #374151;
         }
-        
+
         .overflow-x-auto::-webkit-scrollbar {
             height: 8px;
         }
-        
+
         .overflow-x-auto::-webkit-scrollbar-track {
             background: #374151;
             border-radius: 4px;
         }
-        
+
         .overflow-x-auto::-webkit-scrollbar-thumb {
             background: #6b7280;
             border-radius: 4px;
         }
-        
+
         .overflow-x-auto::-webkit-scrollbar-thumb:hover {
             background: #9ca3af;
         }
-        
+
         /* Better column width distribution */
         .group-card table {
             table-layout: fixed;
         }
-        
-        .group-card th:nth-child(1), .group-card td:nth-child(1) { width: 18%; } /* Cage ID */
-        .group-card th:nth-child(2), .group-card td:nth-child(2) { width: 12%; } /* Animal ID */
-        .group-card th:nth-child(3), .group-card td:nth-child(3) { width: 20%; } /* Tumor Number - made wider */
-        .group-card th:nth-child(4), .group-card td:nth-child(4) { width: 12%; } /* Large Size */
-        .group-card th:nth-child(5), .group-card td:nth-child(5) { width: 12%; } /* Small Size */
-        .group-card th:nth-child(6), .group-card td:nth-child(6) { width: 20%; } /* Volume - made wider */
-        .group-card th:nth-child(7), .group-card td:nth-child(7) { width: 6%; }  /* Actions */
-        
+
+        .group-card th:nth-child(1),
+        .group-card td:nth-child(1) {
+            width: 18%;
+        }
+
+        /* Cage ID */
+        .group-card th:nth-child(2),
+        .group-card td:nth-child(2) {
+            width: 12%;
+        }
+
+        /* Animal ID */
+        .group-card th:nth-child(3),
+        .group-card td:nth-child(3) {
+            width: 20%;
+        }
+
+        /* Tumor Number - made wider */
+        .group-card th:nth-child(4),
+        .group-card td:nth-child(4) {
+            width: 12%;
+        }
+
+        /* Large Size */
+        .group-card th:nth-child(5),
+        .group-card td:nth-child(5) {
+            width: 12%;
+        }
+
+        /* Small Size */
+        .group-card th:nth-child(6),
+        .group-card td:nth-child(6) {
+            width: 20%;
+        }
+
+        /* Volume - made wider */
+        .group-card th:nth-child(7),
+        .group-card td:nth-child(7) {
+            width: 6%;
+        }
+
+        /* Actions */
+
         /* Cage grouping styles */
         .cage-group {
             border: 2px solid #4b5563;
@@ -93,11 +139,11 @@
             margin-bottom: 8px;
             background-color: #374151;
         }
-        
+
         .cage-group:last-child {
             margin-bottom: 0;
         }
-        
+
         .cage-header {
             background-color: #4b5563;
             color: #e5e7eb;
@@ -110,7 +156,7 @@
             justify-content: space-between;
             align-items: center;
         }
-        
+
         .cage-remove-btn {
             background: #dc2626;
             color: white;
@@ -128,13 +174,13 @@
             justify-content: center;
             line-height: 1;
         }
-        
+
         .cage-remove-btn:hover {
             opacity: 1;
             background: #b91c1c;
             transform: scale(1.1);
         }
-        
+
         /* Group management buttons */
         .group-remove-btn {
             background: #dc2626;
@@ -156,13 +202,13 @@
             top: 8px;
             right: 8px;
         }
-        
+
         .group-remove-btn:hover {
             opacity: 1;
             background: #b91c1c;
             transform: scale(1.1);
         }
-        
+
         .add-group-card {
             background: rgba(59, 130, 246, 0.1);
             border: 2px dashed #3b82f6;
@@ -174,12 +220,12 @@
             transition: all 0.3s ease;
             flex-shrink: 0;
         }
-        
+
         .add-group-card:hover {
             background: rgba(59, 130, 246, 0.2);
             border-color: #2563eb;
         }
-        
+
         .add-group-btn {
             background: #3b82f6;
             color: white;
@@ -196,12 +242,12 @@
             justify-content: center;
             line-height: 1;
         }
-        
+
         .add-group-btn:hover {
             background: #2563eb;
             transform: scale(1.1);
         }
-        
+
         .add-cage-btn {
             background: #22c55e;
             color: white;
@@ -215,23 +261,23 @@
             margin-top: 12px;
             width: 100%;
         }
-        
+
         .add-cage-btn:hover {
             background: #16a34a;
             transform: translateY(-1px);
         }
-        
+
         /* Make Large Size and Small Size columns wider for 4-digit numbers */
         .table-fixed th:nth-child(4),
         .table-fixed th:nth-child(5) {
             width: 80px !important;
         }
-        
+
         .table-fixed td:nth-child(4),
         .table-fixed td:nth-child(5) {
             width: 80px !important;
         }
-        
+
         /* Hide number input spinners */
         .large-size-input::-webkit-outer-spin-button,
         .large-size-input::-webkit-inner-spin-button,
@@ -240,24 +286,24 @@
             -webkit-appearance: none;
             margin: 0;
         }
-        
+
         .large-size-input[type=number],
         .small-size-input[type=number] {
             -moz-appearance: textfield;
             appearance: textfield;
         }
-        
+
         /* Combined spacer with both buttons */
         .add-spacer {
             position: relative;
             height: 12px;
             background: transparent;
         }
-        
+
         .add-spacer:hover {
             background: rgba(59, 130, 246, 0.1);
         }
-        
+
         /* Animal button (blue) */
         .add-animal-btn {
             position: absolute;
@@ -281,7 +327,7 @@
             z-index: 10;
             white-space: nowrap;
         }
-        
+
         /* Tumor button (green) */
         .add-tumor-btn {
             position: absolute;
@@ -305,38 +351,37 @@
             z-index: 10;
             white-space: nowrap;
         }
-        
+
         .add-spacer:hover .add-animal-btn,
         .add-spacer:hover .add-tumor-btn {
             opacity: 1;
         }
-        
+
         .add-animal-btn:hover {
             background: #2563eb;
             transform: translate(-50%, -50%) scale(1.1);
         }
-        
+
         .add-tumor-btn:hover {
             background: #16a34a;
             transform: translate(-50%, -50%) scale(1.1);
         }
-        
+
         /* Group name input styling */
         .group-name-input {
             transition: border-color 0.2s ease;
         }
-        
+
         .group-name-input:hover {
             border-bottom-color: #6b7280 !important;
         }
-        
+
         .group-name-input:focus {
             border-bottom-color: #3b82f6 !important;
         }
-        
-
     </style>
 </head>
+
 <body class="bg-gray-900 text-gray-200 antialiased">
 
     <div class="container mx-auto p-4 sm:p-6 lg:p-8">
@@ -353,34 +398,44 @@
                 <h3 class="text-lg font-semibold text-white mb-4">Create New Experiment</h3>
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 items-end">
                     <div>
-                        <label for="numGroupsInput" class="block text-sm font-medium text-gray-300 mb-2">Number of Groups</label>
-                        <input type="number" id="numGroupsInput" min="1" value="2" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2">
+                        <label for="numGroupsInput" class="block text-sm font-medium text-gray-300 mb-2">Number of
+                            Groups</label>
+                        <input type="number" id="numGroupsInput" min="1" value="2"
+                            class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2">
                     </div>
                     <div>
-                        <label for="numCagesInput" class="block text-sm font-medium text-gray-300 mb-2">Number of Cages (per group)</label>
-                        <input type="number" id="numCagesInput" min="1" value="2" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2">
+                        <label for="numCagesInput" class="block text-sm font-medium text-gray-300 mb-2">Number of Cages
+                            (per group)</label>
+                        <input type="number" id="numCagesInput" min="1" value="2"
+                            class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2">
                     </div>
                     <div>
-                        <label for="animalsPerCageInput" class="block text-sm font-medium text-gray-300 mb-2">Animals per Cage</label>
-                        <input type="number" id="animalsPerCageInput" min="1" value="4" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2">
+                        <label for="animalsPerCageInput" class="block text-sm font-medium text-gray-300 mb-2">Animals
+                            per Cage</label>
+                        <input type="number" id="animalsPerCageInput" min="1" value="4"
+                            class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2">
                     </div>
                     <div>
-                        <button id="applyConfigBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-colors w-full">
+                        <button id="applyConfigBtn"
+                            class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-colors w-full">
                             Apply Configuration
                         </button>
                     </div>
                 </div>
-                <p class="text-sm text-gray-400 mt-2">This will replace all existing groups with the new configuration.</p>
+                <p class="text-sm text-gray-400 mt-2">This will replace all existing groups with the new configuration.
+                </p>
             </div>
 
             <!-- Load Previous Experiment Section -->
             <div class="mb-8 p-4 bg-gray-700/50 rounded-lg border border-gray-600">
                 <h3 class="text-lg font-semibold text-white mb-4">Load Previous Experiment</h3>
                 <div class="flex flex-wrap gap-4">
-                    <button id="loadDataBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                    <button id="loadDataBtn"
+                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
                         Load Data
                     </button>
-                    <button id="exportDataBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                    <button id="exportDataBtn"
+                        class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
                         Export Data
                     </button>
                     <input type="file" id="csvFileInput" accept=".csv" class="hidden">
@@ -392,12 +447,16 @@
             <div class="mb-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label for="experimentIdInput" class="block text-lg font-medium text-white mb-2">Experiment ID</label>
-                        <input type="text" id="experimentIdInput" placeholder="e.g., Experiment23" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                        <label for="experimentIdInput" class="block text-lg font-medium text-white mb-2">Experiment
+                            ID</label>
+                        <input type="text" id="experimentIdInput" placeholder="e.g., Experiment23"
+                            class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
                     </div>
                     <div>
-                        <label for="startDateInput" class="block text-lg font-medium text-white mb-2">Experiment Start Date (Day 0)</label>
-                        <input type="text" id="startDateInput" placeholder="mm/dd/yy" class="empty-date-field border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                        <label for="startDateInput" class="block text-lg font-medium text-white mb-2">Experiment Start
+                            Date (Day 0)</label>
+                        <input type="text" id="startDateInput" placeholder="mm/dd/yy"
+                            class="empty-date-field border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
                     </div>
                 </div>
             </div>
@@ -407,9 +466,11 @@
                 <div class="overflow-x-auto">
                     <div class="flex items-center gap-2 mb-2 text-sm text-gray-400">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M7 16l-4-4m0 0l4-4m-4 4h18"></path>
                         </svg>
-                        <span>Scroll horizontally in any measurement date to view all groups across all dates simultaneously</span>
+                        <span>Scroll horizontally in any measurement date to view all groups across all dates
+                            simultaneously</span>
                     </div>
                     <div id="measurementDatesContainer">
                         <!-- Measurement date sections will be dynamically inserted here -->
@@ -419,32 +480,43 @@
 
             <!-- Action Buttons -->
             <div class="flex flex-wrap gap-4">
-                <button id="addMeasurementDateBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                <button id="addMeasurementDateBtn"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
                     Add Measurement Date
                 </button>
-                <button id="analyzeDataBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                <button id="analyzeDataBtn"
+                    class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
                     Analyze Data
                 </button>
-                <button id="exportPrismBtn" class="bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                <button id="exportPrismBtn"
+                    class="bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
                     Export Data to Prism
+                </button>
+                <button id="exportStatisticianBtn"
+                    class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                    Export Data for Statistician
                 </button>
             </div>
         </div>
 
         <!-- Data Analysis Section -->
-        <div id="analysis-section" class="hidden max-w-7xl mx-auto mt-8 bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-700">
+        <div id="analysis-section"
+            class="hidden max-w-7xl mx-auto mt-8 bg-gray-800 rounded-lg shadow-lg p-6 border border-gray-700">
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-2xl font-bold text-white">Data Analysis Results</h3>
-                <button id="hide-analysis-btn" class="text-gray-400 hover:text-red-500 transition-colors text-xl">Hide Analysis</button>
+                <button id="hide-analysis-btn" class="text-gray-400 hover:text-red-500 transition-colors text-xl">Hide
+                    Analysis</button>
             </div>
-            
+
             <div id="analysis-content" class="space-y-6">
                 <!-- Analysis content will be inserted here -->
             </div>
         </div>
 
         <!-- Error Message -->
-        <div id="error-message" class="hidden mt-6 max-w-2xl mx-auto bg-red-900/50 border border-red-700 text-red-300 px-4 py-3 rounded-lg relative" role="alert">
+        <div id="error-message"
+            class="hidden mt-6 max-w-2xl mx-auto bg-red-900/50 border border-red-700 text-red-300 px-4 py-3 rounded-lg relative"
+            role="alert">
             <strong class="font-bold">Error:</strong>
             <span class="block sm:inline" id="error-text"></span>
         </div>
@@ -454,10 +526,13 @@
     <div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 hidden">
         <div class="bg-gray-800 p-8 rounded-xl shadow-2xl w-full max-w-sm m-4 border border-gray-700">
             <h3 class="text-lg font-bold mb-4 text-white">Confirm Deletion</h3>
-            <p class="text-gray-300 mb-6">Are you sure you want to delete this measurement? This action cannot be undone.</p>
+            <p class="text-gray-300 mb-6">Are you sure you want to delete this measurement? This action cannot be
+                undone.</p>
             <div class="flex justify-end gap-4">
-                <button id="cancel-delete-btn" class="bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-500 transition">Cancel</button>
-                <button id="confirm-delete-btn" class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 transition">Delete</button>
+                <button id="cancel-delete-btn"
+                    class="bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-500 transition">Cancel</button>
+                <button id="confirm-delete-btn"
+                    class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 transition">Delete</button>
             </div>
         </div>
     </div>
@@ -472,6 +547,7 @@
         const addMeasurementDateBtn = document.getElementById('addMeasurementDateBtn');
         const analyzeDataBtn = document.getElementById('analyzeDataBtn');
         const exportPrismBtn = document.getElementById('exportPrismBtn');
+        const exportStatisticianBtn = document.getElementById('exportStatisticianBtn');
         const numGroupsInput = document.getElementById('numGroupsInput');
         const numCagesInput = document.getElementById('numCagesInput');
         const animalsPerCageInput = document.getElementById('animalsPerCageInput');
@@ -479,10 +555,10 @@
         const loadDataBtn = document.getElementById('loadDataBtn');
         const exportDataBtn = document.getElementById('exportDataBtn');
         const csvFileInput = document.getElementById('csvFileInput');
-        
+
         const errorMessageDiv = document.getElementById('error-message');
         const errorTextSpan = document.getElementById('error-text');
-        
+
         const analysisSection = document.getElementById('analysis-section');
         const hideAnalysisBtn = document.getElementById('hide-analysis-btn');
         const analysisContent = document.getElementById('analysis-content');
@@ -490,7 +566,7 @@
         let measurementDateCounter = 0;
         let groupNames = [];
         let isSyncingHorizontalScroll = false; // guards synchronized scroll
-        
+
         // Auto-save functionality
         const AUTOSAVE_KEY = 'tumor_measurements_autosave';
         let autoSaveTimeout;
@@ -502,6 +578,7 @@
         });
         analyzeDataBtn.addEventListener('click', analyzeData);
         exportPrismBtn.addEventListener('click', exportDataForPrism);
+        exportStatisticianBtn.addEventListener('click', exportDataForStatistician);
         measurementDatesContainer.addEventListener('click', handleActions);
         measurementDatesContainer.addEventListener('input', handleCageIdChange);
         measurementDatesContainer.addEventListener('input', handleFieldBackgroundChange);
@@ -540,12 +617,12 @@
                     measurementDateSections.forEach(section => {
                         const measurementDate = section.querySelector('.measurement-date-input').value;
                         const groups = [];
-                        
+
                         const groupCards = section.querySelectorAll('.group-card');
                         groupCards.forEach(card => {
                             const groupName = card.querySelector('.group-name-input').value;
                             const animals = [];
-                            
+
                             const rows = card.querySelectorAll('tbody tr:not(.add-spacer)');
                             rows.forEach(row => {
                                 const inputs = row.querySelectorAll('input');
@@ -560,13 +637,13 @@
                                     });
                                 }
                             });
-                            
+
                             groups.push({
                                 groupName: groupName,
                                 animals: animals
                             });
                         });
-                        
+
                         data.measurementDates.push({
                             measurementDate: measurementDate,
                             groups: groups
@@ -587,11 +664,11 @@
                 if (!savedData) return false;
 
                 const data = JSON.parse(savedData);
-                
+
                 // Clear existing data
                 measurementDatesContainer.innerHTML = '';
                 measurementDateCounter = 0;
-                
+
                 // Restore experiment metadata
                 if (data.experimentId) {
                     experimentIdInput.value = data.experimentId;
@@ -601,39 +678,39 @@
                     startDateInput.classList.remove('empty-date-field');
                     startDateInput.classList.add('bg-gray-700');
                 }
-                
+
                 // Restore global settings
                 measurementDateCounter = data.measurementDateCounter || 0;
                 groupNames = data.groupNames || [];
-                
+
                 // Restore measurement dates
                 if (data.measurementDates && data.measurementDates.length > 0) {
                     data.measurementDates.forEach(dateData => {
-        addMeasurementDate();
+                        addMeasurementDate();
                         const currentSection = measurementDatesContainer.querySelector('.measurement-date-section:last-child');
-                        
+
                         // Set measurement date
                         const dateInput = currentSection.querySelector('.measurement-date-input');
                         dateInput.value = dateData.measurementDate;
                         dateInput.classList.remove('empty-date-field');
                         dateInput.classList.add('bg-gray-700');
-                        
+
                         // Update day label
                         const dayLabelSpan = currentSection.querySelector('.day-label');
                         if (dayLabelSpan) {
                             updateDayLabel(dateInput, dayLabelSpan);
                         }
-                        
+
                         // Clear default groups and restore saved groups
                         const groupsContainer = currentSection.querySelector('[data-groups-container]');
                         groupsContainer.innerHTML = '';
-                        
+
                         dateData.groups.forEach(groupData => {
                             // Create group card
                             const groupCard = document.createElement('div');
-                                        groupCard.className = 'group-card bg-gray-700/50 p-4 rounded-lg border border-gray-600 flex-shrink-0 relative';
-            groupCard.style.width = '600px';
-                            
+                            groupCard.className = 'group-card bg-gray-700/50 p-4 rounded-lg border border-gray-600 flex-shrink-0 relative';
+                            groupCard.style.width = '600px';
+
                             groupCard.innerHTML = `
                                 <button class="group-remove-btn" data-action="remove-group">&times;</button>
                                 <div class="mb-4">
@@ -641,9 +718,9 @@
                                 </div>
                                 <div></div>
                             `;
-                            
+
                             const tableContainer = groupCard.querySelector('div:last-child');
-                            
+
                             // Group animals by cage ID
                             const cageGroups = {};
                             groupData.animals.forEach(animal => {
@@ -653,14 +730,14 @@
                                 }
                                 cageGroups[cageId].push(animal);
                             });
-                            
+
                             // Create cage groups
                             Object.keys(cageGroups).forEach(cageId => {
                                 const cageAnimals = cageGroups[cageId];
-                                
+
                                 const cageGroup = document.createElement('div');
                                 cageGroup.className = 'cage-group';
-                                
+
                                 const cageHeader = document.createElement('div');
                                 cageHeader.className = 'cage-header';
                                 const headerText = cageId && cageId.trim() !== '' ? `Cage ${cageId}` : 'Default Cage';
@@ -669,7 +746,7 @@
                                     <button class="cage-remove-btn" data-action="remove-cage">&times;</button>
                                 `;
                                 cageGroup.appendChild(cageHeader);
-                                
+
                                 const cageTable = document.createElement('table');
                                 cageTable.className = 'w-full text-sm text-left text-gray-400 table-fixed';
                                 cageTable.innerHTML = `
@@ -687,18 +764,18 @@
                                     <tbody></tbody>
                                 `;
                                 cageGroup.appendChild(cageTable);
-                                
+
                                 const tbody = cageTable.querySelector('tbody');
                                 cageAnimals.forEach(animal => {
                                     const row = document.createElement('tr');
                                     row.className = 'bg-gray-800 border-b border-gray-700 hover:bg-gray-600/50';
-                                    
+
                                     // Determine styling for each field
                                     const cageIdClass = animal.cageId === '' ? 'empty-cage-id' : 'bg-gray-700';
                                     const largeSizeClass = animal.largeSize === '' ? 'empty-field' : 'bg-gray-700';
                                     const smallSizeClass = animal.smallSize === '' ? 'empty-field' : 'bg-gray-700';
                                     const volumeClass = animal.volume === '' ? 'bg-gray-600' : 'bg-gray-700';
-                                    
+
                                     row.innerHTML = `
                                         <td class="px-3 py-3"><input type="text" value="${animal.cageId}" placeholder="-" class="w-full text-sm ${cageIdClass} rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none cage-id-input"></td>
                                         <td class="px-3 py-3"><input type="text" value="${animal.animalId}" class="w-full text-sm bg-gray-700 rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none animal-id-input"></td>
@@ -711,7 +788,7 @@
                                         </td>
                                     `;
                                     tbody.appendChild(row);
-                                    
+
                                     // Add spacer
                                     const spacer = document.createElement('tr');
                                     spacer.className = 'add-spacer';
@@ -723,20 +800,20 @@
                                     `;
                                     tbody.appendChild(spacer);
                                 });
-                                
+
                                 tableContainer.appendChild(cageGroup);
                             });
-                            
+
                             // Add the add cage button to each group
                             const addCageBtn = document.createElement('button');
                             addCageBtn.className = 'add-cage-btn';
                             addCageBtn.setAttribute('data-action', 'add-cage');
                             addCageBtn.textContent = '+ Add Cage';
                             tableContainer.appendChild(addCageBtn);
-                            
+
                             groupsContainer.appendChild(groupCard);
                         });
-                        
+
                         // Add the "Add Group" card at the end of each measurement date
                         const addGroupCard = document.createElement('div');
                         addGroupCard.className = 'add-group-card rounded-lg flex-shrink-0';
@@ -746,15 +823,15 @@
                         `;
                         groupsContainer.appendChild(addGroupCard);
                     });
-                    
+
                     // Validate all loaded data for size input errors
                     validateAllSizeInputs();
-                    
+
                     // Setup synchronized scrolling for restored measurement dates
                     setTimeout(() => {
                         setupSynchronizedScrolling();
                     }, 100);
-                    
+
                     console.log('Data auto-restored from localStorage');
                     return true
                 } else {
@@ -785,12 +862,12 @@
         function addMeasurementDate() {
             measurementDateCounter++;
             const dateId = `measurement-date-${measurementDateCounter}`;
-            
+
             // Create the measurement date section
             const measurementDateSection = document.createElement('div');
             measurementDateSection.className = 'measurement-date-section mb-8 p-4 bg-gray-700/30 rounded-lg border border-gray-600';
             measurementDateSection.id = dateId;
-            
+
             measurementDateSection.innerHTML = `
                 <div class="flex justify-between items-center mb-4">
                     <div class="flex items-center gap-4">
@@ -806,12 +883,12 @@
                     </div>
                 </div>
             `;
-            
+
             measurementDatesContainer.appendChild(measurementDateSection);
-            
+
             // Check if there's a previous measurement date to copy from
             const previousMeasurementDateSection = measurementDatesContainer.querySelector('.measurement-date-section:nth-last-child(2)');
-            
+
             if (previousMeasurementDateSection) {
                 // Copy structure from previous measurement date
                 copyGroupsFromPreviousDate(measurementDateSection, previousMeasurementDateSection);
@@ -819,27 +896,27 @@
                 // First measurement date, create fresh groups
                 createGroupsForMeasurementDate(measurementDateSection);
             }
-            
+
             // Update the day label for the newly added measurement date
             const measurementDateInput = measurementDateSection.querySelector('.measurement-date-input');
             const dayLabelSpan = measurementDateSection.querySelector('.day-label');
             if (measurementDateInput && dayLabelSpan) {
                 updateDayLabel(measurementDateInput, dayLabelSpan);
             }
-            
+
             // Setup synchronized scrolling for the new measurement date
             setupSynchronizedScrolling();
         }
-        
+
         function createGroupsForMeasurementDate(measurementDateSection) {
             const groupsContainer = measurementDateSection.querySelector('[data-groups-container]');
-            
+
             // If we have configured group names, use them; otherwise create default groups
             const groupsToCreate = groupNames.length > 0 ? groupNames : ['Group 1', 'Group 2'];
-            
+
             groupsToCreate.forEach((groupName, index) => {
                 const groupCard = document.createElement('div');
-                            groupCard.className = 'group-card bg-gray-700/50 p-4 rounded-lg border border-gray-600 flex-shrink-0 relative';
+                groupCard.className = 'group-card bg-gray-700/50 p-4 rounded-lg border border-gray-600 flex-shrink-0 relative';
                 groupCard.style.width = '600px'; // Much wider for better text spacing
                 groupCard.innerHTML = `
                     <button class="group-remove-btn" data-action="remove-group">&times;</button>
@@ -876,7 +953,7 @@
                 groupsContainer.appendChild(groupCard);
                 addAnimalRow(groupCard.querySelector('tbody')); // Add one animal row by default
             });
-            
+
             // Add the "Add Group" card at the end
             const addGroupCard = document.createElement('div');
             addGroupCard.className = 'add-group-card rounded-lg flex-shrink-0';
@@ -890,16 +967,16 @@
         function copyGroupsFromPreviousDate(newMeasurementDateSection, previousMeasurementDateSection) {
             const newGroupsContainer = newMeasurementDateSection.querySelector('[data-groups-container]');
             const previousGroupCards = previousMeasurementDateSection.querySelectorAll('.group-card');
-            
+
             previousGroupCards.forEach(previousGroupCard => {
                 // Create new group card
                 const newGroupCard = document.createElement('div');
                 newGroupCard.className = 'group-card bg-gray-700/50 p-4 rounded-lg border border-gray-600 flex-shrink-0';
                 newGroupCard.style.width = '600px';
-                
+
                 // Get group name from previous card
                 const groupName = previousGroupCard.querySelector('.group-name-input').value.trim();
-                
+
                 newGroupCard.innerHTML = `
                     <button class="group-remove-btn" data-action="remove-group">&times;</button>
                     <div class="mb-4">
@@ -907,28 +984,28 @@
                     </div>
                     <div></div>
                 `;
-                
+
                 const newTableContainer = newGroupCard.querySelector('div:last-child');
-                
+
                 // Copy each cage group from previous measurement date
                 const previousCageGroups = previousGroupCard.querySelectorAll('.cage-group');
                 previousCageGroups.forEach(previousCageGroup => {
                     const newCageGroup = document.createElement('div');
                     newCageGroup.className = 'cage-group';
-                    
+
                     // Copy cage header
                     const previousCageHeader = previousCageGroup.querySelector('.cage-header');
                     const newCageHeader = document.createElement('div');
                     newCageHeader.className = 'cage-header';
-                    const headerText = previousCageHeader.querySelector('span') ? 
-                        previousCageHeader.querySelector('span').textContent : 
+                    const headerText = previousCageHeader.querySelector('span') ?
+                        previousCageHeader.querySelector('span').textContent :
                         previousCageHeader.textContent;
                     newCageHeader.innerHTML = `
                         <span>${headerText}</span>
                         <button class="cage-remove-btn" data-action="remove-cage">&times;</button>
                     `;
                     newCageGroup.appendChild(newCageHeader);
-                    
+
                     // Create table structure
                     const newCageTable = document.createElement('table');
                     newCageTable.className = 'w-full text-sm text-left text-gray-400 table-fixed';
@@ -947,9 +1024,9 @@
                         <tbody></tbody>
                     `;
                     newCageGroup.appendChild(newCageTable);
-                    
+
                     const newTbody = newCageTable.querySelector('tbody');
-                    
+
                     // Copy animal rows from previous cage, but clear size measurements
                     const previousAnimalRows = previousCageGroup.querySelectorAll('tr:not(.add-spacer)');
                     previousAnimalRows.forEach(previousRow => {
@@ -958,7 +1035,7 @@
                             const cageId = previousInputs[0].value || '';
                             const animalId = previousInputs[1].value || '';
                             const tumorNumber = previousInputs[2].value || 'Tumor 1';
-                            
+
                             // Create new row with same cage ID, animal ID, and tumor number, but empty measurements
                             const newRow = document.createElement('tr');
                             newRow.className = 'bg-gray-800 border-b border-gray-700 hover:bg-gray-600/50';
@@ -974,7 +1051,7 @@
                                 </td>
                             `;
                             newTbody.appendChild(newRow);
-                            
+
                             // Add combined spacer with both buttons
                             const spacer = document.createElement('tr');
                             spacer.className = 'add-spacer';
@@ -987,20 +1064,20 @@
                             newTbody.appendChild(spacer);
                         }
                     });
-                    
+
                     newTableContainer.appendChild(newCageGroup);
                 });
-                
+
                 // Add the add cage button
                 const addCageBtn = document.createElement('button');
                 addCageBtn.className = 'add-cage-btn';
                 addCageBtn.setAttribute('data-action', 'add-cage');
                 addCageBtn.textContent = '+ Add Cage';
                 newTableContainer.appendChild(addCageBtn);
-                
+
                 newGroupsContainer.appendChild(newGroupCard);
             });
-            
+
             // Add the "Add Group" card at the end
             const addGroupCard = document.createElement('div');
             addGroupCard.className = 'add-group-card rounded-lg flex-shrink-0';
@@ -1015,7 +1092,7 @@
             // Find the cage group this tbody belongs to
             const cageGroup = tbody.closest('.cage-group');
             const cageHeader = cageGroup ? cageGroup.querySelector('.cage-header') : null;
-            
+
             // Get cage ID from existing animals in this cage, or start empty
             let cageId = '';
             const existingAnimalRows = tbody.querySelectorAll('tr:not(.add-spacer)');
@@ -1025,13 +1102,13 @@
                     cageId = firstAnimalCageInput.value || '';
                 }
             }
-            
+
             // Count existing animal rows (not spacers) in this cage to determine next animal ID
             const nextAnimalId = (existingAnimalRows.length + 1).toString();
-            
-                const row = document.createElement('tr');
+
+            const row = document.createElement('tr');
             row.className = 'bg-gray-800 border-b border-gray-700 hover:bg-gray-600/50';
-                row.innerHTML = `
+            row.innerHTML = `
                 <td class="px-3 py-3"><input type="text" value="${cageId}" placeholder="-" class="w-full text-sm ${cageId === '' ? 'empty-cage-id' : 'bg-gray-700'} rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none cage-id-input"></td>
                 <td class="px-3 py-3"><input type="text" value="${nextAnimalId}" class="w-full text-sm bg-gray-700 rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none animal-id-input"></td>
                 <td class="px-3 py-3"><input type="text" value="Tumor 1" class="w-full text-sm bg-gray-700 rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none tumor-number-input"></td>
@@ -1043,7 +1120,7 @@
                     </td>
                 `;
             tbody.appendChild(row);
-            
+
             // Add combined spacer with both tumor and animal buttons
             const spacer = document.createElement('tr');
             spacer.className = 'add-spacer';
@@ -1060,7 +1137,7 @@
             // Find the cage group this tbody belongs to
             const cageGroup = tbody.closest('.cage-group');
             const cageHeader = cageGroup ? cageGroup.querySelector('.cage-header') : null;
-            
+
             // Get cage ID from existing animals in this cage, or start empty
             let cageId = '';
             const existingAnimalRows = tbody.querySelectorAll('tr:not(.add-spacer)');
@@ -1070,7 +1147,7 @@
                     cageId = firstAnimalCageInput.value || '';
                 }
             }
-            
+
             // Create the new animal row
             const row = document.createElement('tr');
             row.className = 'bg-gray-800 border-b border-gray-700 hover:bg-gray-600/50';
@@ -1085,7 +1162,7 @@
                     <button data-action="remove-animal" class="text-gray-500 hover:text-red-400 remove-btn opacity-20 text-lg">&times;</button>
                 </td>
             `;
-            
+
             // Create combined spacer with both buttons
             const spacer = document.createElement('tr');
             spacer.className = 'add-spacer';
@@ -1095,7 +1172,7 @@
                     <button class="add-animal-btn" data-action="add-animal-after">add mouse</button>
                 </td>
             `;
-            
+
             // Insert the new row and spacer after the clicked spacer
             afterElement.parentNode.insertBefore(row, afterElement.nextSibling);
             afterElement.parentNode.insertBefore(spacer, row.nextSibling);
@@ -1105,7 +1182,7 @@
             // Find the cage group this tbody belongs to
             const cageGroup = tbody.closest('.cage-group');
             const cageHeader = cageGroup ? cageGroup.querySelector('.cage-header') : null;
-            
+
             // Get cage ID from existing animals in this cage, or start empty
             let cageId = '';
             const existingAnimalRows = tbody.querySelectorAll('tr:not(.add-spacer)');
@@ -1115,14 +1192,14 @@
                     cageId = firstAnimalCageInput.value || '';
                 }
             }
-            
+
             // Get animal ID from the previous row (the row that the spacer belongs to)
             let animalId = '';
             const previousRow = afterElement.previousElementSibling;
             if (previousRow && previousRow.querySelector('.animal-id-input')) {
                 animalId = previousRow.querySelector('.animal-id-input').value || '';
             }
-            
+
             // Count existing tumor rows for this animal to determine next tumor number
             let tumorCount = 1;
             const allRows = tbody.querySelectorAll('tr:not(.add-spacer)');
@@ -1132,7 +1209,7 @@
                     tumorCount++;
                 }
             }
-            
+
             // Create the new tumor row
             const row = document.createElement('tr');
             row.className = 'bg-gray-800 border-b border-gray-700 hover:bg-gray-600/50';
@@ -1147,7 +1224,7 @@
                     <button data-action="remove-animal" class="text-gray-500 hover:text-red-400 remove-btn opacity-20 text-lg">&times;</button>
                 </td>
             `;
-            
+
             // Create combined spacer with both buttons
             const spacer = document.createElement('tr');
             spacer.className = 'add-spacer';
@@ -1157,7 +1234,7 @@
                     <button class="add-animal-btn" data-action="add-animal-after">add mouse</button>
                 </td>
             `;
-            
+
             // Insert the new row and spacer after the clicked spacer
             afterElement.parentNode.insertBefore(row, afterElement.nextSibling);
             afterElement.parentNode.insertBefore(spacer, row.nextSibling);
@@ -1200,7 +1277,7 @@
                 const groupCard = target.closest('.group-card');
                 const groupsContainer = target.closest('[data-groups-container]');
                 const groupCards = groupsContainer.querySelectorAll('.group-card');
-                
+
                 // Only allow removal if there are more than 1 group
                 if (groupCards.length > 1 && groupCard) {
                     groupCard.remove();
@@ -1211,7 +1288,7 @@
                 const addGroupCard = target.closest('.add-group-card');
                 const existingGroupCards = groupsContainer.querySelectorAll('.group-card');
                 const newGroupNumber = existingGroupCards.length + 1;
-                
+
                 // Create new group card
                 const newGroupCard = document.createElement('div');
                 newGroupCard.className = 'group-card bg-gray-700/50 p-4 rounded-lg border border-gray-600 flex-shrink-0 relative';
@@ -1225,23 +1302,23 @@
                         <button class="add-cage-btn" data-action="add-cage">+ Add Cage</button>
                     </div>
                 `;
-                
+
                 // Insert before the add group card
                 groupsContainer.insertBefore(newGroupCard, addGroupCard);
-                
+
                 // Copy structure from the last existing group
                 if (existingGroupCards.length > 0) {
                     const lastGroup = existingGroupCards[existingGroupCards.length - 1];
                     const lastGroupCages = lastGroup.querySelectorAll('.cage-group');
                     const tableContainer = newGroupCard.querySelector('div:last-child');
                     const addCageBtn = tableContainer.querySelector('.add-cage-btn');
-                    
+
                     // Copy each cage from the last group
                     lastGroupCages.forEach(lastCage => {
                         // Count animals in this cage (excluding spacer rows)
                         const animalRows = lastCage.querySelectorAll('tbody tr:not(.add-spacer)');
                         const animalCount = animalRows.length;
-                        
+
                         // Create new cage with same structure
                         const newCageGroup = document.createElement('div');
                         newCageGroup.className = 'cage-group';
@@ -1267,10 +1344,10 @@
                                 </tbody>
                             </table>
                         `;
-                        
+
                         // Insert before the add cage button
                         tableContainer.insertBefore(newCageGroup, addCageBtn);
-                        
+
                         // Add the same number of animals as the original cage
                         const tbody = newCageGroup.querySelector('tbody');
                         for (let i = 0; i < animalCount; i++) {
@@ -1281,7 +1358,7 @@
                     // No existing groups, create default structure
                     const tableContainer = newGroupCard.querySelector('div:last-child');
                     const addCageBtn = tableContainer.querySelector('.add-cage-btn');
-                    
+
                     const defaultCageGroup = document.createElement('div');
                     defaultCageGroup.className = 'cage-group';
                     defaultCageGroup.innerHTML = `
@@ -1306,28 +1383,28 @@
                             </tbody>
                         </table>
                     `;
-                    
+
                     tableContainer.insertBefore(defaultCageGroup, addCageBtn);
                     addAnimalRow(defaultCageGroup.querySelector('tbody'));
                 }
-                
+
                 autoSaveData(); // Auto-save after adding group
             } else if (action === 'add-cage') {
                 const groupCard = target.closest('.group-card');
                 const cagesContainer = groupCard.querySelector('div:last-child');
                 const addCageBtn = target;
-                
+
                 // Find the previous cage to determine how many animals to add
                 const existingCages = groupCard.querySelectorAll('.cage-group');
                 let animalCount = 1; // Default to 1 animal
-                
+
                 if (existingCages.length > 0) {
                     // Get the last cage and count its animals (excluding spacer rows)
                     const lastCage = existingCages[existingCages.length - 1];
                     const animalRows = lastCage.querySelectorAll('tbody tr:not(.add-spacer)');
                     animalCount = animalRows.length;
                 }
-                
+
                 // Create new cage
                 const newCageGroup = document.createElement('div');
                 newCageGroup.className = 'cage-group';
@@ -1353,23 +1430,23 @@
                         </tbody>
                     </table>
                 `;
-                
+
                 // Insert before the add cage button
                 cagesContainer.insertBefore(newCageGroup, addCageBtn);
-                
+
                 // Add the same number of animals as the previous cage
                 const tbody = newCageGroup.querySelector('tbody');
                 for (let i = 0; i < animalCount; i++) {
                     addAnimalRow(tbody);
                 }
-                
+
                 autoSaveData(); // Auto-save after adding cage
             }
         }
 
         function renumberAnimalIdsInCage(cageGroup) {
             if (!cageGroup) return;
-            
+
             const animalRows = cageGroup.querySelectorAll('tr:not(.add-spacer)');
             animalRows.forEach((row, index) => {
                 const animalIdInput = row.querySelector('td:nth-child(2) input');
@@ -1382,14 +1459,14 @@
         function handleCageIdChange(event) {
             // Check if the changed input is a cage ID input
             if (!event.target.classList.contains('cage-id-input')) return;
-            
+
             const changedInput = event.target;
             const newValue = changedInput.value;
-            
+
             // Find the cage group this input belongs to
             const cageGroup = changedInput.closest('.cage-group');
             if (!cageGroup) return;
-            
+
             // Update all cage ID inputs in the same cage group
             const cageInputs = Array.from(cageGroup.querySelectorAll('.cage-id-input'));
             cageInputs.forEach(input => {
@@ -1403,7 +1480,7 @@
                     input.classList.add('bg-gray-700');
                 }
             });
-            
+
             // Update the cage header
             const cageHeader = cageGroup.querySelector('.cage-header');
             if (cageHeader) {
@@ -1417,9 +1494,9 @@
                 } else {
                     // Fallback for old format headers
                     if (newValue && newValue.trim() !== '') {
-                cageHeader.textContent = `Cage ${newValue}`;
+                        cageHeader.textContent = `Cage ${newValue}`;
                     } else {
-                cageHeader.textContent = 'Default Cage';
+                        cageHeader.textContent = 'Default Cage';
                     }
                 }
             }
@@ -1428,44 +1505,44 @@
         function handleAnimalIdAutoIncrement(event) {
             // Check if the changed input is an animal ID input
             if (!event.target.classList.contains('animal-id-input')) return;
-            
+
             const changedInput = event.target;
             const newValue = changedInput.value.trim();
-            
+
             // Only proceed if the new value is a number
             const startingNumber = parseInt(newValue);
             if (isNaN(startingNumber)) return;
-            
+
             // Find the cage group this input belongs to
             const cageGroup = changedInput.closest('.cage-group');
             if (!cageGroup) return;
-            
+
             // Get all animal ID inputs in this cage group
             const animalInputs = Array.from(cageGroup.querySelectorAll('.animal-id-input'));
-            
+
             // Find the index of the changed input
             const changedIndex = animalInputs.indexOf(changedInput);
             if (changedIndex === -1) return;
-            
+
             // Only auto-increment if this is the first animal in the cage or if we're changing the first one
             const firstAnimalInput = animalInputs[0];
             if (changedInput !== firstAnimalInput) return;
-            
+
             // Auto-increment the subsequent animal IDs
             for (let i = 1; i < animalInputs.length; i++) {
                 const currentInput = animalInputs[i];
                 const currentRow = currentInput.closest('tr');
                 const nextRow = animalInputs[i - 1].closest('tr');
-                
+
                 // Check if this animal belongs to the same animal (different tumor) by comparing the previous animal ID
                 const previousAnimalId = animalInputs[i - 1].value.trim();
-                
+
                 // If the previous row has the same animal ID, keep the same animal ID (different tumor)
                 if (currentInput.value.trim() === previousAnimalId) {
                     // This is a different tumor for the same animal, don't change
                     continue;
                 }
-                
+
                 // Otherwise, increment the animal ID
                 currentInput.value = (startingNumber + i).toString();
             }
@@ -1473,7 +1550,7 @@
 
         function handleFieldBackgroundChange(event) {
             const target = event.target;
-            
+
             // Handle cage ID fields
             if (target.classList.contains('cage-id-input')) {
                 if (target.value.trim() === '') {
@@ -1484,18 +1561,18 @@
                     target.classList.add('bg-gray-700');
                 }
             }
-            
+
             // Handle size fields - but don't override validation error styling
-            if (target.classList.contains('large-size-input') || 
+            if (target.classList.contains('large-size-input') ||
                 target.classList.contains('small-size-input')) {
                 // Don't change background if there's a validation error
                 if (!target.classList.contains('size-validation-error')) {
-                if (target.value.trim() === '') {
-                    target.classList.remove('bg-gray-700');
-                    target.classList.add('empty-field');
-                } else {
-                    target.classList.remove('empty-field');
-                    target.classList.add('bg-gray-700');
+                    if (target.value.trim() === '') {
+                        target.classList.remove('bg-gray-700');
+                        target.classList.add('empty-field');
+                    } else {
+                        target.classList.remove('empty-field');
+                        target.classList.add('bg-gray-700');
                     }
                 }
             }
@@ -1503,7 +1580,7 @@
 
         function handleDateFieldBackgroundChange(event) {
             const target = event.target;
-            
+
             // Handle start date and measurement date fields
             if (target.id === 'startDateInput' || target.classList.contains('measurement-date-input')) {
                 if (target.value.trim() === '') {
@@ -1518,19 +1595,19 @@
 
         function handleGroupNameSync(event) {
             const target = event.target;
-            
+
             // Only handle group name input changes
             if (!target.classList.contains('group-name-input')) return;
-            
+
             const newGroupName = target.value.trim();
-            
+
             // Find which group index this input represents
             const currentMeasurementSection = target.closest('.measurement-date-section');
             if (!currentMeasurementSection) return;
-            
+
             const currentGroupCards = currentMeasurementSection.querySelectorAll('.group-card');
             let groupIndex = -1;
-            
+
             // Find the index of the current group
             for (let i = 0; i < currentGroupCards.length; i++) {
                 const groupNameInput = currentGroupCards[i].querySelector('.group-name-input');
@@ -1539,15 +1616,15 @@
                     break;
                 }
             }
-            
+
             if (groupIndex === -1) return;
-            
+
             // Update the same group index in all other measurement date sections
             const allMeasurementSections = measurementDatesContainer.querySelectorAll('.measurement-date-section');
-            
+
             allMeasurementSections.forEach(section => {
                 if (section === currentMeasurementSection) return; // Skip the current section
-                
+
                 const groupCards = section.querySelectorAll('.group-card');
                 if (groupCards.length > groupIndex) {
                     const targetGroupNameInput = groupCards[groupIndex].querySelector('.group-name-input');
@@ -1556,7 +1633,7 @@
                     }
                 }
             });
-            
+
             // Update the global groupNames array if it exists
             if (groupNames && groupNames.length > groupIndex) {
                 groupNames[groupIndex] = newGroupName;
@@ -1566,16 +1643,16 @@
         function validateSizeInputs(row) {
             const largeInput = row.querySelector('.large-size-input');
             const smallInput = row.querySelector('.small-size-input');
-            
+
             if (!largeInput || !smallInput) return false;
-            
+
             const large = parseFloat(largeInput.value);
             const small = parseFloat(smallInput.value);
-            
+
             // Clear previous validation error states
             largeInput.classList.remove('size-validation-error');
             smallInput.classList.remove('size-validation-error');
-            
+
             // Validate that large size is greater than or equal to small size
             if (large > 0 && small > 0 && large < small) {
                 // Large size should be greater than or equal to small size
@@ -1583,7 +1660,7 @@
                 smallInput.classList.add('size-validation-error');
                 return false;
             }
-            
+
             return true;
         }
 
@@ -1597,27 +1674,27 @@
 
         function calculateVolume(event) {
             const target = event.target;
-            
+
             // Only calculate if it's a size input
             if (target.classList.contains('large-size-input') || target.classList.contains('small-size-input')) {
                 const row = target.closest('tr');
                 const largeInput = row.querySelector('.large-size-input');
                 const smallInput = row.querySelector('.small-size-input');
                 const volumeInput = row.querySelector('.volume-input');
-                
+
                 const large = parseFloat(largeInput.value);
                 const small = parseFloat(smallInput.value);
-                
+
                 // Validate size inputs
                 const isValid = validateSizeInputs(row);
-                
+
                 if ((large > 0 && small > 0 && isValid) || (large === 0 && small === 0)) {
-                const volume = (large * Math.pow(small, 2)) / 2;
+                    const volume = (large * Math.pow(small, 2)) / 2;
                     volumeInput.value = volume.toFixed(2);
                     // Make volume field gray when it has calculated data
                     volumeInput.classList.remove('bg-gray-600');
                     volumeInput.classList.add('bg-gray-700');
-            } else {
+                } else {
                     volumeInput.value = '';
                     // Reset volume field to original background when empty
                     volumeInput.classList.remove('bg-gray-700');
@@ -1637,53 +1714,53 @@
 
         function parseDate(dateString) {
             if (!dateString || !dateString.trim()) return null;
-            
+
             // Try to parse mm/dd/yy format
             const parts = dateString.trim().split('/');
             if (parts.length === 3) {
                 let month = parseInt(parts[0]);
                 let day = parseInt(parts[1]);
                 let year = parseInt(parts[2]);
-                
+
                 // Convert 2-digit year to 4-digit year
                 if (year < 100) {
                     year += year < 50 ? 2000 : 1900;
                 }
-                
+
                 // Validate date components
                 if (month >= 1 && month <= 12 && day >= 1 && day <= 31 && year >= 1900) {
                     return new Date(year, month - 1, day); // month is 0-indexed in Date constructor
                 }
             }
-            
+
             return null;
         }
 
         function calculateDayDifference(startDateStr, measurementDateStr) {
             const startDate = parseDate(startDateStr);
             const measurementDate = parseDate(measurementDateStr);
-            
+
             if (!startDate || !measurementDate) {
                 return null;
             }
-            
+
             const timeDiff = measurementDate.getTime() - startDate.getTime();
             const dayDiff = Math.round(timeDiff / (1000 * 60 * 60 * 24));
-            
+
             return dayDiff;
         }
 
         function updateDayLabel(measurementDateInput, dayLabelSpan) {
             const startDateValue = startDateInput.value.trim();
             const measurementDateValue = measurementDateInput.value.trim();
-            
+
             if (!startDateValue || !measurementDateValue) {
                 dayLabelSpan.textContent = 'Day --';
-                 return;
+                return;
             }
 
             const dayDiff = calculateDayDifference(startDateValue, measurementDateValue);
-            
+
             if (dayDiff !== null) {
                 dayLabelSpan.textContent = `Day ${dayDiff}`;
                 dayLabelSpan.className = 'text-lg font-medium text-blue-400 day-label';
@@ -1696,11 +1773,11 @@
         function updateDayLabels(event) {
             // Check if the changed input is a measurement date input
             if (!event.target.classList.contains('measurement-date-input')) return;
-            
+
             const measurementDateInput = event.target;
             const measurementDateSection = measurementDateInput.closest('.measurement-date-section');
             const dayLabelSpan = measurementDateSection.querySelector('.day-label');
-            
+
             if (dayLabelSpan) {
                 updateDayLabel(measurementDateInput, dayLabelSpan);
             }
@@ -1709,11 +1786,11 @@
         function updateAllDayLabels() {
             // Update all day labels when start date changes
             const allMeasurementDateInputs = measurementDatesContainer.querySelectorAll('.measurement-date-input');
-            
+
             allMeasurementDateInputs.forEach(measurementDateInput => {
                 const measurementDateSection = measurementDateInput.closest('.measurement-date-section');
                 const dayLabelSpan = measurementDateSection.querySelector('.day-label');
-                
+
                 if (dayLabelSpan) {
                     updateDayLabel(measurementDateInput, dayLabelSpan);
                 }
@@ -1743,23 +1820,23 @@
 
             // Add one measurement date with the new configuration
             addMeasurementDate();
-            
+
             // Fill the groups with animals based on configuration
             const measurementDateSection = measurementDatesContainer.querySelector('.measurement-date-section');
             const groupCards = measurementDateSection.querySelectorAll('.group-card');
-            
+
             groupCards.forEach((groupCard) => {
                 const tableContainer = groupCard.querySelector('div:last-child');
                 tableContainer.innerHTML = ''; // Clear table
-                
+
                 // Create cage groups
                 for (let cageIndex = 1; cageIndex <= numCages; cageIndex++) {
                     const cageId = '';
-                    
+
                     // Create cage group container
                     const cageGroup = document.createElement('div');
                     cageGroup.className = 'cage-group';
-                    
+
                     // Add cage header
                     const cageHeader = document.createElement('div');
                     cageHeader.className = 'cage-header';
@@ -1768,7 +1845,7 @@
                         <button class="cage-remove-btn" data-action="remove-cage">&times;</button>
                     `;
                     cageGroup.appendChild(cageHeader);
-                    
+
                     // Create table for this cage
                     const cageTable = document.createElement('table');
                     cageTable.className = 'w-full text-sm text-left text-gray-400 table-fixed';
@@ -1787,17 +1864,17 @@
                         <tbody></tbody>
                     `;
                     cageGroup.appendChild(cageTable);
-                    
+
                     // Add animals for this cage (reset animal ID per cage)
                     const tbody = cageTable.querySelector('tbody');
                     for (let animalIndex = 1; animalIndex <= animalsPerCage; animalIndex++) {
                         const animalId = animalIndex.toString(); // Reset per cage
                         addAnimalRowWithData(tbody, cageId, animalId);
                     }
-                    
+
                     tableContainer.appendChild(cageGroup);
                 }
-                
+
                 // Add the add cage button after all cages
                 const addCageBtn = document.createElement('button');
                 addCageBtn.className = 'add-cage-btn';
@@ -1805,16 +1882,16 @@
                 addCageBtn.textContent = '+ Add Cage';
                 tableContainer.appendChild(addCageBtn);
             });
-            
+
             // Clear auto-save and start fresh since we applied new configuration
             clearAutoSave();
             autoSaveData();
         }
 
         function addAnimalRowWithData(tbody, cageId = '', animalId = '', tumorNumber = 'Tumor 1') {
-                const row = document.createElement('tr');
+            const row = document.createElement('tr');
             row.className = 'bg-gray-800 border-b border-gray-700 hover:bg-gray-600/50';
-                row.innerHTML = `
+            row.innerHTML = `
                 <td class="px-3 py-3"><input type="text" value="${cageId}" placeholder="-" class="w-full text-sm ${cageId === '' ? 'empty-cage-id' : 'bg-gray-700'} rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none cage-id-input"></td>
                 <td class="px-3 py-3"><input type="text" value="${animalId}" class="w-full text-sm bg-gray-700 rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none animal-id-input"></td>
                 <td class="px-3 py-3"><input type="text" value="${tumorNumber}" class="w-full text-sm bg-gray-700 rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none tumor-number-input"></td>
@@ -1826,7 +1903,7 @@
                     </td>
                 `;
             tbody.appendChild(row);
-            
+
             // Add combined spacer with both buttons
             const spacer = document.createElement('tr');
             spacer.className = 'add-spacer';
@@ -1841,11 +1918,11 @@
 
         function analyzeData() {
             hideError();
-            
+
             // Get experiment metadata
             const experimentId = experimentIdInput.value.trim();
             const startDate = startDateInput.value.trim();
-            
+
             if (!experimentId || !startDate) {
                 showError("Please fill in experiment ID and start date.");
                 return;
@@ -1854,7 +1931,7 @@
             // Collect all data from all measurement date sections
             const allMeasurements = [];
             const measurementDateSections = measurementDatesContainer.querySelectorAll('.measurement-date-section');
-            
+
             if (measurementDateSections.length === 0) {
                 showError("Please add at least one measurement date.");
                 return;
@@ -1862,18 +1939,18 @@
 
             for (const section of measurementDateSections) {
                 const measurementDate = section.querySelector('.measurement-date-input').value.trim();
-                
+
                 if (!measurementDate) {
                     showError("Please fill in all measurement dates.");
-                return;
-            }
-                
+                    return;
+                }
+
                 const groupCards = section.querySelectorAll('.group-card');
-                
+
                 for (const card of groupCards) {
                     const groupName = card.querySelector('.group-name-input').value.trim();
                     const rows = card.querySelectorAll('tbody tr:not(.add-spacer)');
-                    
+
                     for (const row of rows) {
                         const inputs = row.querySelectorAll('input');
                         if (inputs.length >= 6) {
@@ -1883,7 +1960,7 @@
                             const largeSize = parseFloat(inputs[3].value) || 0;
                             const smallSize = parseFloat(inputs[4].value) || 0;
                             const volume = parseFloat(inputs[5].value) || 0;
-                            
+
                             if (cageId && cageId.trim() !== '' && animalId && animalId !== '-' && (largeSize >= 0 && smallSize >= 0)) {
                                 allMeasurements.push({
                                     experimentId,
@@ -1902,15 +1979,15 @@
                     }
                 }
             }
-            
+
             if (allMeasurements.length === 0) {
                 showError("No valid measurements found to analyze. Please fill in the required fields.");
                 return;
             }
-            
+
             // Generate analysis and graphs
             generateAnalysis(allMeasurements);
-            
+
             // Show the analysis section and scroll to it
             analysisSection.classList.remove('hidden');
             analysisSection.scrollIntoView({ behavior: 'smooth' });
@@ -1919,21 +1996,21 @@
         function convertDateToStudyDay(measurementDate, startDate) {
             const measurementDateParsed = parseDate(measurementDate);
             const startDateParsed = parseDate(startDate);
-            
+
             if (!measurementDateParsed || !startDateParsed) {
                 return null;
             }
-            
+
             const timeDiff = measurementDateParsed.getTime() - startDateParsed.getTime();
             const dayDiff = Math.round(timeDiff / (1000 * 60 * 60 * 24));
-            
+
             return `Day ${dayDiff}`;
         }
 
         function generateAnalysis(allMeasurements) {
             // Clear previous analysis
             analysisContent.innerHTML = '';
-            
+
             // Group measurements by group
             const groupedByGroup = {};
             allMeasurements.forEach(m => {
@@ -1942,11 +2019,11 @@
                 }
                 groupedByGroup[m.groupName].push(m);
             });
-            
+
             // Create one chart per group
             const groupNames = Object.keys(groupedByGroup);
             let chartsHTML = '';
-            
+
             groupNames.forEach((groupName, index) => {
                 chartsHTML += `
                     <div class="bg-gray-700/50 p-4 rounded-lg border border-gray-600">
@@ -1955,7 +2032,7 @@
                     </div>
                 `;
             });
-            
+
             analysisContent.innerHTML = `
                 <div class="mb-6 bg-gray-700/50 p-4 rounded-lg border border-gray-600">
                     <h4 class="text-lg font-semibold text-white mb-3">Analysis Overview</h4>
@@ -2098,23 +2175,23 @@
                     </div>
                 </div>
             `;
-            
+
             // Generate charts for each group and summary chart
             setTimeout(() => {
                 const startDate = startDateInput.value.trim();
-                
+
                 // Calculate global max for standardized Y-axis across individual charts
                 const globalMaxVolume = calculateGlobalMaxVolume(allMeasurements, startDate);
-                
+
                 // Generate statistical analysis table
                 generateStatisticsTable(allMeasurements, startDate);
-                
+
                 // Generate Two-way ANOVA analysis
                 generateAnovaAnalysis(allMeasurements, startDate);
-                
+
                 // Create summary chart with all groups
                 createSummaryChart(allMeasurements, startDate, 'summaryChart');
-                
+
                 // Create individual group charts with standardized Y-axis
                 groupNames.forEach((groupName, index) => {
                     createGroupChart(groupedByGroup[groupName], startDate, `groupChart${index}`, groupName, globalMaxVolume);
@@ -2128,7 +2205,7 @@
             allMeasurements.forEach(m => {
                 const animalKey = `${m.groupName}-${m.cageId}-${m.animalId}`;
                 const studyDay = convertDateToStudyDay(m.measurementDate, startDate);
-                
+
                 if (studyDay) {
                     if (!groupDataForStats[m.groupName]) {
                         groupDataForStats[m.groupName] = {};
@@ -2143,20 +2220,20 @@
                     groupDataForStats[m.groupName][studyDay][animalKey] += m.volume;
                 }
             });
-            
+
             // Get all groups and study days
             const groups = Object.keys(groupDataForStats);
             const allStudyDays = new Set();
             Object.values(groupDataForStats).forEach(groupData => {
                 Object.keys(groupData).forEach(day => allStudyDays.add(day));
             });
-            
+
             const studyDays = Array.from(allStudyDays).sort((a, b) => {
                 const dayA = parseInt(a.replace('Day ', ''));
                 const dayB = parseInt(b.replace('Day ', ''));
                 return dayA - dayB;
             });
-            
+
             // Generate all group pairs
             const groupPairs = [];
             for (let i = 0; i < groups.length; i++) {
@@ -2164,15 +2241,15 @@
                     groupPairs.push([groups[i], groups[j]]);
                 }
             }
-            
+
             // Calculate t-tests for each pair at each time point
             const statisticsData = groupPairs.map(([group1, group2]) => {
                 const rowData = { comparison: `${group1} vs ${group2}` };
-                
+
                 studyDays.forEach(studyDay => {
                     const data1 = groupDataForStats[group1][studyDay] ? Object.values(groupDataForStats[group1][studyDay]) : [];
                     const data2 = groupDataForStats[group2][studyDay] ? Object.values(groupDataForStats[group2][studyDay]) : [];
-                    
+
                     if (data1.length >= 2 && data2.length >= 2) {
                         const pValue = performTTest(data1, data2);
                         rowData[studyDay] = pValue;
@@ -2180,13 +2257,13 @@
                         rowData[studyDay] = null; // Not enough data
                     }
                 });
-                
+
                 return rowData;
             });
-            
+
             // Create HTML table
             const container = document.getElementById('statistics-table-container');
-            
+
             let tableHTML = `
                 <table class="w-full text-sm text-left text-gray-300">
                     <thead class="text-xs text-gray-300 uppercase bg-gray-700">
@@ -2197,17 +2274,17 @@
                     </thead>
                     <tbody>
             `;
-            
+
             statisticsData.forEach((rowData, index) => {
                 const rowClass = index % 2 === 0 ? 'bg-gray-800' : 'bg-gray-750';
                 tableHTML += `<tr class="${rowClass} border-b border-gray-700">`;
                 tableHTML += `<td class="px-4 py-3 font-medium text-white">${rowData.comparison}</td>`;
-                
+
                 studyDays.forEach(studyDay => {
                     const pValue = rowData[studyDay];
                     let cellContent = '';
                     let cellClass = 'px-4 py-3 text-center';
-                    
+
                     if (pValue === null) {
                         cellContent = 'N/A';
                         cellClass += ' text-gray-500';
@@ -2215,88 +2292,88 @@
                         cellContent = formatPValue(pValue);
                         cellClass += getPValueColorClass(pValue);
                     }
-                    
+
                     tableHTML += `<td class="${cellClass}">${cellContent}</td>`;
                 });
-                
+
                 tableHTML += '</tr>';
             });
-            
+
             tableHTML += `
                     </tbody>
                 </table>
             `;
-            
+
             container.innerHTML = tableHTML;
         }
-        
+
         function performTTest(data1, data2) {
             // Calculate means
             const mean1 = data1.reduce((sum, val) => sum + val, 0) / data1.length;
             const mean2 = data2.reduce((sum, val) => sum + val, 0) / data2.length;
-            
+
             // Calculate variances
             const var1 = data1.reduce((sum, val) => sum + Math.pow(val - mean1, 2), 0) / (data1.length - 1);
             const var2 = data2.reduce((sum, val) => sum + Math.pow(val - mean2, 2), 0) / (data2.length - 1);
-            
+
             // Welch's t-test (unequal variances)
             const pooledSE = Math.sqrt(var1 / data1.length + var2 / data2.length);
             const tStat = (mean1 - mean2) / pooledSE;
-            
+
             // Calculate degrees of freedom using Welch-Satterthwaite equation
-            const df = Math.pow(var1/data1.length + var2/data2.length, 2) / 
-                      (Math.pow(var1/data1.length, 2)/(data1.length-1) + Math.pow(var2/data2.length, 2)/(data2.length-1));
-            
+            const df = Math.pow(var1 / data1.length + var2 / data2.length, 2) /
+                (Math.pow(var1 / data1.length, 2) / (data1.length - 1) + Math.pow(var2 / data2.length, 2) / (data2.length - 1));
+
             // Convert t-statistic to p-value (two-tailed)
             return 2 * (1 - studentTCDF(Math.abs(tStat), df));
         }
-        
+
         function studentTCDF(t, df) {
             // Approximation of Student's t-distribution CDF
             // Using incomplete beta function approximation
             const x = df / (df + t * t);
-            return 1 - 0.5 * incompleteBeta(df/2, 0.5, x);
+            return 1 - 0.5 * incompleteBeta(df / 2, 0.5, x);
         }
-        
+
         function incompleteBeta(a, b, x) {
             // Simplified approximation of incomplete beta function
             // This is a basic approximation - for more accuracy, would need full implementation
             if (x <= 0) return 0;
             if (x >= 1) return 1;
-            
+
             // Simple approximation using series expansion
             let result = 0;
-            let term = Math.pow(x, a) * Math.pow(1-x, b) / a;
-            
+            let term = Math.pow(x, a) * Math.pow(1 - x, b) / a;
+
             for (let i = 0; i < 100; i++) {
                 result += term;
                 term *= x * (b + i) / (a + i + 1);
                 if (Math.abs(term) < 1e-10) break;
             }
-            
+
             return result / beta(a, b);
         }
-        
+
         function beta(a, b) {
             // Beta function approximation
             return Math.exp(logGamma(a) + logGamma(b) - logGamma(a + b));
         }
-        
+
         function logGamma(x) {
             // Log gamma function approximation (Stirling's approximation)
             if (x < 0.5) return Math.log(Math.PI) - Math.log(Math.sin(Math.PI * x)) - logGamma(1 - x);
             x -= 1;
-            return 0.5 * Math.log(2 * Math.PI) + (x + 0.5) * Math.log(x + 1) - (x + 1) + 
-                   1/(12*(x+1)) - 1/(360*Math.pow(x+1,3)) + 1/(1260*Math.pow(x+1,5));
+            return 0.5 * Math.log(2 * Math.PI) + (x + 0.5) * Math.log(x + 1) - (x + 1) +
+                1 / (12 * (x + 1)) - 1 / (360 * Math.pow(x + 1, 3)) + 1 / (1260 * Math.pow(x + 1, 5));
         }
-        
+
         function formatPValue(pValue) {
             if (pValue < 0.001) return '< 0.001';
             if (pValue < 0.01) return pValue.toFixed(3);
             if (pValue < 0.05) return pValue.toFixed(3);
             return pValue.toFixed(3);
         }
-        
+
         function getPValueColorClass(pValue) {
             if (pValue < 0.001) return ' text-green-400 font-bold'; // Highly significant
             if (pValue < 0.01) return ' text-yellow-400 font-bold'; // Very significant  
@@ -2308,12 +2385,12 @@
             // Prepare data for ANOVA with summed tumor volumes per animal
             const anovaData = [];
             const animalTotals = {};
-            
+
             // First sum multiple tumors per animal per time point
             allMeasurements.forEach(m => {
                 const animalKey = `${m.groupName}-${m.cageId}-${m.animalId}`;
                 const studyDay = convertDateToStudyDay(m.measurementDate, startDate);
-                
+
                 if (studyDay) {
                     if (!animalTotals[animalKey]) {
                         animalTotals[animalKey] = {
@@ -2328,7 +2405,7 @@
                     animalTotals[animalKey].measurements[studyDay] += m.volume;
                 }
             });
-            
+
             // Convert to ANOVA format: each row is one observation
             Object.values(animalTotals).forEach(animal => {
                 Object.keys(animal.measurements).forEach(studyDay => {
@@ -2340,22 +2417,22 @@
                     });
                 });
             });
-            
+
             if (anovaData.length < 4) {
-                document.getElementById('anova-results-container').innerHTML = 
+                document.getElementById('anova-results-container').innerHTML =
                     '<p class="text-gray-400">Insufficient data for ANOVA analysis (need at least 4 observations)</p>';
-                 return;
+                return;
             }
 
             // Perform Two-way ANOVA
             const anovaResults = performTwoWayAnova(anovaData);
-            
+
             // Perform post-hoc analysis for group comparisons
             const postHocResults = performPostHocAnalysis(anovaData);
-            
+
             // Generate ANOVA table HTML
             const container = document.getElementById('anova-results-container');
-            
+
             container.innerHTML = `
                 <div class="space-y-6">
                     <!-- ANOVA Table -->
@@ -2582,65 +2659,65 @@
                 </div>
             `;
         }
-        
+
         function performTwoWayAnova(data) {
             const n = data.length;
             const groups = [...new Set(data.map(d => d.group))];
             const times = [...new Set(data.map(d => d.time))];
             const animals = [...new Set(data.map(d => d.animal))];
-            
+
             // Calculate overall mean
             const grandMean = data.reduce((sum, d) => sum + d.volume, 0) / n;
-            
+
             // Calculate group means
             const groupMeans = {};
             groups.forEach(group => {
                 const groupData = data.filter(d => d.group === group);
                 groupMeans[group] = groupData.reduce((sum, d) => sum + d.volume, 0) / groupData.length;
             });
-            
+
             // Calculate time means
             const timeMeans = {};
             times.forEach(time => {
                 const timeData = data.filter(d => d.time === time);
                 timeMeans[time] = timeData.reduce((sum, d) => sum + d.volume, 0) / timeData.length;
             });
-            
+
             // Calculate cell means (group × time combinations)
             const cellMeans = {};
             groups.forEach(group => {
                 cellMeans[group] = {};
                 times.forEach(time => {
                     const cellData = data.filter(d => d.group === group && d.time === time);
-                    cellMeans[group][time] = cellData.length > 0 ? 
+                    cellMeans[group][time] = cellData.length > 0 ?
                         cellData.reduce((sum, d) => sum + d.volume, 0) / cellData.length : grandMean;
                 });
             });
-            
+
             // Calculate Sum of Squares
             let ssTotal = 0;
             let ssGroup = 0;
             let ssTime = 0;
             let ssInteraction = 0;
             let ssError = 0;
-            
+
             // Total SS
             data.forEach(d => {
                 ssTotal += Math.pow(d.volume - grandMean, 2);
             });
-            
+
             // Group SS
             groups.forEach(group => {
                 const groupData = data.filter(d => d.group === group);
                 ssGroup += groupData.length * Math.pow(groupMeans[group] - grandMean, 2);
             });
-            
+
             // Time SS
             times.forEach(time => {
                 const timeData = data.filter(d => d.time === time);
                 ssTime += timeData.length * Math.pow(timeMeans[time] - grandMean, 2);
             });
-            
+
             // Interaction SS
             groups.forEach(group => {
                 times.forEach(time => {
@@ -2652,66 +2729,66 @@
                     }
                 });
             });
-            
+
             // Error SS
             data.forEach(d => {
                 const cellMean = cellMeans[d.group][d.time];
                 ssError += Math.pow(d.volume - cellMean, 2);
             });
-            
+
             // Degrees of freedom
             const dfGroup = groups.length - 1;
             const dfTime = times.length - 1;
             const dfInteraction = dfGroup * dfTime;
             const dfError = n - groups.length * times.length;
             const dfTotal = n - 1;
-            
+
             // Mean squares
             const msGroup = ssGroup / dfGroup;
             const msTime = ssTime / dfTime;
             const msInteraction = ssInteraction / dfInteraction;
             const msError = ssError / dfError;
-            
+
             // F statistics
             const fGroup = msGroup / msError;
             const fTime = msTime / msError;
             const fInteraction = msInteraction / msError;
-            
+
             // P-values (using F-distribution approximation)
             const pValueGroup = fToPValue(fGroup, dfGroup, dfError);
             const pValueTime = fToPValue(fTime, dfTime, dfError);
             const pValueInteraction = fToPValue(fInteraction, dfInteraction, dfError);
-            
+
             // R-squared
             const rSquared = (ssGroup + ssTime + ssInteraction) / ssTotal;
-            
+
             // Calculate effect sizes (eta-squared)
             const etaSquaredGroup = ssGroup / ssTotal;
             const etaSquaredTime = ssTime / ssTotal;
             const etaSquaredInteraction = ssInteraction / ssTotal;
-            
+
             return {
-                group: { 
-                    df: dfGroup, 
-                    ss: ssGroup, 
-                    ms: msGroup, 
-                    f: fGroup, 
+                group: {
+                    df: dfGroup,
+                    ss: ssGroup,
+                    ms: msGroup,
+                    f: fGroup,
                     pValue: pValueGroup,
                     etaSquared: etaSquaredGroup
                 },
-                time: { 
-                    df: dfTime, 
-                    ss: ssTime, 
-                    ms: msTime, 
-                    f: fTime, 
+                time: {
+                    df: dfTime,
+                    ss: ssTime,
+                    ms: msTime,
+                    f: fTime,
                     pValue: pValueTime,
                     etaSquared: etaSquaredTime
                 },
-                interaction: { 
-                    df: dfInteraction, 
-                    ss: ssInteraction, 
-                    ms: msInteraction, 
-                    f: fInteraction, 
+                interaction: {
+                    df: dfInteraction,
+                    ss: ssInteraction,
+                    ms: msInteraction,
+                    f: fInteraction,
                     pValue: pValueInteraction,
                     etaSquared: etaSquaredInteraction
                 },
@@ -2722,18 +2799,18 @@
                 uniqueAnimals: animals.length
             };
         }
-        
+
         function fToPValue(fStat, dfNum, dfDen) {
             // Simplified F-distribution p-value calculation
             // This is an approximation - for precise values, would need full F-distribution implementation
             if (fStat < 1) return 0.5; // Very rough approximation for F < 1
-            
+
             // Using normal approximation for large df
             if (dfDen > 30) {
                 const z = Math.sqrt(2 * fStat - 1) - Math.sqrt(2 * dfNum - 1);
                 return 2 * (1 - normalCDF(Math.abs(z)));
             }
-            
+
             // Simple lookup table for common F-values (very approximate)
             if (fStat > 10) return 0.001;
             if (fStat > 7) return 0.01;
@@ -2746,14 +2823,14 @@
             // Group data by group and calculate group statistics
             const groupStats = {};
             const groups = [...new Set(data.map(d => d.group))];
-            
+
             groups.forEach(group => {
                 const groupData = data.filter(d => d.group === group);
                 const volumes = groupData.map(d => d.volume);
                 const mean = volumes.reduce((sum, val) => sum + val, 0) / volumes.length;
                 const variance = volumes.reduce((sq, n) => sq + Math.pow(n - mean, 2), 0) / (volumes.length - 1);
                 const se = Math.sqrt(variance / volumes.length);
-                
+
                 groupStats[group] = {
                     n: volumes.length,
                     mean: mean,
@@ -2761,31 +2838,31 @@
                     se: se
                 };
             });
-            
+
             // Generate all pairwise comparisons
             const comparisons = [];
             for (let i = 0; i < groups.length; i++) {
                 for (let j = i + 1; j < groups.length; j++) {
                     const group1 = groups[i];
                     const group2 = groups[j];
-                    
+
                     const stats1 = groupStats[group1];
                     const stats2 = groupStats[group2];
-                    
+
                     // Calculate pooled standard error
                     const pooledVariance = ((stats1.n - 1) * stats1.variance + (stats2.n - 1) * stats2.variance) / (stats1.n + stats2.n - 2);
-                    const pooledSE = Math.sqrt(pooledVariance * (1/stats1.n + 1/stats2.n));
-                    
+                    const pooledSE = Math.sqrt(pooledVariance * (1 / stats1.n + 1 / stats2.n));
+
                     // Calculate t-statistic
                     const meanDiff = stats1.mean - stats2.mean;
                     const tValue = meanDiff / pooledSE;
-                    
+
                     // Calculate degrees of freedom
                     const df = stats1.n + stats2.n - 2;
-                    
+
                     // Calculate p-value (two-tailed)
                     const pValue = 2 * (1 - studentTCDF(Math.abs(tValue), df));
-                    
+
                     // Calculate 95% confidence interval
                     const tCritical = getTCriticalValue(0.025, df); // Two-tailed 95% CI
                     const marginOfError = tCritical * pooledSE;
@@ -2793,7 +2870,7 @@
                         lower: meanDiff - marginOfError,
                         upper: meanDiff + marginOfError
                     };
-                    
+
                     comparisons.push({
                         comparison: `${group1} vs ${group2}`,
                         meanDiff: meanDiff,
@@ -2805,16 +2882,16 @@
                     });
                 }
             }
-            
+
             // Apply Bonferroni correction for multiple comparisons
             const numComparisons = comparisons.length;
             comparisons.forEach(comp => {
                 comp.pValue = Math.min(1, comp.pValue * numComparisons);
             });
-            
+
             // Sort by p-value
             comparisons.sort((a, b) => a.pValue - b.pValue);
-            
+
             return comparisons;
         }
 
@@ -2827,18 +2904,18 @@
                 if (alpha === 0.05) return 1.645;
                 if (alpha === 0.01) return 2.326;
             }
-            
+
             // Simple lookup table for common df values
             const lookup = {
                 0.025: { 10: 2.228, 20: 2.086, 30: 2.042, 40: 2.021, 60: 2.000, 120: 1.98 },
                 0.05: { 10: 1.812, 20: 1.725, 30: 1.697, 40: 1.684, 60: 1.671, 120: 1.658 },
                 0.01: { 10: 2.764, 20: 2.528, 30: 2.457, 40: 2.423, 60: 2.390, 120: 2.358 }
             };
-            
+
             // Find closest df value
             const availableDF = Object.keys(lookup[alpha]).map(Number).sort((a, b) => a - b);
             let closestDF = availableDF[0];
-            
+
             for (const dfVal of availableDF) {
                 if (dfVal <= df) {
                     closestDF = dfVal;
@@ -2846,7 +2923,7 @@
                     break;
                 }
             }
-            
+
             return lookup[alpha][closestDF];
         }
 
@@ -2854,24 +2931,24 @@
             // Group data by group
             const groupStats = {};
             const groups = [...new Set(data.map(d => d.group))];
-            
+
             groups.forEach(group => {
                 const groupData = data.filter(d => d.group === group);
                 const volumes = groupData.map(d => d.volume);
-                
+
                 // Calculate statistics
                 const n = volumes.length;
                 const mean = volumes.reduce((sum, val) => sum + val, 0) / n;
                 const variance = volumes.reduce((sq, n) => sq + Math.pow(n - mean, 2), 0) / (n - 1);
                 const stdDev = Math.sqrt(variance);
                 const sem = stdDev / Math.sqrt(n);
-                
+
                 // Calculate median
                 const sortedVolumes = [...volumes].sort((a, b) => a - b);
-                const median = n % 2 === 0 ? 
-                    (sortedVolumes[n/2 - 1] + sortedVolumes[n/2]) / 2 : 
-                    sortedVolumes[Math.floor(n/2)];
-                
+                const median = n % 2 === 0 ?
+                    (sortedVolumes[n / 2 - 1] + sortedVolumes[n / 2]) / 2 :
+                    sortedVolumes[Math.floor(n / 2)];
+
                 groupStats[group] = {
                     n: n,
                     mean: mean,
@@ -2882,13 +2959,13 @@
                     max: Math.max(...volumes)
                 };
             });
-            
+
             // Generate HTML table rows
             let tableRows = '';
             groups.forEach((group, index) => {
                 const stats = groupStats[group];
                 const rowClass = index % 2 === 0 ? 'bg-gray-800' : 'bg-gray-750';
-                
+
                 tableRows += `
                     <tr class="${rowClass} border-b border-gray-700">
                         <td class="px-3 py-2 font-medium text-white">${group}</td>
@@ -2901,7 +2978,7 @@
                     </tr>
                 `;
             });
-            
+
             return tableRows;
         }
 
@@ -2925,27 +3002,27 @@
             if (etaSquared >= 0.01) return 'Small';
             return 'Negligible';
         }
-        
+
         function normalCDF(x) {
             // Standard normal CDF approximation
             return 0.5 * (1 + erf(x / Math.sqrt(2)));
         }
-        
+
         function erf(x) {
             // Error function approximation
-            const a1 =  0.254829592;
+            const a1 = 0.254829592;
             const a2 = -0.284496736;
-            const a3 =  1.421413741;
+            const a3 = 1.421413741;
             const a4 = -1.453152027;
-            const a5 =  1.061405429;
-            const p  =  0.3275911;
-            
+            const a5 = 1.061405429;
+            const p = 0.3275911;
+
             const sign = x >= 0 ? 1 : -1;
             x = Math.abs(x);
-            
+
             const t = 1.0 / (1.0 + p * x);
             const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
-            
+
             return sign * y;
         }
 
@@ -2955,7 +3032,7 @@
             allMeasurements.forEach(m => {
                 const animalKey = `${m.groupName}-${m.cageId}-${m.animalId}`;
                 const studyDay = convertDateToStudyDay(m.measurementDate, startDate);
-                
+
                 if (studyDay) {
                     if (!animalTotals[animalKey]) {
                         animalTotals[animalKey] = {};
@@ -2966,7 +3043,7 @@
                     animalTotals[animalKey][studyDay] += m.volume;
                 }
             });
-            
+
             // Find the maximum summed volume across all animals and days
             let maxVolume = 0;
             Object.values(animalTotals).forEach(animal => {
@@ -2974,7 +3051,7 @@
                     maxVolume = Math.max(maxVolume, volume);
                 });
             });
-            
+
             // Add 10% padding to the max for better visualization
             return maxVolume * 1.1;
         }
@@ -2991,7 +3068,7 @@
                 groups.add(m.groupName);
                 measurementDates.add(m.measurementDate);
                 totalVolume += m.volume;
-                
+
                 if (!groupStats[m.groupName]) {
                     groupStats[m.groupName] = { volumes: [], count: 0 };
                 }
@@ -3020,13 +3097,13 @@
 
         function createSummaryChart(allMeasurements, startDate, canvasId) {
             const ctx = document.getElementById(canvasId).getContext('2d');
-            
+
             // First, sum multiple tumors per animal per day
             const animalTotals = {};
             allMeasurements.forEach(m => {
                 const animalKey = `${m.groupName}-${m.cageId}-${m.animalId}`;
                 const studyDay = convertDateToStudyDay(m.measurementDate, startDate);
-                
+
                 if (studyDay) {
                     if (!animalTotals[animalKey]) {
                         animalTotals[animalKey] = {
@@ -3041,14 +3118,14 @@
                     animalTotals[animalKey].volumes[studyDay] += m.volume;
                 }
             });
-            
+
             // Now group by group and study day using summed animal totals
             const groupData = {};
             Object.values(animalTotals).forEach(animal => {
                 if (!groupData[animal.groupName]) {
                     groupData[animal.groupName] = {};
                 }
-                
+
                 Object.keys(animal.volumes).forEach(studyDay => {
                     if (!groupData[animal.groupName][studyDay]) {
                         groupData[animal.groupName][studyDay] = [];
@@ -3060,25 +3137,25 @@
             // Calculate mean and SEM for each group at each time point
             const colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4'];
             const studyDays = [...new Set(allMeasurements.map(m => convertDateToStudyDay(m.measurementDate, startDate)).filter(d => d))];
-            
+
             // Sort study days numerically
             studyDays.sort((a, b) => {
                 const dayA = parseInt(a.replace('Day ', ''));
                 const dayB = parseInt(b.replace('Day ', ''));
                 return dayA - dayB;
             });
-            
+
             const datasets = Object.keys(groupData).map((group, index) => {
                 const meanData = [];
                 const errorData = [];
-                
+
                 studyDays.forEach(studyDay => {
                     const volumes = groupData[group][studyDay] || [];
                     if (volumes.length > 0) {
                         const mean = volumes.reduce((a, b) => a + b, 0) / volumes.length;
                         const variance = volumes.reduce((sq, n) => sq + Math.pow(n - mean, 2), 0) / volumes.length;
                         const standardError = Math.sqrt(variance) / Math.sqrt(volumes.length);
-                        
+
                         meanData.push(mean);
                         errorData.push(standardError);
                     } else {
@@ -3086,7 +3163,7 @@
                         errorData.push(null);
                     }
                 });
-                
+
                 return {
                     label: group,
                     data: meanData.map((mean, i) => mean),
@@ -3110,8 +3187,8 @@
                 options: {
                     responsive: true,
                     plugins: {
-                        legend: { 
-                            labels: { 
+                        legend: {
+                            labels: {
                                 color: '#e5e7eb',
                                 font: { size: 12 }
                             }
@@ -3119,7 +3196,7 @@
                         title: { display: false },
                         tooltip: {
                             callbacks: {
-                                afterLabel: function(context) {
+                                afterLabel: function (context) {
                                     const dataset = context.dataset;
                                     const dataIndex = context.dataIndex;
                                     if (dataset.errorBars && dataset.errorBars[dataIndex] !== null) {
@@ -3149,10 +3226,10 @@
                     },
                     // Custom plugin to draw error bars
                     animation: {
-                        onComplete: function() {
+                        onComplete: function () {
                             const chart = this;
                             const ctx = chart.ctx;
-                            
+
                             chart.data.datasets.forEach((dataset, datasetIndex) => {
                                 const meta = chart.getDatasetMeta(datasetIndex);
                                 if (dataset.errorBars && meta.visible) {
@@ -3163,7 +3240,7 @@
                                             const y = point.y;
                                             const yScale = chart.scales.y;
                                             const errorPixels = (sem / (yScale.max - yScale.min)) * (yScale.bottom - yScale.top);
-                                            
+
                                             ctx.save();
                                             ctx.strokeStyle = dataset.borderColor;
                                             ctx.lineWidth = 2;
@@ -3191,13 +3268,13 @@
 
         function createGroupChart(groupMeasurements, startDate, canvasId, groupName, globalMaxVolume) {
             const ctx = document.getElementById(canvasId).getContext('2d');
-            
+
             // Group data by individual mouse and study day to sum multiple tumors
             const mouseDataByDay = {};
             groupMeasurements.forEach(m => {
                 const mouseKey = `${m.cageId}-${m.animalId}`;
                 const studyDay = convertDateToStudyDay(m.measurementDate, startDate);
-                
+
                 if (studyDay) {
                     if (!mouseDataByDay[mouseKey]) {
                         mouseDataByDay[mouseKey] = {};
@@ -3217,14 +3294,14 @@
                     label: `Mouse ${mouseKey}`,
                     data: []
                 };
-                
+
                 Object.keys(mouseDataByDay[mouseKey]).forEach(studyDay => {
                     mouseData[mouseKey].data.push({
                         x: studyDay,
                         y: mouseDataByDay[mouseKey][studyDay]
                     });
                 });
-                
+
                 // Sort data points by study day for each mouse
                 mouseData[mouseKey].data.sort((a, b) => {
                     const dayA = parseInt(a.x.replace('Day ', ''));
@@ -3239,7 +3316,7 @@
                 '#84cc16', '#f97316', '#ec4899', '#6366f1', '#14b8a6', '#f59e0b',
                 '#8b5cf6', '#06b6d4', '#84cc16', '#f97316', '#ec4899', '#6366f1'
             ];
-            
+
             const datasets = Object.values(mouseData).map((mouse, index) => ({
                 label: mouse.label,
                 data: mouse.data,
@@ -3258,8 +3335,8 @@
                 options: {
                     responsive: true,
                     plugins: {
-                        legend: { 
-                            labels: { 
+                        legend: {
+                            labels: {
                                 color: '#e5e7eb',
                                 font: { size: 9 }
                             },
@@ -3292,11 +3369,11 @@
 
         function exportDataForPrism() {
             hideError();
-            
+
             // Get experiment metadata
             const experimentId = experimentIdInput.value.trim();
             const startDate = startDateInput.value.trim();
-            
+
             if (!experimentId || !startDate) {
                 showError("Please fill in experiment ID and start date before exporting.");
                 return;
@@ -3305,7 +3382,7 @@
             // Collect all data from all measurement date sections
             const allMeasurements = [];
             const measurementDateSections = measurementDatesContainer.querySelectorAll('.measurement-date-section');
-            
+
             if (measurementDateSections.length === 0) {
                 showError("Please add at least one measurement date.");
                 return;
@@ -3363,7 +3440,7 @@
                 if (!dateGroups[m.measurementDate][m.groupName]) {
                     dateGroups[m.measurementDate][m.groupName] = {};
                 }
-                
+
                 // Sum volumes for multiple tumors per animal
                 const animalKey = `${m.cageId}-${m.animalId}`;
                 if (!dateGroups[m.measurementDate][m.groupName][animalKey]) {
@@ -3381,13 +3458,13 @@
 
             // Get all group names
             const allGroupNames = [...new Set(allMeasurements.map(m => m.groupName))].sort();
-            
+
             // Get all unique animals per group to create consistent columns
             const animalsByGroup = {};
             allGroupNames.forEach(groupName => {
                 animalsByGroup[groupName] = new Set();
             });
-            
+
             Object.values(dateGroups).forEach(dateData => {
                 Object.keys(dateData).forEach(groupName => {
                     Object.keys(dateData[groupName]).forEach(animalKey => {
@@ -3403,7 +3480,7 @@
 
             // Build CSV content
             let csvContent = '';
-            
+
             // First row: actual start date in first column, then group names repeated for each animal
             let headerRow = [startDate]; // Use actual start date value
             allGroupNames.forEach(groupName => {
@@ -3416,14 +3493,14 @@
             // Data rows: one per measurement date
             sortedDates.forEach(measurementDate => {
                 let dataRow = [measurementDate];
-                
+
                 allGroupNames.forEach(groupName => {
                     animalsByGroup[groupName].forEach(animalKey => {
                         const volume = dateGroups[measurementDate][groupName]?.[animalKey];
                         dataRow.push(volume !== undefined ? volume : '');
                     });
                 });
-                
+
                 csvContent += dataRow.join(',') + '\n';
             });
 
@@ -3439,6 +3516,115 @@
             document.body.removeChild(link);
         }
 
+        function exportDataForStatistician() {
+            hideError();
+
+            // Get experiment metadata
+            const experimentId = experimentIdInput.value.trim();
+            const startDate = startDateInput.value.trim();
+
+            if (!experimentId || !startDate) {
+                showError("Please fill in experiment ID and start date before exporting.");
+                return;
+            }
+
+            const measurementDateSections = measurementDatesContainer.querySelectorAll('.measurement-date-section');
+
+            if (measurementDateSections.length === 0) {
+                showError("Please add at least one measurement date.");
+                return;
+            }
+
+            // First pass: collect all unique animals and assign Mouse IDs
+            const animalToMouseId = new Map(); // Map from "cageId-animalId-groupName" to unique Mouse ID
+            let nextMouseId = 1;
+
+            for (const section of measurementDateSections) {
+                const groupCards = section.querySelectorAll('.group-card');
+                for (const groupCard of groupCards) {
+                    const groupName = groupCard.querySelector('.group-name-input').value.trim();
+                    if (!groupName) continue;
+
+                    const cageGroups = groupCard.querySelectorAll('.cage-group');
+                    for (const cageGroup of cageGroups) {
+                        const trs = cageGroup.querySelectorAll('tbody tr:not(.add-spacer)');
+                        for (const tr of trs) {
+                            const cageId = tr.querySelector('.cage-id-input')?.value?.trim() || '';
+                            const animalId = tr.querySelector('.animal-id-input')?.value?.trim();
+
+                            if (animalId) {
+                                // Create unique key for this animal (cage + animal + group)
+                                const animalKey = `${cageId}-${animalId}-${groupName}`;
+
+                                if (!animalToMouseId.has(animalKey)) {
+                                    animalToMouseId.set(animalKey, nextMouseId++);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Second pass: collect all data with Mouse IDs
+            const rows = [];
+            // Header: Mouse ID,Animal ID,Day,Tumor.Size,Group
+            rows.push(['Mouse ID', 'Animal ID', 'Day', 'Tumor.Size', 'Group']);
+
+            let hasData = false;
+
+            for (const section of measurementDateSections) {
+                const measurementDateValue = section.querySelector('.measurement-date-input').value.trim();
+                if (!measurementDateValue) continue;
+
+                const dayDiff = calculateDayDifference(startDate, measurementDateValue);
+                if (dayDiff === null) continue; // Invalid date
+
+                const groupCards = section.querySelectorAll('.group-card');
+                for (const groupCard of groupCards) {
+                    const groupName = groupCard.querySelector('.group-name-input').value.trim();
+                    if (!groupName) continue;
+
+                    const cageGroups = groupCard.querySelectorAll('.cage-group');
+                    for (const cageGroup of cageGroups) {
+                        const trs = cageGroup.querySelectorAll('tbody tr:not(.add-spacer)');
+                        for (const tr of trs) {
+                            const cageId = tr.querySelector('.cage-id-input')?.value?.trim() || '';
+                            const animalId = tr.querySelector('.animal-id-input')?.value?.trim();
+                            const volume = tr.querySelector('.volume-input')?.value?.trim();
+
+                            // Only export if we have an animal ID. Volume can be 0.
+                            if (animalId && volume !== '') {
+                                const animalKey = `${cageId}-${animalId}-${groupName}`;
+                                const mouseId = animalToMouseId.get(animalKey);
+
+                                rows.push([mouseId, animalId, dayDiff, volume, groupName]);
+                                hasData = true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (!hasData) {
+                showError("No valid data found to export. Ensure dates, group names, and animal IDs are filled.");
+                return;
+            }
+
+            // Convert to CSV
+            const csvContent = rows.map(e => e.join(",")).join("\n");
+
+            // Download
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `${experimentId}_statistician_export.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
         function loadDataFromCSV() {
             csvFileInput.click(); // Trigger file input dialog
         }
@@ -3448,12 +3634,12 @@
             if (!file) return;
 
             const reader = new FileReader();
-            
-            reader.onload = function(e) {
+
+            reader.onload = function (e) {
                 try {
                     const csvData = e.target.result;
                     const lines = csvData.split('\n').filter(line => line.trim());
-                    
+
                     if (lines.length < 2) {
                         showError("CSV file must contain at least a header and one data row.");
                         return;
@@ -3464,7 +3650,7 @@
                         const result = [];
                         let current = '';
                         let inQuotes = false;
-                        
+
                         for (let i = 0; i < line.length; i++) {
                             const char = line[i];
                             if (char === '"') {
@@ -3472,7 +3658,7 @@
                             } else if (char === ',' && !inQuotes) {
                                 result.push(current.trim());
                                 current = '';
-                        } else {
+                            } else {
                                 current += char;
                             }
                         }
@@ -3481,7 +3667,7 @@
                     };
 
                     const headers = parseCSVLine(lines[0]);
-                    
+
                     // Clear existing data
                     measurementDatesContainer.innerHTML = '';
                     measurementDateCounter = 0;
@@ -3491,11 +3677,11 @@
                     const measurementDatesData = {};
                     let experimentStartDate = '';
                     let experimentId = '';
-                    
+
                     for (let i = 1; i < lines.length; i++) {
                         const values = parseCSVLine(lines[i]);
                         if (values.length < headers.length) continue;
-                        
+
                         const rowData = {};
                         headers.forEach((header, index) => {
                             // Remove quotes from values if present
@@ -3514,14 +3700,14 @@
 
                         const measurementDate = rowData['Measurement Date'] || rowData['measurementDate'];
                         const groupName = rowData['Group Name'] || rowData['groupName'] || 'Group 1';
-                        
+
                         if (!measurementDatesData[measurementDate]) {
                             measurementDatesData[measurementDate] = {};
                         }
                         if (!measurementDatesData[measurementDate][groupName]) {
                             measurementDatesData[measurementDate][groupName] = [];
                         }
-                        
+
                         measurementDatesData[measurementDate][groupName].push(rowData);
                     }
 
@@ -3542,29 +3728,29 @@
                         const currentMeasurementDateSection = measurementDatesContainer.querySelector('.measurement-date-section:last-child');
                         const dateInput = currentMeasurementDateSection.querySelector('.measurement-date-input');
                         dateInput.value = measurementDate;
-                        
+
                         // Update background for measurement date
                         dateInput.classList.remove('empty-date-field');
                         dateInput.classList.add('bg-gray-700');
-                        
+
                         // Update day label for imported measurement date
                         const dayLabelSpan = currentMeasurementDateSection.querySelector('.day-label');
                         if (dayLabelSpan) {
                             updateDayLabel(dateInput, dayLabelSpan);
                         }
-                        
+
                         // Clear default groups and create groups based on data
                         const groupsContainer = currentMeasurementDateSection.querySelector('[data-groups-container]');
                         groupsContainer.innerHTML = '';
-                        
+
                         Object.keys(measurementDatesData[measurementDate]).forEach(groupName => {
                             const groupData = measurementDatesData[measurementDate][groupName];
-                            
+
                             // Create group card
                             const groupCard = document.createElement('div');
-                                        groupCard.className = 'group-card bg-gray-700/50 p-4 rounded-lg border border-gray-600 flex-shrink-0 relative';
+                            groupCard.className = 'group-card bg-gray-700/50 p-4 rounded-lg border border-gray-600 flex-shrink-0 relative';
                             groupCard.style.width = '600px';
-                            
+
                             // Group by cage ID
                             const cageGroups = {};
                             groupData.forEach(rowData => {
@@ -3574,23 +3760,23 @@
                                 }
                                 cageGroups[cageId].push(rowData);
                             });
-                            
+
                             groupCard.innerHTML = `
                                 <div class="mb-4">
                                     <input type="text" value="${groupName}" class="text-lg font-semibold text-white text-center bg-transparent border-b-2 border-transparent hover:border-gray-500 focus:border-blue-500 focus:outline-none w-full group-name-input">
                                 </div>
                                 <div></div>
                             `;
-                            
+
                             const tableContainer = groupCard.querySelector('div:last-child');
-                            
+
                             // Create cage groups
                             Object.keys(cageGroups).forEach(cageId => {
                                 const cageAnimals = cageGroups[cageId];
-                                
+
                                 const cageGroup = document.createElement('div');
                                 cageGroup.className = 'cage-group';
-                                
+
                                 const cageHeader = document.createElement('div');
                                 cageHeader.className = 'cage-header';
                                 const headerText = cageId && cageId.trim() !== '' ? `Cage ${cageId}` : 'Default Cage';
@@ -3599,7 +3785,7 @@
                                     <button class="cage-remove-btn" data-action="remove-cage">&times;</button>
                                 `;
                                 cageGroup.appendChild(cageHeader);
-                                
+
                                 const cageTable = document.createElement('table');
                                 cageTable.className = 'w-full text-sm text-left text-gray-400 table-fixed';
                                 cageTable.innerHTML = `
@@ -3617,7 +3803,7 @@
                                     <tbody></tbody>
                                 `;
                                 cageGroup.appendChild(cageTable);
-                                
+
                                 const tbody = cageTable.querySelector('tbody');
                                 // Group cage animals by Animal ID to keep multiple tumors together
                                 const animalGroups = {};
@@ -3628,28 +3814,28 @@
                                     }
                                     animalGroups[animalId].push(rowData);
                                 });
-                                
+
                                 // Process each animal and their tumors
                                 Object.keys(animalGroups).forEach(animalId => {
                                     const animalTumors = animalGroups[animalId];
-                                    
+
                                     // Sort tumors by tumor number for consistent ordering
                                     animalTumors.sort((a, b) => {
                                         const tumorA = a['Tumor Number'] || a['tumorNumber'] || 'Tumor 1';
                                         const tumorB = b['Tumor Number'] || b['tumorNumber'] || 'Tumor 1';
                                         return tumorA.localeCompare(tumorB);
                                     });
-                                    
+
                                     // Add each tumor as a separate row
                                     animalTumors.forEach(rowData => {
-                                    const tumorNumber = rowData['Tumor Number'] || rowData['tumorNumber'] || 'Tumor 1';
-                                    const largeSize = rowData['Large Size'] || rowData['largeSize'] || '';
-                                    const smallSize = rowData['Small Size'] || rowData['smallSize'] || '';
-                                    const volume = rowData['Volume'] || rowData['volume'] || '';
-                                    
-                                    const row = document.createElement('tr');
-                                    row.className = 'bg-gray-800 border-b border-gray-700 hover:bg-gray-600/50';
-                                    row.innerHTML = `
+                                        const tumorNumber = rowData['Tumor Number'] || rowData['tumorNumber'] || 'Tumor 1';
+                                        const largeSize = rowData['Large Size'] || rowData['largeSize'] || '';
+                                        const smallSize = rowData['Small Size'] || rowData['smallSize'] || '';
+                                        const volume = rowData['Volume'] || rowData['volume'] || '';
+
+                                        const row = document.createElement('tr');
+                                        row.className = 'bg-gray-800 border-b border-gray-700 hover:bg-gray-600/50';
+                                        row.innerHTML = `
                                         <td class="px-3 py-3"><input type="text" value="${cageId}" placeholder="-" class="w-full text-sm ${cageId === '' ? 'empty-cage-id' : 'bg-gray-700'} rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none cage-id-input"></td>
                                         <td class="px-3 py-3"><input type="text" value="${animalId}" class="w-full text-sm bg-gray-700 rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none animal-id-input"></td>
                                         <td class="px-3 py-3"><input type="text" value="${tumorNumber}" class="w-full text-sm bg-gray-700 rounded p-2 border border-gray-600 focus:bg-gray-600 focus:outline-none tumor-number-input"></td>
@@ -3660,38 +3846,38 @@
                                             <button data-action="remove-animal" class="text-gray-500 hover:text-red-400 remove-btn opacity-20 text-lg">&times;</button>
                                         </td>
                                     `;
-                                    tbody.appendChild(row);
-                                    
-                                    // Add combined spacer with both buttons
-                                    const spacer = document.createElement('tr');
-                                    spacer.className = 'add-spacer';
-                                    spacer.innerHTML = `
+                                        tbody.appendChild(row);
+
+                                        // Add combined spacer with both buttons
+                                        const spacer = document.createElement('tr');
+                                        spacer.className = 'add-spacer';
+                                        spacer.innerHTML = `
                                         <td colspan="7" class="add-spacer" style="height: 12px; position: relative;">
                                             <button class="add-tumor-btn" data-action="add-tumor-after">add tumor</button>
                                             <button class="add-animal-btn" data-action="add-animal-after">add mouse</button>
                                         </td>
                                     `;
-                                    tbody.appendChild(spacer);
+                                        tbody.appendChild(spacer);
                                     });
                                 });
-                                
+
                                 tableContainer.appendChild(cageGroup);
                             });
-                            
+
                             groupsContainer.appendChild(groupCard);
                         });
                     });
 
                     // Clear file input for next use
                     csvFileInput.value = '';
-                    
+
                     // Validate all loaded data for size input errors
                     validateAllSizeInputs();
-                    
+
                     // Clear auto-save since we loaded fresh data from CSV
                     clearAutoSave();
                     autoSaveData(); // Start auto-saving the new data
-                    
+
                 } catch (error) {
                     showError(`Error loading CSV: ${error.message}`);
                     console.error("CSV loading error:", error);
@@ -3706,7 +3892,7 @@
             csvRows.push('Experiment ID,Experiment Start Date,Measurement Date,Group Name,Cage ID,Animal ID,Tumor Number,Large Size,Small Size,Volume');
 
             const measurementDateSections = measurementDatesContainer.querySelectorAll('.measurement-date-section');
-            
+
             if (measurementDateSections.length === 0) {
                 showError("No data to export. Please add some measurement dates first.");
                 return;
@@ -3749,15 +3935,15 @@
             const csvContent = csvRows.join('\n');
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
-            
+
             const url = URL.createObjectURL(blob);
-            const fileName = experimentId ? 
+            const fileName = experimentId ?
                 `tumor_measurements_${experimentId}_${new Date().toISOString().split('T')[0]}.csv` :
                 `tumor_measurements_${new Date().toISOString().split('T')[0]}.csv`;
             link.setAttribute('href', url);
             link.setAttribute('download', fileName);
             link.style.visibility = 'hidden';
-            
+
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -3765,9 +3951,9 @@
         }
 
         // Initialize the page - dates start empty with yellow background
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Dates start empty to show yellow background
-            
+
             // Setup synchronized scrolling for any existing measurement dates
             setTimeout(() => {
                 setupSynchronizedScrolling();
@@ -3778,7 +3964,7 @@
         function toggleSection(sectionId) {
             const section = document.getElementById(sectionId);
             const toggleText = document.getElementById(sectionId + '-toggle-text');
-            
+
             if (section.classList.contains('hidden')) {
                 section.classList.remove('hidden');
                 toggleText.textContent = 'Hide Details';
@@ -3794,21 +3980,21 @@
             const scrollWrappers = document.querySelectorAll('[data-horizontal-scroll]');
             const wrappersArray = Array.from(scrollWrappers);
             console.log('Setting up synchronized scrolling for', wrappersArray.length, 'wrappers');
-            
+
             if (wrappersArray.length === 0) {
                 console.warn('No scroll containers found!');
                 return;
             }
-            
+
             // Clear any existing synchronized scrolling
             wrappersArray.forEach(wrapper => {
                 if (wrapper._syncScrollHandler) {
                     wrapper.removeEventListener('scroll', wrapper._syncScrollHandler, { passive: true });
                 }
             });
-            
+
             wrappersArray.forEach((wrapper, index) => {
-                const scrollHandler = function(e) {
+                const scrollHandler = function (e) {
                     if (isSyncingHorizontalScroll) return;
                     isSyncingHorizontalScroll = true;
                     const left = e.target.scrollLeft;
@@ -3823,9 +4009,10 @@
                 wrapper.addEventListener('scroll', scrollHandler, { passive: true });
             });
         }
-        
+
         // (Removed test function for production)
     </script>
 
 </body>
+
 </html>
