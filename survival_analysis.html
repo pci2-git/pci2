@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,40 +12,49 @@
         body {
             font-family: 'Inter', sans-serif;
         }
+
         .chart-container {
             position: relative;
             height: 60vh;
             width: 100%;
         }
+
         .group-card {
             transition: all 0.3s ease-in-out;
         }
+
         .remove-btn {
             transition: opacity 0.2s ease-in-out;
         }
+
         tr:hover .remove-btn {
             opacity: 1;
         }
+
         .empty-field {
             background-color: #fef3c7 !important;
         }
+
         .status-alive {
             background-color: #065f46 !important;
             color: white !important;
         }
+
         .status-dead {
             background-color: #7f1d1d !important;
             color: white !important;
         }
     </style>
 </head>
+
 <body class="bg-gray-900 text-gray-200 antialiased">
 
     <div class="container mx-auto p-4 sm:p-6 lg:p-8">
         <!-- Header -->
         <header class="text-center mb-8">
             <h1 class="text-3xl sm:text-4xl font-bold text-white">Survival Data Analysis Tool</h1>
-            <p class="text-lg text-gray-400 mt-2">Enter your experiment data directly to generate Kaplan-Meier survival curves.</p>
+            <p class="text-lg text-gray-400 mt-2">Enter your experiment data directly to generate Kaplan-Meier survival
+                curves.</p>
         </header>
 
         <!-- Data Input Section -->
@@ -54,34 +64,44 @@
                 <h3 class="text-lg font-semibold text-white mb-4">Create New Experiment</h3>
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4 items-end">
                     <div>
-                        <label for="numGroupsInput" class="block text-sm font-medium text-gray-300 mb-2">Number of Groups</label>
-                        <input type="number" id="numGroupsInput" min="1" value="2" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2">
+                        <label for="numGroupsInput" class="block text-sm font-medium text-gray-300 mb-2">Number of
+                            Groups</label>
+                        <input type="number" id="numGroupsInput" min="1" value="2"
+                            class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2">
                     </div>
                     <div>
-                        <label for="numCagesInput" class="block text-sm font-medium text-gray-300 mb-2">Number of Cages (per group)</label>
-                        <input type="number" id="numCagesInput" min="1" value="2" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2">
+                        <label for="numCagesInput" class="block text-sm font-medium text-gray-300 mb-2">Number of Cages
+                            (per group)</label>
+                        <input type="number" id="numCagesInput" min="1" value="2"
+                            class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2">
                     </div>
                     <div>
-                        <label for="animalsPerCageInput" class="block text-sm font-medium text-gray-300 mb-2">Animals per Cage</label>
-                        <input type="number" id="animalsPerCageInput" min="1" value="4" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2">
+                        <label for="animalsPerCageInput" class="block text-sm font-medium text-gray-300 mb-2">Animals
+                            per Cage</label>
+                        <input type="number" id="animalsPerCageInput" min="1" value="4"
+                            class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2">
                     </div>
                     <div>
-                        <button id="applyConfigBtn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-colors w-full">
+                        <button id="applyConfigBtn"
+                            class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-colors w-full">
                             Apply Configuration
                         </button>
                     </div>
                 </div>
-                <p class="text-sm text-gray-400 mt-2">This will replace all existing groups with the new configuration.</p>
+                <p class="text-sm text-gray-400 mt-2">This will replace all existing groups with the new configuration.
+                </p>
             </div>
 
             <!-- Load Previous Experiment Section -->
             <div class="mb-8 p-4 bg-gray-700/50 rounded-lg border border-gray-600">
                 <h3 class="text-lg font-semibold text-white mb-4">Load Previous Experiment</h3>
                 <div class="flex flex-wrap gap-4">
-                    <button id="loadDataBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                    <button id="loadDataBtn"
+                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
                         Load Data
                     </button>
-                    <button id="exportDataBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                    <button id="exportDataBtn"
+                        class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
                         Export Data
                     </button>
                     <input type="file" id="csvFileInput" accept=".csv" class="hidden">
@@ -93,12 +113,16 @@
             <div class="mb-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                        <label for="experimentIdInput" class="block text-lg font-medium text-white mb-2">Experiment ID</label>
-                        <input type="text" id="experimentIdInput" placeholder="e.g., Experiment23" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                        <label for="experimentIdInput" class="block text-lg font-medium text-white mb-2">Experiment
+                            ID</label>
+                        <input type="text" id="experimentIdInput" placeholder="e.g., Experiment23"
+                            class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
                     </div>
                     <div>
-                        <label for="startDateInput" class="block text-lg font-medium text-white mb-2">Experiment Start Date</label>
-                        <input type="text" id="startDateInput" placeholder="mm/dd/yy" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                        <label for="startDateInput" class="block text-lg font-medium text-white mb-2">Experiment Start
+                            Date</label>
+                        <input type="text" id="startDateInput" placeholder="mm/dd/yy"
+                            class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
                     </div>
                 </div>
             </div>
@@ -110,10 +134,12 @@
 
             <!-- Action Buttons -->
             <div class="flex flex-wrap gap-4">
-                <button id="addGroupBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                <button id="addGroupBtn"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
                     Add Group
                 </button>
-                <button id="analyzeBtn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                <button id="analyzeBtn"
+                    class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
                     Analyze Data
                 </button>
             </div>
@@ -127,12 +153,13 @@
                 <p class="text-gray-300"><strong>Experiment ID:</strong> <span id="experimentIdDisplay"></span></p>
                 <p class="text-gray-300"><strong>Start Date:</strong> <span id="startDate"></span></p>
                 <div class="mt-4">
-                    <button id="exportPrismBtn" class="bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                    <button id="exportPrismBtn"
+                        class="bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
                         Export data for Prism
                     </button>
                 </div>
             </div>
-            
+
             <!-- Statistical Analysis -->
             <div class="bg-gray-800 rounded-lg shadow-lg p-6 mb-8 border border-gray-700">
                 <h2 class="text-2xl font-bold text-white mb-4">Statistical Analysis</h2>
@@ -140,7 +167,7 @@
                     <!-- Statistical results will be inserted here -->
                 </div>
             </div>
-            
+
             <!-- Survival Curve Chart -->
             <div class="bg-gray-800 rounded-lg shadow-lg p-6 mb-8 border border-gray-700">
                 <h2 class="text-2xl font-bold text-white mb-6 text-center">Kaplan-Meier Survival Curve</h2>
@@ -155,8 +182,10 @@
                 <div id="dataTables" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
             </div>
         </div>
-         <!-- Error Message -->
-        <div id="error-message" class="hidden mt-6 max-w-2xl mx-auto bg-red-900/50 border border-red-700 text-red-300 px-4 py-3 rounded-lg relative" role="alert">
+        <!-- Error Message -->
+        <div id="error-message"
+            class="hidden mt-6 max-w-2xl mx-auto bg-red-900/50 border border-red-700 text-red-300 px-4 py-3 rounded-lg relative"
+            role="alert">
             <strong class="font-bold">Error:</strong>
             <span class="block sm:inline" id="error-text"></span>
         </div>
@@ -177,7 +206,7 @@
         const exportDataBtn = document.getElementById('exportDataBtn');
         const csvFileInput = document.getElementById('csvFileInput');
         const exportPrismBtn = document.getElementById('exportPrismBtn');
-        
+
         const resultsSection = document.getElementById('resultsSection');
         const startDateDisplay = document.getElementById('startDate');
         const experimentIdDisplay = document.getElementById('experimentIdDisplay');
@@ -247,14 +276,14 @@
             const previousRow = tbody.querySelector('tr:last-child');
             let previousCageId = '';
             let nextAnimalId = '1';
-            
+
             if (previousRow) {
                 const previousInputs = previousRow.querySelectorAll('input');
                 previousCageId = previousInputs[0].value; // Previous cage ID
                 const previousAnimalId = parseInt(previousInputs[1].value) || 0;
                 nextAnimalId = (previousAnimalId + 1).toString();
             }
-            
+
             const row = document.createElement('tr');
             row.className = 'bg-gray-800 border-b border-gray-700 hover:bg-gray-600/50';
             row.innerHTML = `
@@ -292,14 +321,14 @@
         function handleCageIdChange(event) {
             // Check if the changed input is a cage ID input
             if (!event.target.classList.contains('cage-id-input')) return;
-            
+
             const changedInput = event.target;
             const newValue = changedInput.value;
-            
+
             const groupCard = changedInput.closest('.group-card');
             const allCageInputs = Array.from(groupCard.querySelectorAll('.cage-id-input'));
             const changedIndex = allCageInputs.indexOf(changedInput);
-            
+
             // Update all cage IDs that come after the changed one with the same value
             for (let i = changedIndex + 1; i < allCageInputs.length; i++) {
                 const currentInput = allCageInputs[i];
@@ -309,7 +338,7 @@
 
         function handleFieldBackgroundChange(event) {
             const target = event.target;
-            
+
             // Handle cage ID and ending date fields
             if (target.classList.contains('cage-id-input') || target.placeholder === 'mm/dd/yy') {
                 if (target.value.trim() === '') {
@@ -324,12 +353,12 @@
 
         function handleStatusColorChange(event) {
             const target = event.target;
-            
+
             // Handle status select elements
             if (target.tagName === 'SELECT' && target.closest('td')) {
                 const value = target.value;
                 target.classList.remove('status-alive', 'status-dead');
-                
+
                 if (value === '0') {
                     target.classList.add('status-alive');
                 } else if (value === '1') {
@@ -370,10 +399,10 @@
                 addGroup();
                 const currentGroupCard = document.getElementById(`group-${groupCounter}`);
                 const tbody = currentGroupCard.querySelector('tbody');
-                
+
                 // Clear the default animal row that addGroup() creates
                 tbody.innerHTML = '';
-                
+
                 // Add animals for each cage
                 let animalCounter = 1;
                 for (let cageIndex = 1; cageIndex <= numCages; cageIndex++) {
@@ -410,14 +439,14 @@
 
         function parseAndAnalyzeFromDOM() {
             hideError();
-            
+
             // --- 1. Extract and Validate Start Date ---
             const startDateStr = startDateInput.value;
             if (!startDateStr) {
                 showError("Please enter an experiment start date.");
                 return;
             }
-            
+
             // Parse mm/dd/yy format
             const startDate = parseDate(startDateStr);
             if (!startDate) {
@@ -451,8 +480,17 @@
                     const endingDateStr = inputs[2].value;
                     const status = inputs[3].value;
 
-                    if (animalId && endingDateStr) {
-                        const endingDate = parseDate(endingDateStr);
+                    if (animalId) {
+                        let endingDate;
+
+                        // If alive (0) and no date, default to today
+                        if (status === '0' && !endingDateStr) {
+                            endingDate = new Date();
+                            endingDate.setHours(0, 0, 0, 0);
+                        } else if (endingDateStr) {
+                            endingDate = parseDate(endingDateStr);
+                        }
+
                         if (!endingDate) continue;
 
                         const timeDiff = endingDate.getTime() - startDate.getTime();
@@ -494,7 +532,7 @@
                     const subjectsLeaving = groupData.filter(d => d.daysSurvived === time).length;
                     subjectsAtRisk -= subjectsLeaving;
                 });
-                
+
                 const lastDataPoint = groupData[groupData.length - 1];
                 if (lastDataPoint) {
                     kmData.push({ x: lastDataPoint.daysSurvived, y: survivalProbability });
@@ -528,7 +566,7 @@
 
         function performStatisticalAnalysis(groups) {
             const groupNames = Object.keys(groups).filter(name => groups[name].data.length > 0);
-            
+
             if (groupNames.length === 0) {
                 statisticalResults.innerHTML = '<p class="text-gray-400">No data available for statistical analysis.</p>';
                 return { comparisons: [] };
@@ -540,13 +578,13 @@
             // Calculate median survival for each group
             resultsHTML += '<div class="mb-6"><h3 class="text-lg font-semibold text-white mb-3">Median Survival Times</h3>';
             resultsHTML += '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">';
-            
+
             const medianSurvivalTimes = {};
             groupNames.forEach(groupName => {
                 const groupData = groups[groupName].data;
                 const medianSurvival = calculateMedianSurvival(groupData);
                 medianSurvivalTimes[groupName] = medianSurvival;
-                
+
                 resultsHTML += `
                     <div class="bg-gray-700/50 p-4 rounded-lg border border-gray-600">
                         <h4 class="font-semibold text-white">${groupName}</h4>
@@ -562,7 +600,7 @@
                 resultsHTML += '<div class="mb-6"><h3 class="text-lg font-semibold text-white mb-3">Statistical Comparisons (Log-rank Test)</h3>';
                 resultsHTML += '<div class="overflow-x-auto"><table class="w-full text-sm text-left text-gray-400">';
                 resultsHTML += '<thead class="text-xs text-gray-300 uppercase bg-gray-700"><tr><th class="px-4 py-2">Comparison</th><th class="px-4 py-2">n</th><th class="px-4 py-2">Chi-square</th><th class="px-4 py-2">P-value</th><th class="px-4 py-2">Significance</th></tr></thead><tbody>';
-                
+
                 for (let i = 0; i < groupNames.length; i++) {
                     for (let j = i + 1; j < groupNames.length; j++) {
                         const group1 = groupNames[i];
@@ -570,15 +608,15 @@
                         const group1Data = groups[group1].data;
                         const group2Data = groups[group2].data;
                         const logRankResult = performLogRankTest(group1Data, group2Data);
-                        
-                        const significance = logRankResult.pValue < 0.001 ? '***' : 
-                                           logRankResult.pValue < 0.01 ? '**' : 
-                                           logRankResult.pValue < 0.05 ? '*' : 
-                                           logRankResult.pValue < 0.1 ? '†' : 'NS';
-                        
+
+                        const significance = logRankResult.pValue < 0.001 ? '***' :
+                            logRankResult.pValue < 0.01 ? '**' :
+                                logRankResult.pValue < 0.05 ? '*' :
+                                    logRankResult.pValue < 0.1 ? '†' : 'NS';
+
                         const significanceColor = logRankResult.pValue < 0.05 ? 'text-green-400' : 'text-gray-400';
                         const totalN = group1Data.length + group2Data.length;
-                        
+
                         // Store comparison result
                         comparisonResults.push({
                             group1,
@@ -587,7 +625,7 @@
                             significance,
                             significant: logRankResult.pValue < 0.05
                         });
-                        
+
                         resultsHTML += `
                             <tr class="bg-gray-800 border-b border-gray-700">
                                 <td class="px-4 py-2 font-medium">${group1} vs ${group2}</td>
@@ -610,32 +648,32 @@
 
         function calculateMedianSurvival(groupData) {
             if (!groupData || groupData.length === 0) return null;
-            
+
             // Sort by days survived
             const sortedData = [...groupData].sort((a, b) => a.daysSurvived - b.daysSurvived);
-            
+
             // Calculate Kaplan-Meier survival probabilities
             let subjectsAtRisk = sortedData.length;
             let survivalProbability = 1.0;
-            
+
             for (let i = 0; i < sortedData.length; i++) {
                 const currentTime = sortedData[i].daysSurvived;
                 const deathsAtTime = sortedData.filter(d => d.daysSurvived === currentTime && d.isDead).length;
-                
+
                 if (deathsAtTime > 0) {
                     survivalProbability *= (1 - deathsAtTime / subjectsAtRisk);
                 }
-                
+
                 // Check if survival probability has dropped to 50% or below
                 if (survivalProbability <= 0.5) {
                     return currentTime;
                 }
-                
+
                 // Update subjects at risk for next time point
                 const subjectsLeavingAtTime = sortedData.filter(d => d.daysSurvived === currentTime).length;
                 subjectsAtRisk -= subjectsLeavingAtTime;
             }
-            
+
             return null; // Median not reached
         }
 
@@ -645,35 +683,49 @@
                 ...group1Data.map(d => d.daysSurvived),
                 ...group2Data.map(d => d.daysSurvived)
             ])].sort((a, b) => a - b);
-            
+
             let observedEvents1 = 0;
             let expectedEvents1 = 0;
-            
+            let totalVariance = 0;
+
             allTimes.forEach(time => {
                 // Count subjects at risk at this time point
                 const atRisk1 = group1Data.filter(d => d.daysSurvived >= time).length;
                 const atRisk2 = group2Data.filter(d => d.daysSurvived >= time).length;
                 const totalAtRisk = atRisk1 + atRisk2;
-                
+
                 if (totalAtRisk === 0) return;
-                
+
                 // Count deaths at this time point
                 const deaths1 = group1Data.filter(d => d.daysSurvived === time && d.isDead).length;
                 const deaths2 = group2Data.filter(d => d.daysSurvived === time && d.isDead).length;
                 const totalDeaths = deaths1 + deaths2;
-                
+
                 if (totalDeaths > 0) {
                     observedEvents1 += deaths1;
-                    expectedEvents1 += (atRisk1 * totalDeaths) / totalAtRisk;
+                    const expected1 = (atRisk1 * totalDeaths) / totalAtRisk;
+                    expectedEvents1 += expected1;
+
+                    // Calculate variance contribution (Mantel-Cox)
+                    // Var = (n1 * n2 * d * (n - d)) / (n^2 * (n - 1))
+                    if (totalAtRisk > 1) {
+                        const variance = (atRisk1 * atRisk2 * totalDeaths * (totalAtRisk - totalDeaths)) /
+                            (Math.pow(totalAtRisk, 2) * (totalAtRisk - 1));
+                        totalVariance += variance;
+                    }
                 }
             });
-            
+
             // Calculate chi-square statistic
-            const chiSquare = Math.pow(observedEvents1 - expectedEvents1, 2) / expectedEvents1;
-            
+            // Mantel-Cox Log-rank Chi-Square = (O1 - E1)^2 / Var
+            let chiSquare = 0;
+            if (totalVariance > 0) {
+                chiSquare = Math.pow(observedEvents1 - expectedEvents1, 2) / totalVariance;
+            }
+
             // Calculate p-value (approximation using chi-square distribution with 1 df)
             const pValue = 1 - chiSquareCDF(chiSquare, 1);
-            
+
             return {
                 chiSquare: chiSquare,
                 pValue: Math.max(pValue, 0.0001) // Minimum p-value for display
@@ -692,12 +744,12 @@
 
         function erf(x) {
             // Approximation of error function
-            const a1 =  0.254829592;
+            const a1 = 0.254829592;
             const a2 = -0.284496736;
-            const a3 =  1.421413741;
+            const a3 = 1.421413741;
             const a4 = -1.453152027;
-            const a5 =  1.061405429;
-            const p  =  0.3275911;
+            const a5 = 1.061405429;
+            const p = 0.3275911;
 
             const sign = x < 0 ? -1 : 1;
             x = Math.abs(x);
@@ -716,7 +768,7 @@
 
                 const tableWrapper = document.createElement('div');
                 tableWrapper.className = 'bg-gray-800 p-4 rounded-lg border border-gray-700 shadow-md';
-                
+
                 let tableHTML = `<h3 class="text-xl font-semibold text-white mb-3">${groupName}</h3>
                                 <div class="overflow-x-auto max-h-80">
                                 <table class="w-full text-sm text-left text-gray-400">
@@ -728,14 +780,14 @@
                                         </tr>
                                     </thead>
                                     <tbody>`;
-                
+
                 groupData.forEach(animal => {
                     tableHTML += `<tr class="bg-gray-800 border-b border-gray-700 hover:bg-gray-600/50">
                                     <td class="px-4 py-2 font-medium text-gray-200">${animal.animalId}</td>
                                     <td class="px-4 py-2">${animal.daysSurvived}</td>
-                                    <td class="px-4 py-2">${animal.isDead ? 
-                                        '<span class="text-red-400">Dead</span>' : 
-                                        '<span class="text-green-400">Alive</span>'}
+                                    <td class="px-4 py-2">${animal.isDead ?
+                            '<span class="text-red-400">Dead</span>' :
+                            '<span class="text-green-400">Alive</span>'}
                                     </td>
                                   </tr>`;
                 });
@@ -750,7 +802,7 @@
             if (survivalChart) {
                 survivalChart.destroy();
             }
-            
+
             const ctx = survivalChartCanvas.getContext('2d');
             survivalChart = new Chart(ctx, {
                 type: 'line',
@@ -774,11 +826,11 @@
                         }
                     },
                     plugins: {
-                        legend: { 
+                        legend: {
                             position: 'right',
                             align: 'start',
-                            labels: { 
-                                color: '#d1d5db', 
+                            labels: {
+                                color: '#d1d5db',
                                 font: { size: 14 },
                                 usePointStyle: true,
                                 pointStyle: 'line',
@@ -809,11 +861,11 @@
             // Handle mm/dd/yy format
             const parts = dateString.trim().split('/');
             if (parts.length !== 3) return null;
-            
+
             const month = parseInt(parts[0]);
             const day = parseInt(parts[1]);
             let year = parseInt(parts[2]);
-            
+
             // Convert 2-digit year to 4-digit year
             // Assume years 00-30 are 2000-2030, years 31-99 are 1931-1999
             if (year < 31) {
@@ -821,17 +873,17 @@
             } else if (year < 100) {
                 year += 1900;
             }
-            
+
             // Validate the date components
             if (month < 1 || month > 12 || day < 1 || day > 31) return null;
-            
+
             const date = new Date(year, month - 1, day); // month is 0-indexed in Date constructor
-            
+
             // Check if the date is valid (handles invalid dates like Feb 30)
             if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
                 return null;
             }
-            
+
             return date;
         }
 
@@ -844,12 +896,12 @@
             if (!file) return;
 
             const reader = new FileReader();
-            
-            reader.onload = function(e) {
+
+            reader.onload = function (e) {
                 try {
                     const csvData = e.target.result;
                     const lines = csvData.split('\n').filter(line => line.trim());
-                    
+
                     if (lines.length < 2) {
                         showError("CSV file must contain at least a header and one data row.");
                         return;
@@ -860,7 +912,7 @@
                         const result = [];
                         let current = '';
                         let inQuotes = false;
-                        
+
                         for (let i = 0; i < line.length; i++) {
                             const char = line[i];
                             if (char === '"') {
@@ -877,7 +929,7 @@
                     };
 
                     const headers = parseCSVLine(lines[0]);
-                    
+
                     // Clear existing data
                     groupsContainer.innerHTML = '';
                     groupCounter = 0;
@@ -887,11 +939,11 @@
                     const groupsData = {};
                     let experimentStartDate = '';
                     let experimentId = '';
-                    
+
                     for (let i = 1; i < lines.length; i++) {
                         const values = parseCSVLine(lines[i]);
                         if (values.length < headers.length) continue;
-                        
+
                         const rowData = {};
                         headers.forEach((header, index) => {
                             // Remove quotes from values if present
@@ -929,7 +981,7 @@
                         const currentGroupCard = document.getElementById(`group-${groupCounter}`);
                         const groupNameInput = currentGroupCard.querySelector('input[type="text"]');
                         groupNameInput.value = groupName;
-                        
+
                         const tbody = currentGroupCard.querySelector('tbody');
                         tbody.innerHTML = ''; // Clear default row
 
@@ -962,7 +1014,7 @@
 
                     // Clear file input for next use
                     csvFileInput.value = '';
-                    
+
                 } catch (error) {
                     showError(`Error loading CSV: ${error.message}`);
                     console.error("CSV loading error:", error);
@@ -977,7 +1029,7 @@
             csvRows.push('Experiment ID,Experiment Start Date,Group Name,Cage ID,Animal ID,Ending Date,Status');
 
             const groupCards = groupsContainer.querySelectorAll('.group-card');
-            
+
             if (groupCards.length === 0) {
                 showError("No data to export. Please add some groups and animals first.");
                 return;
@@ -1011,15 +1063,15 @@
             const csvContent = csvRows.join('\n');
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
-            
+
             const url = URL.createObjectURL(blob);
-            const fileName = experimentId ? 
+            const fileName = experimentId ?
                 `survival_data_${experimentId}_${new Date().toISOString().split('T')[0]}.csv` :
                 `survival_data_${new Date().toISOString().split('T')[0]}.csv`;
             link.setAttribute('href', url);
             link.setAttribute('download', fileName);
             link.style.visibility = 'hidden';
-            
+
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -1028,7 +1080,7 @@
 
         function exportDataForPrism() {
             const groupCards = groupsContainer.querySelectorAll('.group-card');
-            
+
             if (groupCards.length === 0) {
                 showError("No data to export. Please add some groups and animals first.");
                 return;
@@ -1036,7 +1088,7 @@
 
             const experimentStartDate = startDateInput.value || '';
             const experimentId = experimentIdInput.value || '';
-            
+
             // Collect all data organized by groups
             const groupsData = [];
             const allAnimals = [];
@@ -1058,7 +1110,7 @@
                         const cleanCageId = cageId.replace(/\s+/g, '_');
                         const cleanAnimalId = animalId.replace(/\s+/g, '_');
                         const combinedId = `${cleanCageId}-${cleanGroupName}-${cleanAnimalId}`;
-                        
+
                         const animalData = {
                             combinedId,
                             experimentStartDate,
@@ -1066,12 +1118,12 @@
                             status,
                             groupName: cleanGroupName
                         };
-                        
+
                         groupAnimals.push(animalData);
                         allAnimals.push(animalData);
                     }
                 });
-                
+
                 if (groupAnimals.length > 0) {
                     groupsData.push({
                         groupName: cleanGroupName,
@@ -1101,7 +1153,7 @@
                     animal.experimentStartDate,
                     animal.endingDate
                 ];
-                
+
                 // Add status for each group (only fill the appropriate group column)
                 groupNames.forEach(groupName => {
                     if (animal.groupName === groupName) {
@@ -1110,22 +1162,22 @@
                         row.push(''); // Empty for other groups
                     }
                 });
-                
+
                 csvRows.push(`"${row.join('","')}"`);
             });
 
             const csvContent = csvRows.join('\n');
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
-            
+
             const url = URL.createObjectURL(blob);
-            const fileName = experimentId ? 
+            const fileName = experimentId ?
                 `prism_survival_data_${experimentId}_${new Date().toISOString().split('T')[0]}.csv` :
                 `prism_survival_data_${new Date().toISOString().split('T')[0]}.csv`;
             link.setAttribute('href', url);
             link.setAttribute('download', fileName);
             link.style.visibility = 'hidden';
-            
+
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -1134,4 +1186,5 @@
     </script>
 
 </body>
+
 </html>
