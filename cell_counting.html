@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,20 +12,103 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .read-only-field { background-color: #f3f4f6; color: #4b5563; cursor: not-allowed; border-color: #d1d5db; }
-        .input-error { border-color: #ef4444; }
-        .error-message { display: none; color: #ef4444; font-size: 0.875rem; margin-top: 0.5rem; }
-        .hidden-calc { visibility: hidden; }
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .read-only-field {
+            background-color: #f3f4f6;
+            color: #4b5563;
+            cursor: not-allowed;
+            border-color: #d1d5db;
+        }
+
+        .input-error {
+            border-color: #ef4444;
+        }
+
+        .error-message {
+            display: none;
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+
+        .hidden-calc {
+            visibility: hidden;
+        }
+
+        /* Hide spinners */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type=number] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+
+        /* For text inputs acting as numbers */
+        .formatted-number-input {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+
+        /* Dynamic table column widths - columns adjust based on content */
+        table {
+            table-layout: auto;
+            width: 100%;
+        }
+
+        table th {
+            padding: 0.75rem 0.5rem;
+            word-wrap: break-word;
+            max-width: 150px;
+        }
+
+        table td {
+            padding: 0.75rem 0.5rem;
+        }
+
+        /* Allow inputs to shrink/grow with their column */
+        table td input {
+            width: 100%;
+            min-width: 60px;
+            font-size: 0.875rem;
+        }
+
+        /* Read-only fields */
+        table td input.read-only-field {
+            min-width: 80px;
+        }
+
+        /* Custom column widths */
+        .col-wide {
+            width: 15%;
+            min-width: 120px;
+        }
+
+        .col-narrow {
+            width: 10%;
+            min-width: 80px;
+        }
+
+        .col-medium {
+            width: 12%;
+            min-width: 100px;
+        }
     </style>
 </head>
+
 <body class="bg-gray-50">
     <div class="w-full max-w-4xl mx-auto p-4 md:p-8">
         <div class="bg-white rounded-2xl shadow-lg p-6 md:p-10 mb-8">
-            
+
             <!-- Header Section -->
             <div class="text-center mb-8">
-                <h1 class="text-3xl md:text-4xl font-bold text-gray-800">PBMC Counting Calculator</h1>
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-800">Cell Counting Calculator</h1>
                 <p class="text-gray-500 mt-2">Enter sample and counting details below.</p>
             </div>
 
@@ -34,27 +118,40 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 mt-4">
                     <div>
                         <label for="sampleId" class="block text-sm font-medium text-gray-700 mb-1">Sample ID</label>
-                        <input type="text" id="sampleId" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. PNOC020-p6v3pre">
-                    </div>
-                                        <div>
-                        <label for="totalSampleVolume" class="block text-sm font-medium text-gray-700 mb-1">Total Sample Volume (mL)</label>
-                        <input type="number" id="totalSampleVolume" min="0" value="1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="1">
+                        <input type="text" id="sampleId"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="e.g. PNOC020-p6v3pre">
                     </div>
                     <div>
-                        <label for="trypanBlueVolume" class="block text-sm font-medium text-gray-700 mb-1">Trypan Blue Volume (µL)</label>
-                        <input type="number" id="trypanBlueVolume" min="0" value="90" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="90">
+                        <label for="totalSampleVolume" class="block text-sm font-medium text-gray-700 mb-1">Total Sample
+                            Volume (mL)</label>
+                        <input type="text" id="totalSampleVolume" value="1"
+                            class="formatted-number-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="1">
                     </div>
-                     <div>
-                        <label for="sampleVolumeMixed" class="block text-sm font-medium text-gray-700 mb-1">Sample Volume Mixed with Trypan Blue (µL)</label>
-                        <input type="number" id="sampleVolumeMixed" min="0" value="10" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="10">
+                    <div>
+                        <label for="trypanBlueVolume" class="block text-sm font-medium text-gray-700 mb-1">Trypan Blue
+                            Volume (µL)</label>
+                        <input type="text" id="trypanBlueVolume" value="90"
+                            class="formatted-number-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="90">
+                    </div>
+                    <div>
+                        <label for="sampleVolumeMixed" class="block text-sm font-medium text-gray-700 mb-1">Sample
+                            Volume Mixed with Trypan Blue (µL)</label>
+                        <input type="text" id="sampleVolumeMixed" value="10"
+                            class="formatted-number-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="10">
                     </div>
                 </div>
             </fieldset>
 
             <!-- Counting Method Selection -->
             <div class="mt-8 border-t border-gray-200 pt-6">
-                <label for="countingMethod" class="block text-base font-medium text-gray-800 mb-3">Select Counting Method</label>
-                <select id="countingMethod" class="w-full md:w-1/2 px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <label for="countingMethod" class="block text-base font-medium text-gray-800 mb-3">Select Counting
+                    Method</label>
+                <select id="countingMethod"
+                    class="w-full md:w-1/2 px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option value="none" selected>-- Please choose an option --</option>
                     <option value="countless">Countess 3 Data</option>
                     <option value="manual">Manual Counting Data</option>
@@ -63,73 +160,377 @@
 
             <!-- Countess 3 Data Fields (hidden by default) -->
             <div id="countlessFields" class="hidden mt-6 space-y-6">
-                 <fieldset class="border-t border-gray-200 pt-6">
+                <fieldset class="border-t border-gray-200 pt-6">
                     <legend class="text-lg font-semibold text-gray-900 px-2">Countess 3 Data</legend>
+                    <div class="mb-4 ml-1">
+                        <button type="button"
+                            class="text-sm text-blue-600 hover:text-blue-800 flex items-center focus:outline-none gap-1 info-toggle-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>Show Information</span>
+                        </button>
+                        <div
+                            class="hidden mt-2 p-3 bg-blue-50 rounded-lg text-sm text-blue-800 border border-blue-100 info-content">
+                            <p class="font-semibold mb-2">Protocol & Data Entry:</p>
+                            <ol class="list-decimal list-inside space-y-1 ml-1">
+                                <li><strong>Preparation:</strong> Mix <strong>10 µL</strong> of cells with <strong>90
+                                        µL</strong> of Trypan Blue (e.g., in a 96-well plate).</li>
+                                <li><strong>Loading:</strong> Load 10 µL of the mix into the counting slide and insert
+                                    into the machine.</li>
+                                <li><strong>Settings:</strong> Adjust Brightfield (BF ~40) and Focus (~60) if needed.
+                                    Press <strong>"Count"</strong>.</li>
+                                <li><strong>Machine Calculator:</strong> Go to "Calculators" > "Pre-Dilution
+                                    Calculator":
+                                    <ul class="list-disc list-inside ml-5 mt-1 space-y-1 text-xs">
+                                        <li>Sample volume = 10 µL</li>
+                                        <li>Buffer volume = 90 µL</li>
+                                        <li><strong>Uncheck</strong> "Correct for 1:1 trypan blue dilution"</li>
+                                        <li>Press "Apply"</li>
+                                    </ul>
+                                </li>
+                                <li><strong>Data Entry:</strong> Enter the values from the machine into the fields
+                                    below:
+                                    <ul class="list-disc list-inside ml-5 mt-1 space-y-1 text-xs">
+                                        <li><strong>Live cells:</strong> Enter the final "Live" concentration
+                                            (cells/mL).</li>
+                                        <li><strong>Dead cells:</strong> Enter the final "Dead" concentration
+                                            (cells/mL).</li>
+                                    </ul>
+                                </li>
+                                <li>The system will automatically calculate Live cells, Dead cells and viability.</li>
+                                <li><strong>Cleanup:</strong> Discard the slide in a biohazard container.</li>
+                            </ol>
+                        </div>
+                    </div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-6 mt-4">
                         <div>
-                            <label for="countlessLive" class="block text-sm font-medium text-gray-700 mb-1">Live cells (cells/mL)</label>
-                            <input type="text" id="countlessLive" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. 1.23E7">
+                            <label for="countlessLive" class="block text-sm font-medium text-gray-700 mb-1">Live cells
+                                (cells/mL)</label>
+                            <input type="text" id="countlessLive"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="e.g. 1.23E7">
                         </div>
                         <div>
-                            <label for="countlessDead" class="block text-sm font-medium text-gray-700 mb-1">Dead cells (cells/mL)</label>
-                            <input type="text" id="countlessDead" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g. 4.54E4">
+                            <label for="countlessDead" class="block text-sm font-medium text-gray-700 mb-1">Dead cells
+                                (cells/mL)</label>
+                            <input type="text" id="countlessDead"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="e.g. 4.54E4">
                         </div>
                         <div>
-                            <label for="countlessViability" class="block text-sm font-medium text-gray-700 mb-1">Viability (%)</label>
-                            <input type="text" id="countlessViability" class="w-full px-4 py-2 rounded-lg read-only-field" readonly>
+                            <label for="countlessViability"
+                                class="block text-sm font-medium text-gray-700 mb-1">Viability (%)</label>
+                            <input type="text" id="countlessViability"
+                                class="w-full px-4 py-2 rounded-lg read-only-field" readonly>
                         </div>
                     </div>
                 </fieldset>
+                <div class="text-center border-t border-gray-200 pt-6">
+                    <button
+                        class="calculate-btn w-full md:w-auto bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-transform transform hover:scale-105 duration-300">
+                        Calculate
+                    </button>
+                    <p class="error-message">Please fill in all fields correctly.</p>
+                </div>
             </div>
 
             <!-- Manual Counting Data Fields (hidden by default) -->
             <div id="manualFields" class="hidden mt-6">
                 <fieldset class="border-t border-gray-200 pt-6">
                     <legend class="text-lg font-semibold text-gray-900 px-2">Manual Counting Data</legend>
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-x-8 gap-y-6 mt-4">
-                        <!-- Live Cell Counts -->
-                        <div><label for="live_c1" class="block text-sm font-medium text-gray-700 mb-1">Live cells, Count 1</label><input type="number" id="live_c1" min="0" class="manual-input w-full px-4 py-2 rounded-lg bg-green-50 border-green-200"></div>
-                        <div><label for="live_c2" class="block text-sm font-medium text-gray-700 mb-1">Live cells, Count 2</label><input type="number" id="live_c2" min="0" class="manual-input w-full px-4 py-2 rounded-lg bg-green-50 border-green-200"></div>
-                        <div><label for="live_c3" class="block text-sm font-medium text-gray-700 mb-1">Live cells, Count 3</label><input type="number" id="live_c3" min="0" class="manual-input w-full px-4 py-2 rounded-lg bg-green-50 border-green-200"></div>
-                        <div><label for="live_c4" class="block text-sm font-medium text-gray-700 mb-1">Live cells, Count 4</label><input type="number" id="live_c4" min="0" class="manual-input w-full px-4 py-2 rounded-lg bg-green-50 border-green-200"></div>
-                        <!-- Dead Cell Counts -->
-                        <div><label for="dead_c1" class="block text-sm font-medium text-gray-700 mb-1">Dead cells, Count 1</label><input type="number" id="dead_c1" min="0" class="manual-input w-full px-4 py-2 rounded-lg bg-red-50 border-red-200"></div>
-                        <div><label for="dead_c2" class="block text-sm font-medium text-gray-700 mb-1">Dead cells, Count 2</label><input type="number" id="dead_c2" min="0" class="manual-input w-full px-4 py-2 rounded-lg bg-red-50 border-red-200"></div>
-                        <div><label for="dead_c3" class="block text-sm font-medium text-gray-700 mb-1">Dead cells, Count 3</label><input type="number" id="dead_c3" min="0" class="manual-input w-full px-4 py-2 rounded-lg bg-red-50 border-red-200"></div>
-                        <div><label for="dead_c4" class="block text-sm font-medium text-gray-700 mb-1">Dead cells, Count 4</label><input type="number" id="dead_c4" min="0" class="manual-input w-full px-4 py-2 rounded-lg bg-red-50 border-red-200"></div>
+                    <div class="mb-4 ml-1">
+                        <button type="button"
+                            class="text-sm text-blue-600 hover:text-blue-800 flex items-center focus:outline-none gap-1 info-toggle-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>Show Information</span>
+                        </button>
+                        <div
+                            class="hidden mt-2 p-3 bg-blue-50 rounded-lg text-sm text-blue-800 border border-blue-100 info-content">
+                            <div class="flex flex-col md:flex-row gap-4 items-start">
+                                <div class="flex-1">
+                                    <p class="font-semibold mb-2">Protocol & Data Entry:</p>
+                                    <ol class="list-decimal list-inside space-y-1 ml-1">
+                                        <li><strong>Preparation:</strong> Mix <strong>10 µL</strong> of cells with
+                                            <strong>90 µL</strong> of Trypan Blue.
+                                        </li>
+                                        <li><strong>Loading:</strong> Load 10 µL of the mix into the Neubauer chamber.
+                                        </li>
+                                        <li><strong>Counting:</strong> Count cells in the 4 corner squares (marked "L"
+                                            in figure). Count at least 2 areas.</li>
+                                        <li><strong>Data Entry:</strong> Fill in the fields below:
+                                            <ul class="list-disc list-inside ml-5 mt-1 space-y-1 text-xs">
+                                                <li><strong>Preparation Fields (top):</strong> Ensure "Total Sample
+                                                    Volume", "Trypan Blue Volume", and "Sample Volume Mixed" are
+                                                    correct.</li>
+                                                <li><strong>Counts:</strong> Enter the raw count of
+                                                    <strong>Live</strong> and <strong>Dead</strong> cells for each area
+                                                    (Count 1, Count 2, etc.).
+                                                </li>
+                                            </ul>
+                                        </li>
+                                        <li>The system will automatically calculate Live cells, Dead cells and
+                                            viability.</li>
+                                    </ol>
+                                </div>
+                                <div class="w-full md:w-1/3 flex-shrink-0">
+                                    <img src="images/neubauer_chamber.jpg" alt="Neubauer Chamber Counting Areas"
+                                        class="w-full h-auto rounded-lg border border-blue-200 shadow-sm">
+                                    <p class="text-xs text-center mt-1 text-blue-600">Count cells in areas marked with
+                                        "L"</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+                    <div id="manualGrid" class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 mt-4">
+                        <!-- Live Cell Counts -->
+                        <div><label for="live_c1" class="block text-sm font-medium text-gray-700 mb-1">Live cells, Count
+                                1</label><input type="text" id="live_c1"
+                                class="manual-input formatted-number-input w-full px-4 py-2 rounded-lg bg-green-50 border-green-200">
+                        </div>
+                        <div><label for="live_c2" class="block text-sm font-medium text-gray-700 mb-1">Live cells, Count
+                                2</label><input type="text" id="live_c2"
+                                class="manual-input formatted-number-input w-full px-4 py-2 rounded-lg bg-green-50 border-green-200">
+                        </div>
+                        <div class="additional-count hidden"><label for="live_c3"
+                                class="block text-sm font-medium text-gray-700 mb-1">Live cells, Count
+                                3</label><input type="text" id="live_c3"
+                                class="manual-input formatted-number-input w-full px-4 py-2 rounded-lg bg-green-50 border-green-200">
+                        </div>
+                        <div class="additional-count hidden"><label for="live_c4"
+                                class="block text-sm font-medium text-gray-700 mb-1">Live cells, Count
+                                4</label><input type="text" id="live_c4"
+                                class="manual-input formatted-number-input w-full px-4 py-2 rounded-lg bg-green-50 border-green-200">
+                        </div>
+                        <!-- Dead Cell Counts -->
+                        <div><label for="dead_c1" class="block text-sm font-medium text-gray-700 mb-1">Dead cells, Count
+                                1</label><input type="text" id="dead_c1"
+                                class="manual-input formatted-number-input w-full px-4 py-2 rounded-lg bg-red-50 border-red-200">
+                        </div>
+                        <div><label for="dead_c2" class="block text-sm font-medium text-gray-700 mb-1">Dead cells, Count
+                                2</label><input type="text" id="dead_c2"
+                                class="manual-input formatted-number-input w-full px-4 py-2 rounded-lg bg-red-50 border-red-200">
+                        </div>
+                        <div class="additional-count hidden"><label for="dead_c3"
+                                class="block text-sm font-medium text-gray-700 mb-1">Dead cells, Count
+                                3</label><input type="text" id="dead_c3"
+                                class="manual-input formatted-number-input w-full px-4 py-2 rounded-lg bg-red-50 border-red-200">
+                        </div>
+                        <div class="additional-count hidden"><label for="dead_c4"
+                                class="block text-sm font-medium text-gray-700 mb-1">Dead cells, Count
+                                4</label><input type="text" id="dead_c4"
+                                class="manual-input formatted-number-input w-full px-4 py-2 rounded-lg bg-red-50 border-red-200">
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <button type="button" id="toggleCountsBtn"
+                            class="text-blue-600 hover:text-blue-800 text-sm font-medium focus:outline-none underline">
+                            Show Additional Counts
+                        </button>
+                    </div>
+
+                    <div class="text-center mt-8 mb-8">
+                        <button
+                            class="calculate-btn w-full md:w-auto bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-transform transform hover:scale-105 duration-300">
+                            Calculate
+                        </button>
+                        <p class="error-message">Please fill in all fields correctly.</p>
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-6 mt-8 bg-gray-50 p-4 rounded-lg">
                         <!-- Calculated Outputs for Manual -->
                         <div>
-                            <label for="manualLive" class="block text-sm font-medium text-gray-700 mb-1">Live cells (cells/mL)</label>
-                            <input type="text" id="manualLive" class="w-full px-4 py-2 rounded-lg read-only-field" readonly>
+                            <label for="manualLive" class="block text-sm font-medium text-gray-700 mb-1">Live cells
+                                (cells/mL)</label>
+                            <input type="text" id="manualLive" class="w-full px-4 py-2 rounded-lg read-only-field"
+                                readonly>
                         </div>
                         <div>
-                            <label for="manualDead" class="block text-sm font-medium text-gray-700 mb-1">Dead cells (cells/mL)</label>
-                            <input type="text" id="manualDead" class="w-full px-4 py-2 rounded-lg read-only-field" readonly>
+                            <label for="manualDead" class="block text-sm font-medium text-gray-700 mb-1">Dead cells
+                                (cells/mL)</label>
+                            <input type="text" id="manualDead" class="w-full px-4 py-2 rounded-lg read-only-field"
+                                readonly>
                         </div>
                         <div>
-                            <label for="manualViability" class="block text-sm font-medium text-gray-700 mb-1">Viability (%)</label>
-                            <input type="text" id="manualViability" class="w-full px-4 py-2 rounded-lg read-only-field" readonly>
+                            <label for="manualViability" class="block text-sm font-medium text-gray-700 mb-1">Viability
+                                (%)</label>
+                            <input type="text" id="manualViability" class="w-full px-4 py-2 rounded-lg read-only-field"
+                                readonly>
                         </div>
                     </div>
                 </fieldset>
             </div>
-            
-            <!-- Action Button -->
-            <div id="actionButtonContainer" class="hidden mt-8 text-center border-t border-gray-200 pt-6">
-                <button id="calculateButton" class="w-full md:w-auto bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-transform transform hover:scale-105 duration-300">
-                    Calculate
-                </button>
-                <p id="errorMessage" class="error-message">Please fill in all fields correctly.</p>
-            </div>
+
+
 
         </div>
-        
+
+        <!-- Edit Modal -->
+        <div id="editModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+            <div class="relative top-20 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white">
+                <div class="mt-3">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Edit Entry</h3>
+
+                    <!-- Modal Content (Duplicate of Form) -->
+                    <fieldset class="border-t border-gray-200 pt-6">
+                        <legend class="text-lg font-semibold text-gray-900 px-2">Counting Preparation</legend>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 mt-4">
+                            <div>
+                                <label for="edit_sampleId" class="block text-sm font-medium text-gray-700 mb-1">Sample
+                                    ID</label>
+                                <input type="text" id="edit_sampleId"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label for="edit_totalSampleVolume"
+                                    class="block text-sm font-medium text-gray-700 mb-1">Total Sample Volume
+                                    (mL)</label>
+                                <input type="number" id="edit_totalSampleVolume" min="0"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label for="edit_trypanBlueVolume"
+                                    class="block text-sm font-medium text-gray-700 mb-1">Trypan Blue Volume (µL)</label>
+                                <input type="number" id="edit_trypanBlueVolume" min="0"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label for="edit_sampleVolumeMixed"
+                                    class="block text-sm font-medium text-gray-700 mb-1">Sample Volume Mixed with Trypan
+                                    Blue (µL)</label>
+                                <input type="number" id="edit_sampleVolumeMixed" min="0"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <div class="mt-8 border-t border-gray-200 pt-6">
+                        <label for="edit_countingMethod" class="block text-base font-medium text-gray-800 mb-3">Select
+                            Counting Method</label>
+                        <select id="edit_countingMethod"
+                            class="w-full md:w-1/2 px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="none">-- Please choose an option --</option>
+                            <option value="countless">Countess 3 Data</option>
+                            <option value="manual">Manual Counting Data</option>
+                        </select>
+                    </div>
+
+                    <!-- Edit Countess Fields -->
+                    <div id="edit_countlessFields" class="hidden mt-6 space-y-6">
+                        <fieldset class="border-t border-gray-200 pt-6">
+                            <legend class="text-lg font-semibold text-gray-900 px-2">Countess 3 Data</legend>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-6 mt-4">
+                                <div>
+                                    <label for="edit_countlessLive"
+                                        class="block text-sm font-medium text-gray-700 mb-1">Live cells
+                                        (cells/mL)</label>
+                                    <input type="text" id="edit_countlessLive"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <div>
+                                    <label for="edit_countlessDead"
+                                        class="block text-sm font-medium text-gray-700 mb-1">Dead cells
+                                        (cells/mL)</label>
+                                    <input type="text" id="edit_countlessDead"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <div>
+                                    <label for="edit_countlessViability"
+                                        class="block text-sm font-medium text-gray-700 mb-1">Viability (%)</label>
+                                    <input type="text" id="edit_countlessViability"
+                                        class="w-full px-4 py-2 rounded-lg read-only-field" readonly>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+
+                    <!-- Edit Manual Fields -->
+                    <div id="edit_manualFields" class="hidden mt-6">
+                        <fieldset class="border-t border-gray-200 pt-6">
+                            <legend class="text-lg font-semibold text-gray-900 px-2">Manual Counting Data</legend>
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-x-8 gap-y-6 mt-4">
+                                <!-- Live Cell Counts -->
+                                <div><label class="block text-sm font-medium text-gray-700 mb-1">Live cells, Count
+                                        1</label><input type="number" id="edit_live_c1" min="0"
+                                        class="edit-manual-input w-full px-4 py-2 rounded-lg bg-green-50 border-green-200">
+                                </div>
+                                <div><label class="block text-sm font-medium text-gray-700 mb-1">Live cells, Count
+                                        2</label><input type="number" id="edit_live_c2" min="0"
+                                        class="edit-manual-input w-full px-4 py-2 rounded-lg bg-green-50 border-green-200">
+                                </div>
+                                <div><label class="block text-sm font-medium text-gray-700 mb-1">Live cells, Count
+                                        3</label><input type="number" id="edit_live_c3" min="0"
+                                        class="edit-manual-input w-full px-4 py-2 rounded-lg bg-green-50 border-green-200">
+                                </div>
+                                <div><label class="block text-sm font-medium text-gray-700 mb-1">Live cells, Count
+                                        4</label><input type="number" id="edit_live_c4" min="0"
+                                        class="edit-manual-input w-full px-4 py-2 rounded-lg bg-green-50 border-green-200">
+                                </div>
+                                <!-- Dead Cell Counts -->
+                                <div><label class="block text-sm font-medium text-gray-700 mb-1">Dead cells, Count
+                                        1</label><input type="number" id="edit_dead_c1" min="0"
+                                        class="edit-manual-input w-full px-4 py-2 rounded-lg bg-red-50 border-red-200">
+                                </div>
+                                <div><label class="block text-sm font-medium text-gray-700 mb-1">Dead cells, Count
+                                        2</label><input type="number" id="edit_dead_c2" min="0"
+                                        class="edit-manual-input w-full px-4 py-2 rounded-lg bg-red-50 border-red-200">
+                                </div>
+                                <div><label class="block text-sm font-medium text-gray-700 mb-1">Dead cells, Count
+                                        3</label><input type="number" id="edit_dead_c3" min="0"
+                                        class="edit-manual-input w-full px-4 py-2 rounded-lg bg-red-50 border-red-200">
+                                </div>
+                                <div><label class="block text-sm font-medium text-gray-700 mb-1">Dead cells, Count
+                                        4</label><input type="number" id="edit_dead_c4" min="0"
+                                        class="edit-manual-input w-full px-4 py-2 rounded-lg bg-red-50 border-red-200">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-6 mt-8 bg-gray-50 p-4 rounded-lg">
+                                <div>
+                                    <label for="edit_manualLive"
+                                        class="block text-sm font-medium text-gray-700 mb-1">Live cells
+                                        (cells/mL)</label>
+                                    <input type="text" id="edit_manualLive"
+                                        class="w-full px-4 py-2 rounded-lg read-only-field" readonly>
+                                </div>
+                                <div>
+                                    <label for="edit_manualDead"
+                                        class="block text-sm font-medium text-gray-700 mb-1">Dead cells
+                                        (cells/mL)</label>
+                                    <input type="text" id="edit_manualDead"
+                                        class="w-full px-4 py-2 rounded-lg read-only-field" readonly>
+                                </div>
+                                <div>
+                                    <label for="edit_manualViability"
+                                        class="block text-sm font-medium text-gray-700 mb-1">Viability (%)</label>
+                                    <input type="text" id="edit_manualViability"
+                                        class="w-full px-4 py-2 rounded-lg read-only-field" readonly>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+
+                    <div class="mt-8 flex justify-end space-x-4">
+                        <p id="editErrorMessage" class="error-message mr-auto">Please fill in all fields correctly.</p>
+                        <button id="cancelEditBtn"
+                            class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400">Cancel</button>
+                        <button id="updateBtn"
+                            class="px-4 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700">Update</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Results Table Section -->
         <div id="tableContainer" class="hidden bg-white rounded-2xl shadow-lg p-6 md:p-8">
             <h2 class="text-2xl font-bold text-gray-800 mb-4">Cell Calculations</h2>
-            <div class="overflow-x-auto">
+            <div>
                 <table class="w-full text-sm text-gray-600">
                     <thead class="bg-gray-100 text-gray-700 uppercase font-semibold">
                         <tr>
@@ -137,7 +538,8 @@
                             <th class="px-4 py-3 text-left">Counting Method</th>
                             <th class="px-4 py-3 text-left">Viability (%)</th>
                             <th class="px-4 py-3 text-left">Total Number of Cells (millions)</th>
-                            <th class="px-4 py-3 text-left rounded-r-lg">Cells/mL (millions)</th>
+                            <th class="px-4 py-3 text-left">Cells/mL (millions)</th>
+                            <th class="px-4 py-3 text-left rounded-r-lg">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="resultsTableBody">
@@ -147,16 +549,201 @@
             </div>
         </div>
 
+        <!-- Cells for IV or SC Section -->
+        <div id="icScCalcContainer" class="hidden bg-white rounded-2xl shadow-lg p-6 md:p-8 mt-8">
+            <div class="flex items-center justify-between cursor-pointer" id="icScCalcToggle">
+                <h2 class="text-2xl font-bold text-gray-800 mb-0">Cells for IV or SC</h2>
+                <svg id="icScCalcChevron" class="w-6 h-6 text-gray-600 transform transition-transform duration-200"
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </div>
+            <div id="icScCalcContent" class="hidden mt-4">
+                <div class="mb-4 ml-1">
+                    <button type="button"
+                        class="text-sm text-blue-600 hover:text-blue-800 flex items-center focus:outline-none gap-1 info-toggle-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>Show Information</span>
+                    </button>
+                    <div
+                        class="hidden mt-2 p-3 bg-blue-50 rounded-lg text-sm text-blue-800 border border-blue-100 info-content">
+                        <p class="font-semibold">Standard number of cells:</p>
+                        <ul class="list-disc list-inside mb-2">
+                            <li>K7M2 IV: 1.25 million/mouse in 100µL IV.</li>
+                            <li>B16F10OVA SC: 1 million/mouse in 100 µL SC.</li>
+                            <li>B16F10OVA IV: 300K/mouse in 100 µL IV.</li>
+                        </ul>
+                        <p class="mb-2">It is recommended to prepare cells 1 extra animal every 5 animals, just to
+                            prevent running out of cells in the last animals (for example, for 30 mice, you should
+                            prepare cells for 36 mice).</p>
+                        <p class="font-semibold">Steps:</p>
+                        <ul class="list-decimal list-inside">
+                            <li>Take the volume of cells required in a 15mL-tube, centrifuge 500 g for 5 mins.</li>
+                            <li>Discard supernatant and resuspend in PBS.</li>
+                            <li>Place on ice and bring cells to the surgery room.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div>
+                    <table class="w-full text-sm text-gray-600">
+                        <thead class="bg-gray-100 text-gray-700 font-semibold">
+                            <tr>
+                                <th class="px-4 py-3 text-left rounded-l-lg col-narrow">Sample ID</th>
+                                <th class="px-4 py-3 text-left col-narrow">Mouse Number</th>
+                                <th class="px-4 py-3 text-left col-wide">Cells per mouse</th>
+                                <th class="px-4 py-3 text-left col-narrow">Vol. per mouse (µL)</th>
+                                <th class="px-4 py-3 text-left col-wide">Total cells</th>
+                                <th class="px-4 py-3 text-left col-narrow">Vol. of cells required</th>
+                                <th class="px-4 py-3 text-left rounded-r-lg col-narrow">PBS to resuspend</th>
+                            </tr>
+                        </thead>
+                        <tbody id="icScCalcTableBody">
+                            <!-- Rows will be added here dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cells for IC injections Section -->
+        <div id="icInjCalcContainer" class="hidden bg-white rounded-2xl shadow-lg p-6 md:p-8 mt-8">
+            <div class="flex items-center justify-between cursor-pointer" id="icInjCalcToggle">
+                <h2 class="text-2xl font-bold text-gray-800 mb-0">Cells for IC injections</h2>
+                <svg id="icInjCalcChevron" class="w-6 h-6 text-gray-600 transform transition-transform duration-200"
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </div>
+            <div id="icInjCalcContent" class="hidden mt-4">
+                <div class="mb-4 ml-1">
+                    <button type="button"
+                        class="text-sm text-blue-600 hover:text-blue-800 flex items-center focus:outline-none gap-1 info-toggle-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>Show Information</span>
+                    </button>
+                    <div
+                        class="hidden mt-2 p-3 bg-blue-50 rounded-lg text-sm text-blue-800 border border-blue-100 info-content">
+                        <p class="font-semibold">Standard doses:</p>
+                        <ul class="list-disc list-inside mb-2">
+                            <li>Kluc: 10,000 Kluc in 2.5 µL per animal.</li>
+                            <li>GL261: 20,000 Kluc in 2.5 µL per animal.</li>
+                        </ul>
+                        <p class="mb-2">It is better to make extra volume to load several syringes easier, so it is
+                            recommended to prepare volume for 400 animals. Clean and reload the syringe every 5 animals.
+                        </p>
+                        <p class="font-semibold">Steps:</p>
+                        <ul class="list-decimal list-inside">
+                            <li>Take the volume of cells required in a 2mL-tube, centrifuge 500 g for 5 mins.</li>
+                            <li>Discard supernatant, resuspend in PBS.</li>
+                            <li>Using the Special Pipettes for dense liquids, add the MethilCellulose to the cells and
+                                mix gently, without making bubbles.</li>
+                            <li>Place on ice and bring to the surgery room.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div>
+                    <table class="w-full text-sm text-gray-600">
+                        <thead class="bg-gray-100 text-gray-700 font-semibold">
+                            <tr>
+                                <th class="px-4 py-3 text-left rounded-l-lg col-narrow">Sample ID</th>
+                                <th class="px-4 py-3 text-left col-narrow">Mouse Number</th>
+                                <th class="px-4 py-3 text-left col-wide">Cells per mouse</th>
+                                <th class="px-4 py-3 text-left col-narrow">Vol. per mouse (µL)</th>
+                                <th class="px-4 py-3 text-left col-wide">Total cells (mill)</th>
+                                <th class="px-4 py-3 text-left col-narrow">Vol. of cells required (µL)</th>
+                                <th class="px-4 py-3 text-left col-narrow">PBS to resuspend</th>
+                                <th class="px-4 py-3 text-left rounded-r-lg col-narrow">Vol. of Methil Cellulose (µL)
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="icInjCalcTableBody">
+                            <!-- Rows will be added here dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cells for cell culture Section -->
+        <div id="cultureCalcContainer" class="hidden bg-white rounded-2xl shadow-lg p-6 md:p-8 mt-8">
+            <div class="flex items-center justify-between cursor-pointer" id="cultureCalcToggle">
+                <h2 class="text-2xl font-bold text-gray-800 mb-0">Cells for cell culture</h2>
+                <svg id="cultureCalcChevron" class="w-6 h-6 text-gray-600 transform transition-transform duration-200"
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </div>
+            <div id="cultureCalcContent" class="hidden mt-4">
+                <div class="mb-4 ml-1">
+                    <button type="button"
+                        class="text-sm text-blue-600 hover:text-blue-800 flex items-center focus:outline-none gap-1 info-toggle-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>Show Information</span>
+                    </button>
+                    <div
+                        class="hidden mt-2 p-3 bg-blue-50 rounded-lg text-sm text-blue-800 border border-blue-100 info-content">
+                        <p>Add specific instructions or notes for this section here.</p>
+                    </div>
+                </div>
+                <div>
+                    <table class="w-full text-sm text-gray-600">
+                        <thead class="bg-gray-100 text-gray-700 font-semibold">
+                            <tr>
+                                <th class="px-4 py-3 text-left rounded-l-lg">Sample ID</th>
+                                <th class="px-4 py-3 text-left">Number of wells</th>
+                                <th class="px-4 py-3 text-left">Cells per well</th>
+                                <th class="px-4 py-3 text-left">Volume of media per well (µL)</th>
+                                <th class="px-4 py-3 text-left">Total cells</th>
+                                <th class="px-4 py-3 text-left">Volume of cells needed (µL)</th>
+                                <th class="px-4 py-3 text-left rounded-r-lg">Extra volume of media (µL)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cultureCalcTableBody">
+                            <!-- Rows will be added here dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
         <!-- Downstream Calculation Section -->
         <div id="flowCalcContainer" class="hidden bg-white rounded-2xl shadow-lg p-6 md:p-8 mt-8">
             <div class="flex items-center justify-between cursor-pointer" id="flowCalcToggle">
                 <h2 class="text-2xl font-bold text-gray-800 mb-0">Cells for Flow</h2>
-                <svg id="flowCalcChevron" class="w-6 h-6 text-gray-600 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg id="flowCalcChevron" class="w-6 h-6 text-gray-600 transform transition-transform duration-200"
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                 </svg>
             </div>
             <div id="flowCalcContent" class="hidden mt-4">
-                <div class="overflow-x-auto">
+                <div class="mb-4 ml-1">
+                    <button type="button"
+                        class="text-sm text-blue-600 hover:text-blue-800 flex items-center focus:outline-none gap-1 info-toggle-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>Show Information</span>
+                    </button>
+                    <div
+                        class="hidden mt-2 p-3 bg-blue-50 rounded-lg text-sm text-blue-800 border border-blue-100 info-content">
+                        <p>Add specific instructions or notes for this section here.</p>
+                    </div>
+                </div>
+                <div>
                     <table class="w-full text-sm text-gray-600">
                         <thead class="bg-gray-100 text-gray-700 font-semibold">
                             <tr>
@@ -176,31 +763,53 @@
 
         <!-- Calculation for Cryopreservation Section -->
         <div id="cryoCalcContainer" class="hidden bg-white rounded-2xl shadow-lg p-6 md:p-8 mt-8">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">Cells for Cryopreservation</h2>
-            <div class="overflow-x-auto">
-                <table class="w-full text-sm text-gray-600">
-                    <thead class="bg-gray-100 text-gray-700 font-semibold">
-                        <tr>
-                            <th class="px-4 py-3 text-left rounded-l-lg">Action</th>
-                            <th class="px-4 py-3 text-left">Sample ID</th>
-                            <th class="px-4 py-3 text-left">Total Cells Removed for Flow (Millions)</th>
-                            <th class="px-4 py-3 text-left">Cells per Aliquot (Millions)</th>
-                            <th class="px-4 py-3 text-left">Volume per Aliquot (mL)</th>
-                            <th class="px-4 py-3 text-left">Number of Aliquots</th>
-                            <th class="px-4 py-3 text-left">CryoStor CS10 Volume (mL)</th>
-                            <th class="px-4 py-3 text-left rounded-r-lg">Delete</th>
-                        </tr>
-                    </thead>
-                    <tbody id="cryoCalcTableBody">
-                        <!-- Rows will be added here dynamically -->
-                    </tbody>
-                </table>
+            <div class="flex items-center justify-between cursor-pointer" id="cryoCalcToggle">
+                <h2 class="text-2xl font-bold text-gray-800 mb-0">Cells for Cryopreservation</h2>
+                <svg id="cryoCalcChevron" class="w-6 h-6 text-gray-600 transform transition-transform duration-200"
+                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+            </div>
+            <div id="cryoCalcContent" class="hidden mt-4">
+                <div class="mb-4 ml-1">
+                    <button type="button"
+                        class="text-sm text-blue-600 hover:text-blue-800 flex items-center focus:outline-none gap-1 info-toggle-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span>Show Information</span>
+                    </button>
+                    <div
+                        class="hidden mt-2 p-3 bg-blue-50 rounded-lg text-sm text-blue-800 border border-blue-100 info-content">
+                        <p>Add specific instructions or notes for this section here.</p>
+                    </div>
+                </div>
+                <div>
+                    <table class="w-full text-sm text-gray-600">
+                        <thead class="bg-gray-100 text-gray-700 font-semibold">
+                            <tr>
+                                <th class="px-4 py-3 text-left rounded-l-lg">Sample ID</th>
+                                <th class="px-4 py-3 text-left">Total Cells Removed for Flow (Millions)</th>
+                                <th class="px-4 py-3 text-left">Cells per Aliquot (Millions)</th>
+                                <th class="px-4 py-3 text-left">Volume per Aliquot (mL)</th>
+                                <th class="px-4 py-3 text-left">Number of Aliquots</th>
+                                <th class="px-4 py-3 text-left rounded-r-lg">CryoStor CS10 Volume (mL)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cryoCalcTableBody">
+                            <!-- Rows will be added here dynamically -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
         <!-- Log to Sheet Button -->
         <div id="logButtonContainer" class="hidden text-center mt-8 pt-8 border-t-2 border-dashed border-gray-300">
-            <button id="logDataButton" class="w-full md:w-auto bg-green-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300">
+            <button id="logDataButton"
+                class="w-full md:w-auto bg-green-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-300">
                 Log All Data to Google Sheet
             </button>
             <p id="logErrorMessage" class="error-message"></p>
@@ -211,16 +820,15 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzRYERSQ04_JhqGK9hzHT4Q7i2x5GGR8BtxKV5tLnKmYpyjUeGm9MLIV1yhPNTEBeMVLw/exec';
-            
+
             // --- Element References ---
             const countingMethodSelect = document.getElementById('countingMethod');
             const countlessFields = document.getElementById('countlessFields');
             const manualFields = document.getElementById('manualFields');
-            const actionButtonContainer = document.getElementById('actionButtonContainer');
             const tableContainer = document.getElementById('tableContainer');
-            const calculateButton = document.getElementById('calculateButton');
+            const calculateButtons = document.querySelectorAll('.calculate-btn');
             const resultsTableBody = document.getElementById('resultsTableBody');
-            const errorMessage = document.getElementById('errorMessage');
+            const errorMessages = document.querySelectorAll('.error-message');
 
             // --- Log Button ---
             const logButtonContainer = document.getElementById('logButtonContainer');
@@ -230,6 +838,33 @@
             // --- Downstream Section ---
             const flowCalcContainer = document.getElementById('flowCalcContainer');
             const flowCalcTableBody = document.getElementById('flowCalcTableBody');
+
+            // --- New Sections ---
+            const icScCalcContainer = document.getElementById('icScCalcContainer');
+            const icScCalcTableBody = document.getElementById('icScCalcTableBody');
+
+            const icInjCalcContainer = document.getElementById('icInjCalcContainer');
+            const icInjCalcTableBody = document.getElementById('icInjCalcTableBody');
+
+            const cultureCalcContainer = document.getElementById('cultureCalcContainer');
+            const cultureCalcTableBody = document.getElementById('cultureCalcTableBody');
+
+            // --- Helper Functions for Formatting ---
+            function formatWithCommas(value) {
+                if (value === '' || value === null || value === undefined) return '';
+                // Remove existing commas first to avoid double formatting
+                const num = parseFloat(value.toString().replace(/,/g, ''));
+                if (isNaN(num)) return value;
+                return num.toLocaleString('en-US');
+            }
+
+            function parseFormattedNumber(value) {
+                if (value === '' || value === null || value === undefined) return 0;
+                if (typeof value === 'number') return value;
+                // Remove commas and parse
+                const cleanValue = value.toString().replace(/,/g, '');
+                return parseFloat(cleanValue) || 0;
+            }
 
             // --- Cryo Section ---
             const cryoCalcContainer = document.getElementById('cryoCalcContainer');
@@ -252,53 +887,155 @@
             const manualDeadOutput = document.getElementById('manualDead');
             const manualViabilityOutput = document.getElementById('manualViability');
 
+            // --- Edit Modal Elements ---
+            const editModal = document.getElementById('editModal');
+            const cancelEditBtn = document.getElementById('cancelEditBtn');
+            const updateBtn = document.getElementById('updateBtn');
+            const editErrorMessage = document.getElementById('editErrorMessage');
+
+            const editCountingMethodSelect = document.getElementById('edit_countingMethod');
+            const editCountlessFields = document.getElementById('edit_countlessFields');
+            const editManualFields = document.getElementById('edit_manualFields');
+            const editManualCountInputs = document.querySelectorAll('.edit-manual-input');
+
+            const editCountlessLiveInput = document.getElementById('edit_countlessLive');
+            const editCountlessDeadInput = document.getElementById('edit_countlessDead');
+            const editCountlessViabilityInput = document.getElementById('edit_countlessViability');
+
+            const editManualLiveOutput = document.getElementById('edit_manualLive');
+            const editManualDeadOutput = document.getElementById('edit_manualDead');
+            const editManualViabilityOutput = document.getElementById('edit_manualViability');
+
             const HEMOCYTOMETER_FACTOR = 10000;
             let calculationIdCounter = 0;
 
             // --- Event Listeners ---
-            countingMethodSelect.addEventListener('change', handleMethodChange);
-            calculateButton.addEventListener('click', handleCalculation);
-            manualCountInputs.forEach(input => input.addEventListener('input', calculateManualOutputs));
-            countlessLiveInput.addEventListener('blur', handleCountlessInput);
-            countlessDeadInput.addEventListener('blur', handleCountlessInput);
-            countlessLiveInput.addEventListener('input', calculateCountessViability);
-            countlessDeadInput.addEventListener('input', calculateCountessViability);
+            countingMethodSelect.addEventListener('change', (e) => handleMethodChange(e, 'main'));
+            editCountingMethodSelect.addEventListener('change', (e) => handleMethodChange(e, 'edit'));
+
+            calculateButtons.forEach(btn => btn.addEventListener('click', handleCalculation));
+
+            manualCountInputs.forEach(input => input.addEventListener('input', () => calculateManualOutputs('main')));
+            editManualCountInputs.forEach(input => input.addEventListener('input', () => calculateManualOutputs('edit')));
+
+            countlessLiveInput.addEventListener('blur', (e) => handleCountlessInput(e, 'main'));
+            countlessDeadInput.addEventListener('blur', (e) => handleCountlessInput(e, 'main'));
+            countlessLiveInput.addEventListener('input', () => calculateCountessViability('main'));
+            countlessDeadInput.addEventListener('input', () => calculateCountessViability('main'));
+
+            editCountlessLiveInput.addEventListener('blur', (e) => handleCountlessInput(e, 'edit'));
+            editCountlessDeadInput.addEventListener('blur', (e) => handleCountlessInput(e, 'edit'));
+            editCountlessLiveInput.addEventListener('input', () => calculateCountessViability('edit'));
+            editCountlessDeadInput.addEventListener('input', () => calculateCountessViability('edit'));
+
             flowCalcTableBody.addEventListener('input', handleFlowCalcInput);
             cryoCalcTableBody.addEventListener('input', handleCryoInput);
             cryoCalcTableBody.addEventListener('click', handleLogClick);
             cryoCalcTableBody.addEventListener('click', handleDeleteClick);
-            
+            resultsTableBody.addEventListener('click', handleResultActions);
+
+            // New Sections Event Listeners
+            icScCalcTableBody.addEventListener('input', handleIcScInput);
+            icInjCalcTableBody.addEventListener('input', handleIcInjInput);
+            cultureCalcTableBody.addEventListener('input', handleCultureInput);
+
+            cancelEditBtn.addEventListener('click', () => editModal.classList.add('hidden'));
+            updateBtn.addEventListener('click', handleUpdate);
+
+            // Info Section Toggles
+            document.querySelectorAll('.info-toggle-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const button = e.currentTarget;
+                    const content = button.nextElementSibling;
+                    const span = button.querySelector('span');
+
+                    content.classList.toggle('hidden');
+                    if (content.classList.contains('hidden')) {
+                        span.textContent = 'Show Information';
+                    } else {
+                        span.textContent = 'Hide Information';
+                    }
+                });
+            });
+
             // Flow calc section toggle
             const flowCalcToggle = document.getElementById('flowCalcToggle');
             const flowCalcContent = document.getElementById('flowCalcContent');
             const flowCalcChevron = document.getElementById('flowCalcChevron');
-            flowCalcToggle.addEventListener('click', toggleFlowCalcSection);
+            flowCalcToggle.addEventListener('click', () => toggleSection(flowCalcContent, flowCalcChevron));
+
+            // Toggle Manual Counts
+            const toggleCountsBtn = document.getElementById('toggleCountsBtn');
+            const manualGrid = document.getElementById('manualGrid');
+            // Select only the ones in the main form, not edit modal (unless we add class there too)
+            // But 'additional-count' is only added to main form in this edit.
+            const additionalCounts = document.querySelectorAll('#manualGrid .additional-count');
+
+            toggleCountsBtn.addEventListener('click', () => {
+                const isHidden = additionalCounts[0].classList.contains('hidden');
+
+                additionalCounts.forEach(el => el.classList.toggle('hidden'));
+
+                if (isHidden) {
+                    // Showing
+                    manualGrid.classList.remove('md:grid-cols-2');
+                    manualGrid.classList.add('md:grid-cols-4');
+                    toggleCountsBtn.textContent = 'Hide Additional Counts';
+                } else {
+                    // Hiding
+                    manualGrid.classList.remove('md:grid-cols-4');
+                    manualGrid.classList.add('md:grid-cols-2');
+                    toggleCountsBtn.textContent = 'Show Additional Counts';
+                }
+            });
+
+            // Cryo calc section toggle
+            const cryoCalcToggle = document.getElementById('cryoCalcToggle');
+            const cryoCalcContent = document.getElementById('cryoCalcContent');
+            const cryoCalcChevron = document.getElementById('cryoCalcChevron');
+            cryoCalcToggle.addEventListener('click', () => toggleSection(cryoCalcContent, cryoCalcChevron));
+
+            // New Sections Toggles
+            const icScCalcToggle = document.getElementById('icScCalcToggle');
+            const icScCalcContent = document.getElementById('icScCalcContent');
+            const icScCalcChevron = document.getElementById('icScCalcChevron');
+            icScCalcToggle.addEventListener('click', () => toggleSection(icScCalcContent, icScCalcChevron));
+
+            const icInjCalcToggle = document.getElementById('icInjCalcToggle');
+            const icInjCalcContent = document.getElementById('icInjCalcContent');
+            const icInjCalcChevron = document.getElementById('icInjCalcChevron');
+            icInjCalcToggle.addEventListener('click', () => toggleSection(icInjCalcContent, icInjCalcChevron));
+
+            const cultureCalcToggle = document.getElementById('cultureCalcToggle');
+            const cultureCalcContent = document.getElementById('cultureCalcContent');
+            const cultureCalcChevron = document.getElementById('cultureCalcChevron');
+            cultureCalcToggle.addEventListener('click', () => toggleSection(cultureCalcContent, cultureCalcChevron));
 
 
             // --- Functions ---
-            function toggleFlowCalcSection() {
-                const isHidden = flowCalcContent.classList.contains('hidden');
-                flowCalcContent.classList.toggle('hidden');
-                flowCalcChevron.classList.toggle('rotate-180', isHidden);
+            function toggleSection(content, chevron) {
+                const isHidden = content.classList.contains('hidden');
+                content.classList.toggle('hidden');
+                chevron.classList.toggle('rotate-180', isHidden);
             }
 
-            function handleMethodChange(event) {
+            function handleMethodChange(event, scope) {
                 const selectedMethod = event.target.value;
-                const showFields = (method) => {
-                    countlessFields.classList.toggle('hidden', method !== 'countless');
-                    manualFields.classList.toggle('hidden', method !== 'manual');
-                    actionButtonContainer.classList.toggle('hidden', method === 'none');
-                };
-                showFields(selectedMethod);
+                const prefix = scope === 'edit' ? 'edit_' : '';
+                const cFields = document.getElementById(`${prefix}countlessFields`);
+                const mFields = document.getElementById(`${prefix}manualFields`);
+
+                cFields.classList.toggle('hidden', selectedMethod !== 'countless');
+                mFields.classList.toggle('hidden', selectedMethod !== 'manual');
             }
 
             /**
              * Handles blur for Countess 3 fields - formats to scientific notation when user finishes typing
              */
-            function handleCountlessInput(event) {
+            function handleCountlessInput(event, scope) {
                 const input = event.target;
                 const value = input.value.trim();
-                
+
                 if (value && !isNaN(parseFloat(value))) {
                     const numValue = parseFloat(value);
                     // Only format if the number is not already in the desired format
@@ -306,19 +1043,24 @@
                         input.value = formatToScientific(numValue);
                     }
                 }
-                
-                calculateCountessViability();
+
+                calculateCountessViability(scope);
             }
 
             /**
              * Calculates viability for the Countess 3 section.
              */
-            function calculateCountessViability() {
-                const live = parseFloat(countlessLiveInput.value) || 0;
-                const dead = parseFloat(countlessDeadInput.value) || 0;
+            function calculateCountessViability(scope) {
+                const prefix = scope === 'edit' ? 'edit_' : '';
+                const liveInput = document.getElementById(`${prefix}countlessLive`);
+                const deadInput = document.getElementById(`${prefix}countlessDead`);
+                const viabilityInput = document.getElementById(`${prefix}countlessViability`);
+
+                const live = parseFloat(liveInput.value) || 0;
+                const dead = parseFloat(deadInput.value) || 0;
                 const total = live + dead;
                 const viability = total > 0 ? (live / total) * 100 : 0;
-                countlessViabilityInput.value = viability.toFixed(1);
+                viabilityInput.value = viability.toFixed(1);
             }
 
             /**
@@ -334,49 +1076,145 @@
              */
             function formatToScientific(num) {
                 if (num === 0) return '0';
-                
+
                 const exponent = Math.floor(Math.log10(Math.abs(num)));
                 const mantissa = num / Math.pow(10, exponent);
-                
+
                 // Format mantissa to 2 decimal places, remove trailing zeros
                 let formattedMantissa = mantissa.toFixed(2).replace(/\.?0+$/, '');
-                
+
                 return `${formattedMantissa}E${exponent}`;
             }
 
-            function calculateManualOutputs() {
-                const trypanBlueVolume = parseFloat(trypanBlueVolumeInput.value) || 0;
-                const sampleVolumeMixed = parseFloat(sampleVolumeMixedInput.value) || 0;
+            /**
+             * Parses a string that might contain commas or scientific notation into a float.
+             * Returns 0 if parsing fails or value is empty.
+             */
+            function parseFormattedNumber(value) {
+                if (!value) return 0;
+                // Handle already numeric values
+                if (typeof value === 'number') return value;
 
-                if (sampleVolumeMixed === 0) { // Avoid division by zero
-                    manualLiveOutput.value = manualDeadOutput.value = manualViabilityOutput.value = '';
-                    return;
+                let str = String(value).replace(/,/g, '');
+                let multiplier = 1;
+
+                if (/mill\.?$/i.test(str)) {
+                    multiplier = 1e6;
+                    str = str.replace(/mill\.?$/i, '');
+                } else if (/mL$/i.test(str)) {
+                    multiplier = 1000;
+                    str = str.replace(/mL$/i, '');
+                } else {
+                    str = str.replace(/\s*(µL|cells)$/i, '');
                 }
+
+                const num = parseFloat(str);
+                return isNaN(num) ? 0 : num * multiplier;
+            }
+
+            /**
+             * Formats a number with commas for thousands separators.
+             */
+            function formatWithCommas(value) {
+                if (value === null || value === undefined || value === '') return '';
+                const parts = String(value).split('.');
+                parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                return parts.join('.');
+            }
+            function calculateManualOutputs(scope) {
+                const prefix = scope === 'edit' ? 'edit_' : '';
+                const tBlueInput = document.getElementById(`${prefix}trypanBlueVolume`) || document.getElementById('trypanBlueVolume');
+                const sMixedInput = document.getElementById(`${prefix}sampleVolumeMixed`) || document.getElementById('sampleVolumeMixed');
+                const mLiveOut = document.getElementById(`${prefix}manualLive`);
+                const mDeadOut = document.getElementById(`${prefix}manualDead`);
+                const mViabOut = document.getElementById(`${prefix}manualViability`);
+
+                // Use main inputs if edit inputs don't exist (for prep values which are shared/global in main view)
+                // Actually, for edit modal, we might need to pass these values or have them in the modal. 
+                // For now, assuming main view uses main inputs.
+
+                const trypanBlueVolume = parseFormattedNumber(tBlueInput.value);
+                const sampleVolumeMixed = parseFormattedNumber(sMixedInput.value);
 
                 const dilutionFactor = (trypanBlueVolume + sampleVolumeMixed) / sampleVolumeMixed;
 
-                const liveCounts = Array.from({ length: 4 }, (_, i) => parseFloat(document.getElementById(`live_c${i + 1}`).value)).filter(v => !isNaN(v));
-                const deadCounts = Array.from({ length: 4 }, (_, i) => parseFloat(document.getElementById(`dead_c${i + 1}`).value)).filter(v => !isNaN(v));
+                // Get all visible manual inputs - fixed selector for edit mode
+                let liveInputs, deadInputs;
+                if (scope === 'edit') {
+                    // For edit mode, select by ID pattern directly
+                    liveInputs = [
+                        document.getElementById('edit_live_c1'),
+                        document.getElementById('edit_live_c2'),
+                        document.getElementById('edit_live_c3'),
+                        document.getElementById('edit_live_c4')
+                    ].filter(input => input !== null);
+                    deadInputs = [
+                        document.getElementById('edit_dead_c1'),
+                        document.getElementById('edit_dead_c2'),
+                        document.getElementById('edit_dead_c3'),
+                        document.getElementById('edit_dead_c4')
+                    ].filter(input => input !== null);
+                } else {
+                    liveInputs = Array.from(document.querySelectorAll(`#manualGrid input[id^="live_c"]`));
+                    deadInputs = Array.from(document.querySelectorAll(`#manualGrid input[id^="dead_c"]`));
+                }
 
-                const avgLive = liveCounts.length > 0 ? liveCounts.reduce((a, b) => a + b, 0) / liveCounts.length : 0;
-                const avgDead = deadCounts.length > 0 ? deadCounts.reduce((a, b) => a + b, 0) / deadCounts.length : 0;
+                let totalLive = 0;
+                let liveCount = 0;
+                liveInputs.forEach(input => {
+                    // For edit mode, all inputs are visible; for main view, check visibility
+                    const isVisible = scope === 'edit' || input.offsetParent !== null;
+                    if (isVisible) {
+                        const val = parseFormattedNumber(input.value);
+                        if (val > 0) { // Only count non-zero values
+                            totalLive += val;
+                            liveCount++;
+                        }
+                    }
+                });
+
+                let totalDead = 0;
+                let deadCount = 0;
+                deadInputs.forEach(input => {
+                    const isVisible = scope === 'edit' || input.offsetParent !== null;
+                    if (isVisible) {
+                        const val = parseFormattedNumber(input.value);
+                        if (val > 0) { // Only count non-zero values
+                            totalDead += val;
+                            deadCount++;
+                        }
+                    }
+                });
+
+                const avgLive = liveCount > 0 ? totalLive / liveCount : 0;
+                const avgDead = deadCount > 0 ? totalDead / deadCount : 0;
 
                 const liveConcentration = avgLive * dilutionFactor * HEMOCYTOMETER_FACTOR;
                 const deadConcentration = avgDead * dilutionFactor * HEMOCYTOMETER_FACTOR;
                 const totalConcentration = liveConcentration + deadConcentration;
                 const viability = totalConcentration > 0 ? (liveConcentration / totalConcentration) * 100 : 0;
 
-                manualLiveOutput.value = liveConcentration > 0 ? liveConcentration.toExponential(2) : '0';
-                manualDeadOutput.value = deadConcentration > 0 ? deadConcentration.toExponential(2) : '0';
-                manualViabilityOutput.value = viability.toFixed(1);
+                mLiveOut.value = liveConcentration > 0 ? liveConcentration.toExponential(2) : '0';
+                mDeadOut.value = deadConcentration > 0 ? deadConcentration.toExponential(2) : '0';
+                mViabOut.value = viability.toFixed(1);
             }
 
             function validateInputs(inputs) {
                 let hasError = false;
                 inputs.forEach(input => {
                     input.classList.remove('input-error');
-                    const value = input.type === 'text' ? input.value.trim() : parseFloat(input.value);
-                    if (!value || (input.type === 'number' && value < 0)) {
+                    // Use parseFormattedNumber for validation
+                    const value = input.type === 'text' && input.classList.contains('formatted-number-input')
+                        ? parseFormattedNumber(input.value)
+                        : (input.type === 'text' && !input.classList.contains('formatted-number-input') ? input.value.trim() : parseFloat(input.value));
+
+                    // Check if it's a number field (either type=number or formatted text input)
+                    const isNumberField = input.type === 'number' || input.classList.contains('formatted-number-input');
+
+                    if (!value && value !== 0) { // Empty check
+                        input.classList.add('input-error');
+                        hasError = true;
+                    } else if (isNumberField && value < 0) { // Negative check
                         input.classList.add('input-error');
                         hasError = true;
                     }
@@ -384,21 +1222,29 @@
                 return !hasError;
             }
 
-            function handleCalculation() {
+            function handleCalculation(event) {
+                const btn = event.target;
+                const container = btn.closest('div'); // The container of the button
+                const currentErrorMessage = container.querySelector('.error-message');
+
                 // --- 1. Clear previous errors ---
-                errorMessage.style.display = 'none';
+                currentErrorMessage.style.display = 'none';
 
                 // --- 2. Validate inputs ---
                 const baseInputs = [sampleIdInput, totalSampleVolumeInput, trypanBlueVolumeInput, sampleVolumeMixedInput];
                 if (!validateInputs(baseInputs)) {
-                    errorMessage.textContent = 'Please fill in all preparation fields correctly.';
-                    errorMessage.style.display = 'block';
+                    currentErrorMessage.textContent = 'Please fill in all preparation fields correctly.';
+                    currentErrorMessage.style.display = 'block';
                     return;
                 }
 
                 const selectedMethod = countingMethodSelect.value;
                 let cellsPerMl, totalCells, viability;
-                 // --- Pre-calculation Data Gathering ---
+                // --- Pre-calculation Data Gathering ---
+                const totalSampleVolume = parseFormattedNumber(totalSampleVolumeInput.value);
+                const trypanBlueVolume = parseFormattedNumber(trypanBlueVolumeInput.value);
+                const sampleVolumeMixed = parseFormattedNumber(sampleVolumeMixedInput.value);
+                const dilutionFactor = (trypanBlueVolume + sampleVolumeMixed) / sampleVolumeMixed;
                 const initialData = {
                     "Sample ID": sampleIdInput.value,
                     "Counting Method": selectedMethod,
@@ -409,8 +1255,8 @@
 
                 if (selectedMethod === 'countless') {
                     if (!validateInputs([countlessLiveInput, countlessDeadInput])) {
-                        errorMessage.textContent = 'Please fill in the Countess 3 Live and Dead cell fields.';
-                        errorMessage.style.display = 'block';
+                        currentErrorMessage.textContent = 'Please fill in the Countess 3 Live and Dead cell fields.';
+                        currentErrorMessage.style.display = 'block';
                         return;
                     }
                     cellsPerMl = parseFloat(countlessLiveInput.value);
@@ -418,21 +1264,21 @@
                     initialData["Countess Live Input"] = countlessLiveInput.value;
                     initialData["Countess Dead Input"] = countlessDeadInput.value;
                 } else if (selectedMethod === 'manual') {
-                     const requiredManualInputs = [
+                    const requiredManualInputs = [
                         document.getElementById('live_c1'),
                         document.getElementById('live_c2'),
                         document.getElementById('dead_c1'),
                         document.getElementById('dead_c2'),
-                     ];
-                     if (!validateInputs(requiredManualInputs)) {
-                        errorMessage.textContent = 'Please fill in at least the first two live and dead count fields.';
-                        errorMessage.style.display = 'block';
+                    ];
+                    if (!validateInputs(requiredManualInputs)) {
+                        currentErrorMessage.textContent = 'Please fill in at least the first two live and dead count fields.';
+                        currentErrorMessage.style.display = 'block';
                         return;
                     }
                     cellsPerMl = parseFloat(manualLiveOutput.value);
                     viability = parseFloat(manualViabilityOutput.value);
-                    for(let i=1; i<=4; i++) initialData[`Manual Live ${i}`] = document.getElementById(`live_c${i}`).value;
-                    for(let i=1; i<=4; i++) initialData[`Manual Dead ${i}`] = document.getElementById(`dead_c${i}`).value;
+                    for (let i = 1; i <= 4; i++) initialData[`Manual Live ${i}`] = document.getElementById(`live_c${i}`).value;
+                    for (let i = 1; i <= 4; i++) initialData[`Manual Dead ${i}`] = document.getElementById(`dead_c${i}`).value;
                 }
 
                 // --- 3. Perform calculations ---
@@ -455,6 +1301,18 @@
                     <td class="px-4 py-3">${viability.toFixed(1)}</td>
                     <td class="px-4 py-3" data-value="${totalCells}">${formatNumber(totalCells, true)}</td>
                     <td class="px-4 py-3" data-value="${cellsPerMl}">${formatNumber(cellsPerMl, true)}</td>
+                    <td class="px-4 py-3 flex space-x-2">
+                        <button class="edit-btn text-blue-600 hover:text-blue-800" title="Edit">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                            </svg>
+                        </button>
+                        <button class="delete-btn text-red-600 hover:text-red-800" title="Delete">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </td>
                 `;
                 resultsTableBody.appendChild(newRow);
 
@@ -467,11 +1325,63 @@
                 newFlowRow.dataset.concentration = cellsPerMlInMillions;
                 newFlowRow.innerHTML = `
                     <td class="px-4 py-3 font-medium text-gray-800">${sampleIdInput.value}</td>
-                    <td><input type="number" min="0" class="w-full p-2 border border-gray-300 rounded-lg flow-needed-input" placeholder="e.g., 5"></td>
-                    <td><input type="number" min="0" class="w-full p-2 border border-gray-300 rounded-lg pbs-resusp-input" placeholder="e.g., 500"></td>
+                    <td><input type="text" class="w-full p-2 border border-gray-300 rounded-lg flow-needed-input formatted-number-input" placeholder="e.g., 5"></td>
+                    <td><input type="text" class="w-full p-2 border border-gray-300 rounded-lg pbs-resusp-input formatted-number-input" placeholder="e.g., 500"></td>
                     <td><input type="text" class="w-full p-2 rounded-lg read-only-field flow-volume-output" readonly></td>
                 `;
                 flowCalcTableBody.appendChild(newFlowRow);
+
+                // IV or SC Table
+                icScCalcContainer.classList.remove('hidden');
+                const newIcScRow = document.createElement('tr');
+                newIcScRow.className = 'border-b border-gray-200';
+                newIcScRow.dataset.calcId = calcId;
+                newIcScRow.dataset.cellsPerMl = cellsPerMl;
+                newIcScRow.innerHTML = `
+                    <td class="px-4 py-3 font-medium text-gray-800">${sampleIdInput.value}</td>
+                    <td><input type="text" class="w-full p-2 border border-gray-300 rounded-lg ic-sc-num-animals formatted-number-input" placeholder="0"></td>
+                    <td><input type="text" class="w-full p-2 border border-gray-300 rounded-lg ic-sc-cells-per-animal formatted-number-input" placeholder="0"></td>
+                    <td><input type="text" class="w-full p-2 border border-gray-300 rounded-lg ic-sc-vol-per-animal formatted-number-input" placeholder="0"></td>
+                    <td><input type="text" class="w-full p-2 rounded-lg read-only-field ic-sc-total-cells" readonly></td>
+                    <td><input type="text" class="w-full p-2 rounded-lg read-only-field ic-sc-vol-required" readonly></td>
+                    <td><input type="text" class="w-full p-2 rounded-lg read-only-field ic-sc-pbs" readonly></td>
+                `;
+                icScCalcTableBody.appendChild(newIcScRow);
+
+                // IC Injections Table
+                icInjCalcContainer.classList.remove('hidden');
+                const newIcInjRow = document.createElement('tr');
+                newIcInjRow.className = 'border-b border-gray-200';
+                newIcInjRow.dataset.calcId = calcId;
+                newIcInjRow.dataset.cellsPerMl = cellsPerMl;
+                newIcInjRow.innerHTML = `
+                    <td class="px-4 py-3 font-medium text-gray-800">${sampleIdInput.value}</td>
+                    <td><input type="text" class="w-full p-2 border border-gray-300 rounded-lg ic-inj-num-animals formatted-number-input" placeholder="0"></td>
+                    <td><input type="text" class="w-full p-2 border border-gray-300 rounded-lg ic-inj-cells-per-animal formatted-number-input" placeholder="0"></td>
+                    <td><input type="text" class="w-full p-2 border border-gray-300 rounded-lg ic-inj-vol-per-animal formatted-number-input" placeholder="0"></td>
+                    <td><input type="text" class="w-full p-2 rounded-lg read-only-field ic-inj-total-cells" readonly></td>
+                    <td><input type="text" class="w-full p-2 rounded-lg read-only-field ic-inj-vol-required" readonly></td>
+                    <td><input type="text" class="w-full p-2 rounded-lg read-only-field ic-inj-pbs" readonly></td>
+                    <td><input type="text" class="w-full p-2 rounded-lg read-only-field ic-inj-methil" readonly></td>
+                `;
+                icInjCalcTableBody.appendChild(newIcInjRow);
+
+                // Cell Culture Table
+                cultureCalcContainer.classList.remove('hidden');
+                const newCultureRow = document.createElement('tr');
+                newCultureRow.className = 'border-b border-gray-200';
+                newCultureRow.dataset.calcId = calcId;
+                newCultureRow.dataset.cellsPerMl = cellsPerMl;
+                newCultureRow.innerHTML = `
+                    <td class="px-4 py-3 font-medium text-gray-800">${sampleIdInput.value}</td>
+                    <td><input type="text" class="w-full p-2 border border-gray-300 rounded-lg culture-num-wells formatted-number-input" placeholder="0"></td>
+                    <td><input type="text" class="w-full p-2 border border-gray-300 rounded-lg culture-cells-per-well formatted-number-input" placeholder="0"></td>
+                    <td><input type="text" class="w-full p-2 border border-gray-300 rounded-lg culture-vol-media formatted-number-input" placeholder="0"></td>
+                    <td><input type="text" class="w-full p-2 rounded-lg read-only-field culture-total-cells" readonly></td>
+                    <td><input type="text" class="w-full p-2 rounded-lg read-only-field culture-vol-needed" readonly></td>
+                    <td><input type="text" class="w-full p-2 rounded-lg read-only-field culture-extra-media" readonly></td>
+                `;
+                cultureCalcTableBody.appendChild(newCultureRow);
 
                 // Cryo table
                 cryoCalcContainer.classList.remove('hidden');
@@ -481,34 +1391,239 @@
                 newCryoRow.dataset.calcId = calcId;
                 newCryoRow.dataset.totalCells = totalCellsInMillions;
                 newCryoRow.innerHTML = `
-                    <td><button class="w-full h-full px-3 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 log-sample-btn">Calculate</button></td>
                     <td class="px-4 py-3 font-medium text-gray-800">${sampleIdInput.value}</td>
-                    <td><input type="number" min="0" value="0" class="w-full p-2 border border-gray-300 rounded-lg cryo-removed-input" placeholder="e.g., 10"></td>
-                    <td><input type="number" min="0" value="2.5" class="w-full p-2 border border-gray-300 rounded-lg cryo-per-aliquot-input" placeholder="e.g., 10"></td>
-                    <td><input type="number" min="0" value="1" class="w-full p-2 border border-gray-300 rounded-lg cryo-vol-aliquot-input" placeholder="e.g., 1"></td>
-                    <td><input type="text" class="w-full p-2 rounded-lg read-only-field cryo-num-aliquots-output hidden-calc" readonly></td>
-                    <td><input type="text" class="w-full p-2 rounded-lg read-only-field cryo-cs10-vol-output hidden-calc" readonly></td>
-                    <td><button class="w-full h-full px-3 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 delete-row-btn">Delete</button></td>
+                    <td><input type="text" value="0" class="w-full p-2 border border-gray-300 rounded-lg cryo-removed-input formatted-number-input" placeholder="e.g., 10"></td>
+                    <td><input type="text" value="2.5" class="w-full p-2 border border-gray-300 rounded-lg cryo-per-aliquot-input formatted-number-input" placeholder="e.g., 10"></td>
+                    <td><input type="text" value="1" class="w-full p-2 border border-gray-300 rounded-lg cryo-vol-aliquot-input formatted-number-input" placeholder="e.g., 1"></td>
+                    <td><input type="text" class="w-full p-2 rounded-lg read-only-field cryo-num-aliquots-output" readonly></td>
+                    <td><input type="text" class="w-full p-2 rounded-lg read-only-field cryo-cs10-vol-output" readonly></td>
                 `;
                 cryoCalcTableBody.appendChild(newCryoRow);
+
+                // Trigger initial calculation for Cryo row
+                handleCryoInput({ target: newCryoRow.querySelector('.cryo-per-aliquot-input') });
+            }
+
+            function handleResultActions(event) {
+                const btn = event.target.closest('button');
+                if (!btn) return;
+
+                const row = btn.closest('tr');
+                const calcId = row.dataset.calcId;
+
+                if (btn.classList.contains('delete-btn')) {
+                    // Delete Logic
+                    const flowRow = flowCalcTableBody.querySelector(`tr[data-calc-id="${calcId}"]`);
+                    const cryoRow = cryoCalcTableBody.querySelector(`tr[data-calc-id="${calcId}"]`);
+                    const icScRow = icScCalcTableBody.querySelector(`tr[data-calc-id="${calcId}"]`);
+                    const icInjRow = icInjCalcTableBody.querySelector(`tr[data-calc-id="${calcId}"]`);
+                    const cultureRow = cultureCalcTableBody.querySelector(`tr[data-calc-id="${calcId}"]`);
+
+                    if (row) row.remove();
+                    if (flowRow) flowRow.remove();
+                    if (cryoRow) cryoRow.remove();
+                    if (icScRow) icScRow.remove();
+                    if (icInjRow) icInjRow.remove();
+                    if (cultureRow) cultureRow.remove();
+
+                    // Hide sections if no rows remain
+                    if (resultsTableBody.children.length === 0) tableContainer.classList.add('hidden');
+                    if (flowCalcTableBody.children.length === 0) flowCalcContainer.classList.add('hidden');
+                    if (cryoCalcTableBody.children.length === 0) cryoCalcContainer.classList.add('hidden');
+                    if (icScCalcTableBody.children.length === 0) icScCalcContainer.classList.add('hidden');
+                    if (icInjCalcTableBody.children.length === 0) icInjCalcContainer.classList.add('hidden');
+                    if (cultureCalcTableBody.children.length === 0) cultureCalcContainer.classList.add('hidden');
+
+                } else if (btn.classList.contains('edit-btn')) {
+                    // Edit Logic
+                    const data = JSON.parse(row.dataset.initialData);
+                    editModal.dataset.editingId = calcId;
+                    editErrorMessage.style.display = 'none';
+
+                    // 1. Populate Preparation Fields
+                    document.getElementById('edit_sampleId').value = data["Sample ID"];
+                    document.getElementById('edit_totalSampleVolume').value = data["Total Sample Volume (mL)"];
+                    document.getElementById('edit_trypanBlueVolume').value = data["Trypan Blue Volume (uL)"];
+                    document.getElementById('edit_sampleVolumeMixed').value = data["Sample Volume Mixed (uL)"];
+
+                    // 2. Set Method and Trigger Change
+                    editCountingMethodSelect.value = data["Counting Method"];
+                    editCountingMethodSelect.dispatchEvent(new Event('change'));
+
+                    // 3. Populate Method Specific Fields
+                    if (data["Counting Method"] === 'countless') {
+                        document.getElementById('edit_countlessLive').value = data["Countess Live Input"];
+                        document.getElementById('edit_countlessDead').value = data["Countess Dead Input"];
+                        calculateCountessViability('edit');
+                    } else if (data["Counting Method"] === 'manual') {
+                        for (let i = 1; i <= 4; i++) {
+                            document.getElementById(`edit_live_c${i}`).value = data[`Manual Live ${i}`];
+                            document.getElementById(`edit_dead_c${i}`).value = data[`Manual Dead ${i}`];
+                        }
+                        calculateManualOutputs('edit');
+                    }
+
+                    // 4. Show Modal
+                    editModal.classList.remove('hidden');
+                }
+            }
+
+            function handleUpdate() {
+                const calcId = editModal.dataset.editingId;
+                const row = resultsTableBody.querySelector(`tr[data-calc-id="${calcId}"]`);
+                if (!row) return;
+
+                // --- Validate Edit Inputs ---
+                editErrorMessage.style.display = 'none';
+                const baseInputs = [
+                    document.getElementById('edit_sampleId'),
+                    document.getElementById('edit_totalSampleVolume'),
+                    document.getElementById('edit_trypanBlueVolume'),
+                    document.getElementById('edit_sampleVolumeMixed')
+                ];
+
+                if (!validateInputs(baseInputs)) {
+                    editErrorMessage.textContent = 'Please fill in all preparation fields correctly.';
+                    editErrorMessage.style.display = 'block';
+                    return;
+                }
+
+                const selectedMethod = editCountingMethodSelect.value;
+                let cellsPerMl, totalCells, viability;
+                const newData = {
+                    "Sample ID": document.getElementById('edit_sampleId').value,
+                    "Counting Method": selectedMethod,
+                    "Total Sample Volume (mL)": document.getElementById('edit_totalSampleVolume').value,
+                    "Trypan Blue Volume (uL)": document.getElementById('edit_trypanBlueVolume').value,
+                    "Sample Volume Mixed (uL)": document.getElementById('edit_sampleVolumeMixed').value,
+                };
+
+                if (selectedMethod === 'countless') {
+                    const liveIn = document.getElementById('edit_countlessLive');
+                    const deadIn = document.getElementById('edit_countlessDead');
+                    if (!validateInputs([liveIn, deadIn])) {
+                        editErrorMessage.textContent = 'Please fill in the Countess 3 Live and Dead cell fields.';
+                        editErrorMessage.style.display = 'block';
+                        return;
+                    }
+                    cellsPerMl = parseFloat(liveIn.value);
+                    viability = parseFloat(document.getElementById('edit_countlessViability').value);
+                    newData["Countess Live Input"] = liveIn.value;
+                    newData["Countess Dead Input"] = deadIn.value;
+
+                } else if (selectedMethod === 'manual') {
+                    const requiredManualInputs = [
+                        document.getElementById('edit_live_c1'),
+                        document.getElementById('edit_live_c2'),
+                        document.getElementById('edit_dead_c1'),
+                        document.getElementById('edit_dead_c2'),
+                    ];
+                    if (!validateInputs(requiredManualInputs)) {
+                        editErrorMessage.textContent = 'Please fill in at least the first two live and dead count fields.';
+                        editErrorMessage.style.display = 'block';
+                        return;
+                    }
+                    cellsPerMl = parseFloat(document.getElementById('edit_manualLive').value);
+                    viability = parseFloat(document.getElementById('edit_manualViability').value);
+                    for (let i = 1; i <= 4; i++) newData[`Manual Live ${i}`] = document.getElementById(`edit_live_c${i}`).value;
+                    for (let i = 1; i <= 4; i++) newData[`Manual Dead ${i}`] = document.getElementById(`edit_dead_c${i}`).value;
+                }
+
+                // --- Update Calculations ---
+                const totalVolume = parseFloat(document.getElementById('edit_totalSampleVolume').value);
+                totalCells = cellsPerMl * totalVolume;
+
+                // --- Update DOM ---
+                // 1. Update Results Row
+                row.dataset.initialData = JSON.stringify(newData);
+                row.cells[0].textContent = newData["Sample ID"];
+                row.cells[1].textContent = selectedMethod.charAt(0).toUpperCase() + selectedMethod.slice(1);
+                row.cells[2].textContent = viability.toFixed(1);
+                row.cells[3].textContent = formatNumber(totalCells, true);
+                row.cells[3].dataset.value = totalCells;
+                row.cells[4].textContent = formatNumber(cellsPerMl, true);
+                row.cells[4].dataset.value = cellsPerMl;
+
+                // 2. Update Flow Row
+                const flowRow = flowCalcTableBody.querySelector(`tr[data-calc-id="${calcId}"]`);
+                if (flowRow) {
+                    flowRow.cells[0].textContent = newData["Sample ID"];
+                    const cellsPerMlInMillions = cellsPerMl / 1e6;
+                    flowRow.dataset.concentration = cellsPerMlInMillions;
+                    // Trigger recalc for flow
+                    const flowNeededInput = flowRow.querySelector('.flow-needed-input');
+                    if (flowNeededInput.value) {
+                        flowNeededInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                }
+
+                // 3. Update Cryo Row
+                const cryoRow = cryoCalcTableBody.querySelector(`tr[data-calc-id="${calcId}"]`);
+                if (cryoRow) {
+                    cryoRow.cells[1].textContent = newData["Sample ID"];
+                    const totalCellsInMillions = totalCells / 1e6;
+                    cryoRow.dataset.totalCells = totalCellsInMillions;
+                    // Trigger recalc for cryo
+                    const cryoPerAliquotInput = cryoRow.querySelector('.cryo-per-aliquot-input');
+                    if (cryoPerAliquotInput.value) {
+                        cryoPerAliquotInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                }
+
+                // 4. Update New Sections Rows - Update cellsPerMl and trigger recalculations
+                const icScRow = icScCalcTableBody.querySelector(`tr[data-calc-id="${calcId}"]`);
+                if (icScRow) {
+                    icScRow.cells[0].textContent = newData["Sample ID"];
+                    icScRow.dataset.cellsPerMl = cellsPerMl;
+                    // Trigger recalculation
+                    const numAnimalsInput = icScRow.querySelector('.ic-sc-num-animals');
+                    if (numAnimalsInput && numAnimalsInput.value) {
+                        numAnimalsInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                }
+
+                const icInjRow = icInjCalcTableBody.querySelector(`tr[data-calc-id="${calcId}"]`);
+                if (icInjRow) {
+                    icInjRow.cells[0].textContent = newData["Sample ID"];
+                    icInjRow.dataset.cellsPerMl = cellsPerMl;
+                    // Trigger recalculation
+                    const numAnimalsInput = icInjRow.querySelector('.ic-inj-num-animals');
+                    if (numAnimalsInput && numAnimalsInput.value) {
+                        numAnimalsInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                }
+
+                const cultureRow = cultureCalcTableBody.querySelector(`tr[data-calc-id="${calcId}"]`);
+                if (cultureRow) {
+                    cultureRow.cells[0].textContent = newData["Sample ID"];
+                    cultureRow.dataset.cellsPerMl = cellsPerMl;
+                    // Trigger recalculation
+                    const numWellsInput = cultureRow.querySelector('.culture-num-wells');
+                    if (numWellsInput && numWellsInput.value) {
+                        numWellsInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                }
+
+                // Close Modal
+                editModal.classList.add('hidden');
             }
 
             function handleDeleteClick(event) {
                 if (!event.target.classList.contains('delete-row-btn')) return;
-                
+
                 const button = event.target;
                 const cryoRow = button.closest('tr');
                 const calcId = cryoRow.dataset.calcId;
-                
+
                 // Find and remove corresponding rows
                 const resultRow = resultsTableBody.querySelector(`tr[data-calc-id="${calcId}"]`);
                 const flowRow = flowCalcTableBody.querySelector(`tr[data-calc-id="${calcId}"]`);
-                
+
                 // Remove rows
                 if (resultRow) resultRow.remove();
                 if (flowRow) flowRow.remove();
                 if (cryoRow) cryoRow.remove();
-                
+
                 // Hide sections if no rows remain
                 if (resultsTableBody.children.length === 0) {
                     tableContainer.classList.add('hidden');
@@ -523,18 +1638,18 @@
 
             async function handleLogClick(event) {
                 if (!event.target.classList.contains('log-sample-btn')) return;
-                
+
                 const button = event.target;
                 const cryoRow = button.closest('tr');
                 const calcId = cryoRow.dataset.calcId;
-                
+
                 // Show calculations for this row
                 const hiddenCalcs = cryoRow.querySelectorAll('.hidden-calc');
                 hiddenCalcs.forEach(calc => calc.classList.remove('hidden-calc'));
-                
+
                 // Trigger calculation to populate the now-visible fields
                 handleCryoInput({ target: cryoRow.querySelector('.cryo-per-aliquot-input') });
-                
+
                 // --- Gather All Data for Logging ---
                 const resultRow = resultsTableBody.querySelector(`tr[data-calc-id="${calcId}"]`);
                 const flowRow = flowCalcTableBody.querySelector(`tr[data-calc-id="${calcId}"]`);
@@ -556,11 +1671,11 @@
                 dataToLog["Volume per Aliquot (mL)"] = cryoRow.querySelector('.cryo-vol-aliquot-input').value;
                 dataToLog["Number of Aliquots"] = cryoRow.querySelector('.cryo-num-aliquots-output').value;
                 dataToLog["CryoStor CS10 Volume (mL)"] = cryoRow.querySelector('.cryo-cs10-vol-output').value;
-                
+
                 // --- Send Data ---
                 button.disabled = true;
                 button.textContent = 'Processing...';
-                
+
                 try {
                     const response = await fetch(SCRIPT_URL, {
                         method: 'POST', mode: 'cors', cache: 'no-cache',
@@ -573,7 +1688,7 @@
                     button.textContent = 'Done';
                     button.classList.remove('bg-blue-600', 'hover:bg-blue-700');
                     button.classList.add('bg-gray-500', 'cursor-default');
-                
+
                 } catch (error) {
                     console.error('Error logging data:', error);
                     button.textContent = 'Error!';
@@ -583,45 +1698,117 @@
                     button.disabled = false; // Allow retry
                 }
             }
-            
+
             function handleCryoInput(event) {
                 const row = event.target.closest('tr');
                 if (!row) return;
 
-                const cellsRemovedInput = row.querySelector('.cryo-removed-input');
-                const cellsPerAliquotInput = row.querySelector('.cryo-per-aliquot-input');
-                const volumePerAliquotInput = row.querySelector('.cryo-vol-aliquot-input');
+                const removedInput = row.querySelector('.cryo-removed-input');
+                const perAliquotInput = row.querySelector('.cryo-per-aliquot-input');
+                const volAliquotInput = row.querySelector('.cryo-vol-aliquot-input');
                 const numAliquotsOutput = row.querySelector('.cryo-num-aliquots-output');
                 const cs10VolOutput = row.querySelector('.cryo-cs10-vol-output');
 
-                // Only calculate if the output fields are visible (Calculate button has been pressed)
-                if (numAliquotsOutput.classList.contains('hidden-calc')) {
-                    return;
-                }
+                const totalCellsMillions = parseFloat(row.dataset.totalCells) || 0;
+                const removedMillions = parseFormattedNumber(removedInput.value);
+                const cellsPerAliquot = parseFormattedNumber(perAliquotInput.value);
+                const volumePerAliquot = parseFormattedNumber(volAliquotInput.value);
 
-                const totalCells = parseFloat(row.dataset.totalCells);
-                const cellsRemoved = parseFloat(cellsRemovedInput.value) || 0;
-                const cellsPerAliquot = parseFloat(cellsPerAliquotInput.value) || 0;
-                const volumePerAliquot = parseFloat(volumePerAliquotInput.value) || 0;
-                
+                const remainingCells = (totalCellsMillions - removedMillions) * 1e6; // Convert back to absolute for calculation if needed, or keep in millions
+
                 if (cellsPerAliquot <= 0) {
                     numAliquotsOutput.value = '';
                     cs10VolOutput.value = '';
                     return;
                 }
 
-                const remainingCells = totalCells - cellsRemoved;
-                if (remainingCells < 0) {
-                    numAliquotsOutput.value = 'Error';
-                    cs10VolOutput.value = '';
-                    return;
-                }
-                
-                const numAliquots = Math.floor(remainingCells / cellsPerAliquot);
+                // cellsPerAliquot is likely in Millions based on default 2.5 (2.5M)
+                // remainingCells is in absolute. 
+                // Let's assume cellsPerAliquot is in Millions.
+                const remainingCellsMillions = totalCellsMillions - removedMillions;
+                const numAliquots = Math.floor(remainingCellsMillions / cellsPerAliquot);
                 const cs10Vol = numAliquots * volumePerAliquot;
 
                 numAliquotsOutput.value = numAliquots;
-                cs10VolOutput.value = cs10Vol.toFixed(2);
+                cs10VolOutput.value = formatWithCommas(cs10Vol.toFixed(1));
+            }
+
+            function handleIcScInput(event) {
+                const row = event.target.closest('tr');
+                if (!row) return;
+
+                const numAnimals = parseFormattedNumber(row.querySelector('.ic-sc-num-animals').value);
+                const cellsPerAnimal = parseFormattedNumber(row.querySelector('.ic-sc-cells-per-animal').value);
+                const volPerAnimal = parseFormattedNumber(row.querySelector('.ic-sc-vol-per-animal').value);
+                const cellsPerMl = parseFloat(row.dataset.cellsPerMl) || 0;
+                const totalCellsOutput = row.querySelector('.ic-sc-total-cells');
+                const volRequiredOutput = row.querySelector('.ic-sc-vol-required');
+                const pbsOutput = row.querySelector('.ic-sc-pbs');
+
+                const totalCells = numAnimals * cellsPerAnimal;
+                // Display in millions with thousand separators
+                totalCellsOutput.value = formatNumber(totalCells, true);
+
+                if (cellsPerMl > 0) {
+                    const volRequired = (totalCells / cellsPerMl) * 1000;
+                    volRequiredOutput.value = formatVolumeWithUnit(volRequired);
+                } else {
+                    volRequiredOutput.value = '';
+                }
+
+                // Calculate PBS for resuspension: Number of animals × Volume per animal
+                const pbsVolume = numAnimals * volPerAnimal;
+                pbsOutput.value = pbsVolume > 0 ? formatVolumeWithUnit(pbsVolume) : '';
+            }
+
+            function handleIcInjInput(event) {
+                const row = event.target.closest('tr');
+                if (!row) return;
+
+                const numAnimals = parseFormattedNumber(row.querySelector('.ic-inj-num-animals').value);
+                const cellsPerAnimal = parseFormattedNumber(row.querySelector('.ic-inj-cells-per-animal').value);
+                const volPerAnimal = parseFormattedNumber(row.querySelector('.ic-inj-vol-per-animal').value);
+                const cellsPerMl = parseFloat(row.dataset.cellsPerMl) || 0;
+                const totalCellsOutput = row.querySelector('.ic-inj-total-cells');
+                const volRequiredOutput = row.querySelector('.ic-inj-vol-required');
+                const pbsOutput = row.querySelector('.ic-inj-pbs');
+
+                const totalCells = numAnimals * cellsPerAnimal;
+                // Display in millions with thousand separators
+                totalCellsOutput.value = formatNumber(totalCells, true);
+
+                if (cellsPerMl > 0) {
+                    const volRequired = (totalCells / cellsPerMl) * 1000;
+                    volRequiredOutput.value = formatVolumeWithUnit(volRequired);
+                } else {
+                    volRequiredOutput.value = '';
+                }
+
+                // Calculate PBS for resuspension: Number of animals × Volume per animal
+                const pbsVolume = numAnimals * volPerAnimal;
+                pbsOutput.value = pbsVolume > 0 ? formatVolumeWithUnit(pbsVolume) : '';
+            }
+
+            function handleCultureInput(event) {
+                const row = event.target.closest('tr');
+                if (!row) return;
+
+                const numWells = parseFormattedNumber(row.querySelector('.culture-num-wells').value);
+                const cellsPerWell = parseFormattedNumber(row.querySelector('.culture-cells-per-well').value);
+                const cellsPerMl = parseFloat(row.dataset.cellsPerMl) || 0;
+
+                const totalCellsOutput = row.querySelector('.culture-total-cells');
+                const volNeededOutput = row.querySelector('.culture-vol-needed');
+
+                const totalCells = numWells * cellsPerWell;
+                totalCellsOutput.value = formatNumber(totalCells, true);
+
+                if (cellsPerMl > 0) {
+                    const volNeeded = (totalCells / cellsPerMl) * 1000;
+                    volNeededOutput.value = formatVolumeWithUnit(volNeeded);
+                } else {
+                    volNeededOutput.value = '';
+                }
             }
 
             function handleFlowCalcInput(event) {
@@ -633,29 +1820,126 @@
                 const row = input.closest('tr');
                 const outputField = row.querySelector('.flow-volume-output');
 
-                const concentration = parseFloat(row.dataset.concentration);
-                const cellsNeeded = parseFloat(input.value);
+                const neededInput = row.querySelector('.flow-needed-input');
+                const pbsInput = row.querySelector('.pbs-resusp-input');
+                const volumeOutput = row.querySelector('.flow-volume-output');
 
-                if (isNaN(concentration) || concentration <= 0 || isNaN(cellsNeeded) || cellsNeeded < 0) {
-                    outputField.value = '';
-                    return;
+                const needed = parseFormattedNumber(neededInput.value);
+                const pbs = parseFormattedNumber(pbsInput.value);
+                const concentrationMillions = parseFloat(row.dataset.concentration) || 0; // This is already in millions
+
+                if (concentrationMillions > 0) {
+                    // Formula: (Needed (millions) * 1000) / Concentration (millions/mL)
+                    // If PBS is added, add it to the result? 
+                    // Based on previous logic: Volume = (Needed * 1000) / Concentration
+                    // The PBS input seems to be just for recording, or maybe subtraction?
+                    // Re-reading requirement: "Calculate Volume of cells required"
+                    // Usually: Vol = TotalCells / Concentration. 
+                    // Here: Needed is in Millions. Concentration is in Millions/mL.
+                    // Vol (uL) = (Needed / Concentration) * 1000.
+
+                    const vol = (needed / concentrationMillions) * 1000;
+                    volumeOutput.value = formatVolumeWithUnit(vol);
+                } else {
+                    volumeOutput.value = '';
                 }
-
-                const volumeRequired = (cellsNeeded / concentration) * 1000;
-                outputField.value = volumeRequired.toFixed(1);
             }
 
             /**
-             * Formats a number into millions with regular decimal notation (no scientific)
+             * Formats a number with appropriate units (mill or cells)
+             * If >= 1 million, shows in millions with 'mill' suffix (max 2 decimals, hidden if integer)
+             * If < 1 million, shows regular number with thousand separators and 'cells' suffix
              */
             function formatNumber(num, millions = false) {
-                if (isNaN(num) || num === 0) return '0.0';
-                if (millions) num /= 1e6;
+                if (isNaN(num) || num === 0) return '0 cells';
 
-                // Always use regular decimal notation for millions display
-                return num.toFixed(1);
+                // If millions flag is true, num is already the raw cell count
+                if (millions) {
+                    // Check if it's >= 1 million
+                    if (num >= 1e6) {
+                        const inMillions = num / 1e6;
+                        // Max 2 decimals, hide if integer
+                        const rounded = Math.round(inMillions * 100) / 100;
+                        return formatWithCommas(rounded) + ' mill';
+                    } else {
+                        // Show as regular number with thousand separators
+                        return formatWithCommas(num.toFixed(0)) + ' cells';
+                    }
+                } else {
+                    // Legacy: just format the number as-is (shouldn't happen with new code)
+                    return num.toFixed(1);
+                }
             }
+
+            /**
+             * Formats a volume with appropriate units (µL or mL)
+             * If volume >= 1000 µL, converts to mL with max 1 decimal place (hidden if integer)
+             * Otherwise shows in µL with max 1 decimal place (hidden if integer)
+             */
+            function formatVolumeWithUnit(volumeInMicroliters) {
+                if (isNaN(volumeInMicroliters) || volumeInMicroliters === 0) return '0 µL';
+
+                if (volumeInMicroliters >= 1000) {
+                    const volumeInMl = volumeInMicroliters / 1000;
+                    // Max 1 decimal, hide if integer
+                    const rounded = Math.round(volumeInMl * 10) / 10;
+                    return formatWithCommas(rounded) + ' mL';
+                } else {
+                    // Show max 1 decimal, remove .0 for whole numbers
+                    const rounded = Math.round(volumeInMicroliters * 10) / 10;
+                    return formatWithCommas(rounded) + ' µL';
+                }
+            }
+            // --- Global Formatting Listeners ---
+            document.addEventListener('blur', function (event) {
+                if (event.target.classList.contains('formatted-number-input')) {
+                    const val = parseFormattedNumber(event.target.value);
+                    event.target.dataset.rawValue = val;
+                    event.target.value = formatWithCommas(event.target.value);
+                }
+            }, true);
+
+            // Format cells-per-animal inputs with units
+            document.addEventListener('blur', function (event) {
+                if (event.target.classList.contains('ic-sc-cells-per-animal') ||
+                    event.target.classList.contains('ic-inj-cells-per-animal')) {
+                    const val = parseFormattedNumber(event.target.value);
+                    event.target.dataset.rawValue = val;
+                    if (val > 0) {
+                        event.target.value = formatNumber(val, true);
+                    }
+                }
+            }, true);
+
+            // Format vol-per-animal inputs with units
+            document.addEventListener('blur', function (event) {
+                if (event.target.classList.contains('ic-sc-vol-per-animal') ||
+                    event.target.classList.contains('ic-inj-vol-per-animal')) {
+                    const val = parseFormattedNumber(event.target.value);
+                    event.target.dataset.rawValue = val;
+                    if (val > 0) {
+                        event.target.value = formatVolumeWithUnit(val);
+                    }
+                }
+            }, true);
+
+            document.addEventListener('focus', function (event) {
+                if (event.target.classList.contains('formatted-number-input')) {
+                    // Use raw value if available
+                    if (event.target.dataset.rawValue) {
+                        event.target.value = event.target.dataset.rawValue;
+                    } else {
+                        // Fallback: Remove commas and units
+                        let val = event.target.value;
+                        val = val.replace(/,/g, '');
+                        val = val.replace(/\s*(µL|mL|cells|mill\.?)$/i, '').trim();
+                        event.target.value = val;
+                    }
+                }
+            }, true);
         });
     </script>
+    </div>
 </body>
+
 </html>
