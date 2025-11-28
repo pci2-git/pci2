@@ -115,8 +115,16 @@
                     <div>
                         <label for="experimentIdInput" class="block text-lg font-medium text-white mb-2">Experiment
                             ID</label>
-                        <input type="text" id="experimentIdInput" placeholder="e.g., Experiment23"
-                            class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                        <div class="flex gap-2">
+                            <input type="text" id="experimentIdInput" list="experiment-history-list"
+                                placeholder="e.g., Experiment23"
+                                class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                            <button id="browseExperimentsBtn" title="Browse saved experiments"
+                                class="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-lg transition-colors whitespace-nowrap">
+                                📋 Browse
+                            </button>
+                        </div>
+                        <datalist id="experiment-history-list"></datalist>
                     </div>
                     <div>
                         <label for="startDateInput" class="block text-lg font-medium text-white mb-2">Experiment Start
@@ -189,6 +197,38 @@
             <strong class="font-bold">Error:</strong>
             <span class="block sm:inline" id="error-text"></span>
         </div>
+
+        <!-- Experiment Browser Modal -->
+        <div id="experimentBrowserModal"
+            class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+            <div
+                class="bg-gray-800 p-6 rounded-xl shadow-2xl w-full max-w-2xl m-4 border border-gray-700 max-h-[80vh] flex flex-col">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-white">Saved Experiments</h3>
+                    <button id="closeModalBtn" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+                </div>
+                <div id="experimentsList" class="overflow-y-auto flex-1 space-y-2">
+                    <!-- Experiment list will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div id="deleteConfirmModal"
+            class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+            <div class="bg-gray-800 p-8 rounded-xl shadow-2xl w-full max-w-sm m-4 border border-gray-700">
+                <h3 class="text-lg font-bold mb-4 text-white">Confirm Deletion</h3>
+                <p class="text-gray-300 mb-2">Are you sure you want to delete this experiment?</p>
+                <p class="text-xl font-semibold text-white mb-6" id="deleteExpName"></p>
+                <p class="text-sm text-red-400 mb-6">This action cannot be undone.</p>
+                <div class="flex justify-end gap-4">
+                    <button id="cancelDeleteBtn"
+                        class="bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-500 transition">Cancel</button>
+                    <button id="confirmDeleteBtn"
+                        class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700 transition">Delete</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -216,8 +256,27 @@
         const errorMessageDiv = document.getElementById('error-message');
         const errorTextSpan = document.getElementById('error-text');
 
+        // Experiment Browser Modal
+        const browserModal = document.getElementById('experimentBrowserModal');
+        const browseExperimentsBtn = document.getElementById('browseExperimentsBtn');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const experimentsList = document.getElementById('experimentsList');
+
+        // Delete Confirmation Modal
+        const deleteConfirmModal = document.getElementById('deleteConfirmModal');
+        const deleteExpName = document.getElementById('deleteExpName');
+        const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+        let experimentToDelete = null;
+
         let survivalChart = null;
         let groupCounter = 0;
+
+        // Persistence Constants
+        const EXPERIMENTS_KEY = 'survival_analysis_experiments';
+        const LAST_ACTIVE_KEY = 'survival_analysis_last_active';
+        let autoSaveTimeout;
+        let experimentIdChangeTimeout;
 
         // --- Event Listeners ---
         addGroupBtn.addEventListener('click', addGroup);
@@ -231,6 +290,35 @@
         exportDataBtn.addEventListener('click', exportDataToCSV);
         csvFileInput.addEventListener('change', handleCSVFileInput);
         exportPrismBtn.addEventListener('click', exportDataForPrism);
+
+        // Experiment Browser Modal
+        browseExperimentsBtn.addEventListener('click', openExperimentBrowser);
+        closeModalBtn.addEventListener('click', closeExperimentBrowser);
+        browserModal.addEventListener('click', (e) => {
+            if (e.target === browserModal) closeExperimentBrowser();
+        });
+
+        // Delete Confirmation Modal
+        cancelDeleteBtn.addEventListener('click', closeDeleteConfirmation);
+        confirmDeleteBtn.addEventListener('click', deleteExperiment);
+        deleteConfirmModal.addEventListener('click', (e) => {
+            if (e.target === deleteConfirmModal) closeDeleteConfirmation();
+        });
+
+        // Auto-save listeners
+        startDateInput.addEventListener('input', handleAutoSaveTrigger);
+        experimentIdInput.addEventListener('input', handleExperimentIdChange);
+        groupsContainer.addEventListener('input', handleAutoSaveTrigger);
+        groupsContainer.addEventListener('change', handleAutoSaveTrigger); // For select elements
+        groupsContainer.addEventListener('click', (e) => {
+            // Save on remove buttons
+            if (e.target.closest('button')) {
+                handleAutoSaveTrigger();
+            }
+        });
+
+        // Restore data on load
+        window.addEventListener('load', initializePersistence);
 
         // Initialize with one group
         addGroup();
@@ -417,17 +505,17 @@
             }
         }
 
-        function addAnimalRowWithData(tbody, cageId = '', animalId = '') {
+        function addAnimalRowWithData(tbody, cageId = '', animalId = '', endingDate = '', status = '0') {
             const row = document.createElement('tr');
             row.className = 'bg-gray-800 border-b border-gray-700 hover:bg-gray-600/50';
             row.innerHTML = `
                 <td class="p-1"><input type="text" value="${cageId}" class="w-full ${cageId ? 'bg-gray-700' : 'empty-field'} rounded p-1 border border-gray-600 focus:bg-gray-600 focus:outline-none cage-id-input"></td>
                 <td class="p-1"><input type="text" value="${animalId}" class="w-full bg-gray-700 rounded p-1 border border-gray-600 focus:bg-gray-600 focus:outline-none"></td>
-                <td class="p-1"><input type="text" placeholder="mm/dd/yy" class="w-full empty-field rounded p-1 border border-gray-600 focus:bg-gray-600 focus:outline-none"></td>
+                <td class="p-1"><input type="text" value="${endingDate}" placeholder="mm/dd/yy" class="w-full ${endingDate ? 'bg-gray-700' : 'empty-field'} rounded p-1 border border-gray-600 focus:bg-gray-600 focus:outline-none"></td>
                 <td class="p-1">
-                    <select class="w-full rounded p-1 border border-gray-600 focus:bg-gray-600 focus:outline-none status-alive">
-                        <option value="0">Alive (0)</option>
-                        <option value="1">Dead (1)</option>
+                    <select class="w-full rounded p-1 border border-gray-600 focus:bg-gray-600 focus:outline-none ${status === '1' ? 'status-dead' : 'status-alive'}">
+                        <option value="0" ${status === '0' ? 'selected' : ''}>Alive (0)</option>
+                        <option value="1" ${status === '1' ? 'selected' : ''}>Dead (1)</option>
                     </select>
                 </td>
                 <td class="p-1 text-center">
@@ -661,7 +749,7 @@
                 const deathsAtTime = sortedData.filter(d => d.daysSurvived === currentTime && d.isDead).length;
 
                 if (deathsAtTime > 0) {
-                    survivalProbability *= (1 - deathsAtTime / subjectsAtRisk);
+                    survivalProbability *= (1 - deathsAtRisk / subjectsAtRisk); // Corrected formula
                 }
 
                 // Check if survival probability has dropped to 50% or below
@@ -1182,6 +1270,267 @@
             link.click();
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
+        }
+
+        // --- Persistence Functions ---
+
+        function initializePersistence() {
+            updateExperimentList();
+
+            // Load last active experiment
+            const lastActiveId = localStorage.getItem(LAST_ACTIVE_KEY);
+            if (lastActiveId) {
+                loadExperiment(lastActiveId);
+            }
+        }
+
+        function updateExperimentList() {
+            const historyList = document.getElementById('experiment-history-list');
+            historyList.innerHTML = '';
+
+            const experiments = getSavedExperiments();
+            Object.keys(experiments).forEach(id => {
+                const option = document.createElement('option');
+                option.value = id;
+                historyList.appendChild(option);
+            });
+        }
+
+        function getSavedExperiments() {
+            try {
+                return JSON.parse(localStorage.getItem(EXPERIMENTS_KEY)) || {};
+            } catch {
+                return {};
+            }
+        }
+
+        function handleExperimentIdChange() {
+            // Debounce to avoid triggering on every keystroke
+            clearTimeout(experimentIdChangeTimeout);
+            experimentIdChangeTimeout = setTimeout(() => {
+                const newId = experimentIdInput.value.trim();
+                if (!newId) {
+                    handleAutoSaveTrigger(); // Still trigger save for empty ID case
+                    return;
+                }
+
+                const lastActiveId = localStorage.getItem(LAST_ACTIVE_KEY);
+                const experiments = getSavedExperiments();
+
+                // Only load if:
+                // 1. The experiment exists
+                // 2. It's different from the currently active experiment
+                if (experiments[newId] && newId !== lastActiveId) {
+                    loadExperiment(newId);
+                } else {
+                    // New ID or same as current - just update last active and trigger save
+                    localStorage.setItem(LAST_ACTIVE_KEY, newId);
+                    handleAutoSaveTrigger();
+                }
+            }, 500); // Wait 500ms after user stops typing
+        }
+
+        function handleAutoSaveTrigger() {
+            clearTimeout(autoSaveTimeout);
+            autoSaveTimeout = setTimeout(saveCurrentExperiment, 1000);
+        }
+
+        function saveCurrentExperiment() {
+            const experimentId = experimentIdInput.value.trim();
+            if (!experimentId) return; // Don't save without an ID
+
+            try {
+                const experiments = getSavedExperiments();
+
+                const currentData = {
+                    experimentId: experimentId,
+                    startDate: startDateInput.value,
+                    groups: []
+                };
+
+                const groupCards = groupsContainer.querySelectorAll('.group-card');
+                groupCards.forEach(card => {
+                    const groupName = card.querySelector('input[type="text"]').value;
+                    const animals = [];
+                    const rows = card.querySelectorAll('tbody tr');
+
+                    rows.forEach(row => {
+                        const inputs = row.querySelectorAll('input, select');
+                        animals.push({
+                            cageId: inputs[0].value,
+                            animalId: inputs[1].value,
+                            endingDate: inputs[2].value,
+                            status: inputs[3].value
+                        });
+                    });
+
+                    currentData.groups.push({
+                        groupName: groupName,
+                        animals: animals
+                    });
+                });
+
+                experiments[experimentId] = currentData;
+                localStorage.setItem(EXPERIMENTS_KEY, JSON.stringify(experiments));
+                localStorage.setItem(LAST_ACTIVE_KEY, experimentId);
+
+                updateExperimentList();
+                console.log(`Experiment '${experimentId}' saved.`);
+            } catch (error) {
+                console.error('Save failed:', error);
+            }
+        }
+
+        function loadExperiment(experimentId) {
+            const experiments = getSavedExperiments();
+            const data = experiments[experimentId];
+
+            if (!data) return;
+
+            // Prevent auto-save while loading
+            const originalIdHandler = experimentIdInput.oninput;
+            experimentIdInput.oninput = null;
+
+            try {
+                experimentIdInput.value = data.experimentId;
+                startDateInput.value = data.startDate || '';
+
+                // Restore Groups
+                groupsContainer.innerHTML = '';
+                groupCounter = 0;
+
+                if (data.groups && data.groups.length > 0) {
+                    data.groups.forEach(groupData => {
+                        addGroup();
+                        const currentGroupCard = document.getElementById(`group-${groupCounter}`);
+
+                        // Set Group Name
+                        const groupNameInput = currentGroupCard.querySelector('input[type="text"]');
+                        if (groupNameInput) groupNameInput.value = groupData.groupName;
+
+                        const tbody = currentGroupCard.querySelector('tbody');
+                        tbody.innerHTML = ''; // Clear default row
+
+                        // Restore Animals
+                        if (groupData.animals) {
+                            groupData.animals.forEach(animal => {
+                                addAnimalRowWithData(
+                                    tbody,
+                                    animal.cageId,
+                                    animal.animalId,
+                                    animal.endingDate,
+                                    animal.status
+                                );
+                            });
+                        }
+                    });
+                }
+
+                localStorage.setItem(LAST_ACTIVE_KEY, experimentId);
+
+            } catch (error) {
+                console.error('Load failed:', error);
+            } finally {
+                // Re-enable listeners if needed (though we used addEventListener so this logic is slightly different)
+                // We don't need to detach/attach addEventListener, just be careful about triggering events.
+                // Setting .value programmatically does NOT trigger 'input' events, so we are safe from loops.
+            }
+        }
+
+        // --- Experiment Browser Modal ---
+
+        function openExperimentBrowser() {
+            const experiments = getSavedExperiments();
+            const experimentIds = Object.keys(experiments).sort();
+
+            experimentsList.innerHTML = '';
+
+            if (experimentIds.length === 0) {
+                experimentsList.innerHTML = '<p class="text-gray-400 text-center py-8">No saved experiments found. Create one by entering an Experiment ID and adding data.</p>';
+            } else {
+                experimentIds.forEach(id => {
+                    const exp = experiments[id];
+                    const card = document.createElement('div');
+                    card.className = 'bg-gray-700 hover:bg-gray-600 p-4 rounded-lg cursor-pointer transition-colors border border-gray-600';
+
+                    const groupCount = exp.groups ? exp.groups.length : 0;
+                    let totalAnimals = 0;
+                    if (exp.groups) {
+                        exp.groups.forEach(g => {
+                            if (g.animals) totalAnimals += g.animals.length;
+                        });
+                    }
+
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <h4 class="text-lg font-semibold text-white">${id}</h4>
+                                <p class="text-sm text-gray-400 mt-1">Start Date: ${exp.startDate || 'Not set'}</p>
+                                <p class="text-sm text-gray-400">${groupCount} group(s), ${totalAnimals} animal(s)</p>
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <button class="load-btn bg-blue-600 hover:bg-blue-700 text-white font-semibold py-1 px-3 rounded transition-colors text-sm">
+                                    Load
+                                </button>
+                                <button class="delete-btn bg-red-600 hover:bg-red-700 text-white font-semibold py-1 px-3 rounded transition-colors text-sm">
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
+                    `;
+
+                    // Load button
+                    card.querySelector('.load-btn').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        loadExperiment(id);
+                        closeExperimentBrowser();
+                    });
+
+                    // Delete button
+                    card.querySelector('.delete-btn').addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        showDeleteConfirmation(id);
+                    });
+
+                    experimentsList.appendChild(card);
+                });
+            }
+
+            browserModal.classList.remove('hidden');
+        }
+
+        function closeExperimentBrowser() {
+            browserModal.classList.add('hidden');
+        }
+
+        function showDeleteConfirmation(experimentId) {
+            experimentToDelete = experimentId;
+            deleteExpName.textContent = experimentId;
+            deleteConfirmModal.classList.remove('hidden');
+        }
+
+        function closeDeleteConfirmation() {
+            experimentToDelete = null;
+            deleteConfirmModal.classList.add('hidden');
+        }
+
+        function deleteExperiment() {
+            if (!experimentToDelete) return;
+
+            const experiments = getSavedExperiments();
+            delete experiments[experimentToDelete];
+
+            localStorage.setItem(EXPERIMENTS_KEY, JSON.stringify(experiments));
+
+            // If we deleted the currently active experiment, clear last active
+            const lastActive = localStorage.getItem(LAST_ACTIVE_KEY);
+            if (lastActive === experimentToDelete) {
+                localStorage.removeItem(LAST_ACTIVE_KEY);
+            }
+
+            closeDeleteConfirmation();
+            updateExperimentList();
+            openExperimentBrowser(); // Refresh the list
         }
     </script>
 
