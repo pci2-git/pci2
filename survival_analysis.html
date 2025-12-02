@@ -179,6 +179,19 @@
             <!-- Survival Curve Chart -->
             <div class="bg-gray-800 rounded-lg shadow-lg p-6 mb-8 border border-gray-700">
                 <h2 class="text-2xl font-bold text-white mb-6 text-center">Kaplan-Meier Survival Curve</h2>
+
+                <!-- Chart Controls -->
+                <div class="flex justify-end mb-2 px-4">
+                    <label class="inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="jitterCheckbox" class="sr-only peer">
+                        <div
+                            class="relative w-11 h-6 bg-gray-700 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600">
+                        </div>
+                        <span class="ms-3 text-sm font-medium text-gray-300">Avoid Overlap</span>
+                    </label>
+                    <input type="color" id="chartColorPicker" class="fixed opacity-0 pointer-events-none"
+                        style="z-index: 50;">
+                </div>
                 <div class="chart-container">
                     <canvas id="survivalChart"></canvas>
                 </div>
@@ -255,6 +268,8 @@
         const survivalChartCanvas = document.getElementById('survivalChart');
         const errorMessageDiv = document.getElementById('error-message');
         const errorTextSpan = document.getElementById('error-text');
+        const jitterCheckbox = document.getElementById('jitterCheckbox');
+        const chartColorPicker = document.getElementById('chartColorPicker');
 
         // Experiment Browser Modal
         const browserModal = document.getElementById('experimentBrowserModal');
@@ -271,6 +286,8 @@
 
         let survivalChart = null;
         let groupCounter = 0;
+        let currentChartDatasets = []; // Store datasets for re-rendering
+        let selectedDatasetIndex = -1; // Track which dataset is being colored
 
         // Persistence Constants
         const EXPERIMENTS_KEY = 'survival_analysis_experiments';
@@ -290,6 +307,22 @@
         exportDataBtn.addEventListener('click', exportDataToCSV);
         csvFileInput.addEventListener('change', handleCSVFileInput);
         exportPrismBtn.addEventListener('click', exportDataForPrism);
+
+        // Chart Controls
+        jitterCheckbox.addEventListener('change', () => {
+            if (currentChartDatasets.length > 0) {
+                renderSurvivalChart(currentChartDatasets);
+            }
+        });
+
+        chartColorPicker.addEventListener('input', (e) => {
+            if (selectedDatasetIndex !== -1 && survivalChart) {
+                const newColor = e.target.value;
+                survivalChart.data.datasets[selectedDatasetIndex].borderColor = newColor;
+                survivalChart.data.datasets[selectedDatasetIndex].backgroundColor = newColor + '33';
+                survivalChart.update();
+            }
+        });
 
         // Experiment Browser Modal
         browseExperimentsBtn.addEventListener('click', openExperimentBrowser);
@@ -556,6 +589,9 @@
                 return;
             }
 
+            let hasAnyData = false;
+            let missingFieldsErrors = [];
+
             for (const card of groupCards) {
                 const groupName = card.querySelector('input[type="text"]').value.trim() || "Untitled Group";
                 groups[groupName] = { data: [] };
@@ -563,36 +599,65 @@
 
                 for (const row of rows) {
                     const inputs = row.querySelectorAll('input, select');
-                    const cageId = inputs[0].value;
-                    const animalId = inputs[1].value;
-                    const endingDateStr = inputs[2].value;
+                    const cageId = inputs[0].value.trim();
+                    const animalId = inputs[1].value.trim();
+                    const endingDateStr = inputs[2].value.trim();
                     const status = inputs[3].value;
 
-                    if (animalId) {
-                        let endingDate;
+                    // Skip completely empty rows
+                    if (!cageId && !animalId && !endingDateStr) continue;
 
-                        // If alive (0) and no date, default to today
-                        if (status === '0' && !endingDateStr) {
-                            endingDate = new Date();
-                            endingDate.setHours(0, 0, 0, 0);
-                        } else if (endingDateStr) {
-                            endingDate = parseDate(endingDateStr);
-                        }
-
-                        if (!endingDate) continue;
-
-                        const timeDiff = endingDate.getTime() - startDate.getTime();
-                        const daysSurvived = Math.round(timeDiff / (1000 * 3600 * 24));
-
-                        groups[groupName].data.push({
-                            cageId,
-                            animalId,
-                            endingDate: endingDate.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: '2-digit' }),
-                            isDead: status === '1',
-                            daysSurvived: daysSurvived >= 0 ? daysSurvived : 0,
-                        });
+                    // Check for partially filled rows
+                    if (!cageId || !animalId) {
+                        missingFieldsErrors.push(`Row in group "${groupName}" is missing ${!cageId ? 'Cage ID' : ''}${!cageId && !animalId ? ' and ' : ''}${!animalId ? 'Animal ID' : ''}`);
+                        continue;
                     }
+
+                    // Check if dead animals have an ending date
+                    if (status === '1' && !endingDateStr) {
+                        missingFieldsErrors.push(`Animal ${animalId} (Cage ${cageId}) in group "${groupName}" is marked as Dead but has no Ending Date`);
+                        continue;
+                    }
+
+                    hasAnyData = true;
+                    let endingDate;
+
+                    // If alive (0) and no date, default to today
+                    if (status === '0' && !endingDateStr) {
+                        endingDate = new Date();
+                        endingDate.setHours(0, 0, 0, 0);
+                    } else if (endingDateStr) {
+                        endingDate = parseDate(endingDateStr);
+                        if (!endingDate) {
+                            missingFieldsErrors.push(`Invalid date format for Animal ${animalId} (Cage ${cageId}) in group "${groupName}". Use mm/dd/yy format.`);
+                            continue;
+                        }
+                    }
+
+                    if (!endingDate) continue;
+
+                    const timeDiff = endingDate.getTime() - startDate.getTime();
+                    const daysSurvived = Math.round(timeDiff / (1000 * 3600 * 24));
+
+                    groups[groupName].data.push({
+                        cageId,
+                        animalId,
+                        endingDate: endingDate.toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: '2-digit' }),
+                        isDead: status === '1',
+                        daysSurvived: daysSurvived >= 0 ? daysSurvived : 0,
+                    });
                 }
+            }
+
+            // Show specific error messages if there are issues
+            if (missingFieldsErrors.length > 0) {
+                showError(missingFieldsErrors[0] + (missingFieldsErrors.length > 1 ? ` (and ${missingFieldsErrors.length - 1} more issue${missingFieldsErrors.length > 2 ? 's' : ''})` : ''));
+                return;
+            }
+
+            if (!hasAnyData) {
+                showError("No valid animal data found. Please ensure each animal has a Cage ID, Animal ID, and (if Dead) an Ending Date.");
+                return;
             }
 
             // --- 3. Calculate Survival Curves (Kaplan-Meier) ---
@@ -647,7 +712,8 @@
             }
             displayDataTables(groups);
             const statisticalData = performStatisticalAnalysis(groups);
-            renderSurvivalChart(chartDatasets, statisticalData);
+            currentChartDatasets = JSON.parse(JSON.stringify(chartDatasets)); // Deep copy for jittering
+            renderSurvivalChart(currentChartDatasets, statisticalData);
             resultsSection.classList.remove('hidden');
             window.scrollTo({ top: resultsSection.offsetTop, behavior: 'smooth' });
         }
@@ -749,7 +815,7 @@
                 const deathsAtTime = sortedData.filter(d => d.daysSurvived === currentTime && d.isDead).length;
 
                 if (deathsAtTime > 0) {
-                    survivalProbability *= (1 - deathsAtRisk / subjectsAtRisk); // Corrected formula
+                    survivalProbability *= (1 - deathsAtTime / subjectsAtRisk); // Corrected formula
                 }
 
                 // Check if survival probability has dropped to 50% or below
@@ -887,14 +953,67 @@
         }
 
         function renderSurvivalChart(datasets, statisticalData = { comparisons: [] }) {
-            if (survivalChart) {
-                survivalChart.destroy();
+            // Apply jitter if enabled
+            const isJitterEnabled = jitterCheckbox.checked;
+            const datasetsToRender = JSON.parse(JSON.stringify(datasets)); // Work on a copy
+
+            if (isJitterEnabled) {
+                // Determine max time to scale X jitter appropriately
+                let maxTime = 0;
+                datasetsToRender.forEach(d => {
+                    d.data.forEach(p => {
+                        if (p.x > maxTime) maxTime = p.x;
+                    });
+                });
+
+                datasetsToRender.forEach((dataset, index) => {
+                    // Y Jitter (Horizontal separation)
+                    const yOffset = (index - (datasetsToRender.length - 1) / 2) * 0.02; // 2% shift per group
+
+                    // X Jitter (Vertical separation)
+                    let xOffset = 0;
+                    if (maxTime > 0) {
+                        // Shift by a small percentage of the total time range
+                        xOffset = (index - (datasetsToRender.length - 1) / 2) * (maxTime * 0.005); // 0.5% of max time
+                    }
+
+                    dataset.data = dataset.data.map(point => ({
+                        x: point.x + xOffset,
+                        y: Math.max(0, Math.min(1, point.y + yOffset))
+                    }));
+                });
             }
 
+            // Check if chart exists and we are just updating data (for smooth animation)
+            if (survivalChart) {
+                // Update datasets
+                survivalChart.data.datasets.forEach((dataset, i) => {
+                    if (datasetsToRender[i]) {
+                        dataset.data = datasetsToRender[i].data;
+                    }
+                });
+
+                // If the number of datasets changed, we might need to do a full destroy/create, 
+                // but for jitter toggle, the number of datasets is constant.
+                // However, if we loaded new data, we destroyed the chart in parseAndAnalyzeFromDOM anyway 
+                // (wait, no, parseAndAnalyzeFromDOM calls this function).
+                // Let's check if we need to full re-render (e.g. different number of groups)
+                if (survivalChart.data.datasets.length !== datasetsToRender.length) {
+                    survivalChart.destroy();
+                    createChart(datasetsToRender);
+                } else {
+                    survivalChart.update();
+                }
+            } else {
+                createChart(datasetsToRender);
+            }
+        }
+
+        function createChart(datasetsToRender) {
             const ctx = survivalChartCanvas.getContext('2d');
             survivalChart = new Chart(ctx, {
                 type: 'line',
-                data: { datasets: datasets },
+                data: { datasets: datasetsToRender },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
@@ -921,10 +1040,22 @@
                                 color: '#d1d5db',
                                 font: { size: 14 },
                                 usePointStyle: true,
-                                pointStyle: 'line',
-                                boxWidth: 20,
-                                boxHeight: 2,
+                                pointStyle: 'rect', // Square legend
+                                boxWidth: 15,
+                                boxHeight: 15,
                                 padding: 15
+                            },
+                            onClick: (e, legendItem, legend) => {
+                                const index = legendItem.datasetIndex;
+                                selectedDatasetIndex = index;
+
+                                // Position the color picker near the cursor
+                                const x = e.native.clientX;
+                                const y = e.native.clientY;
+                                chartColorPicker.style.left = `${x}px`;
+                                chartColorPicker.style.top = `${y}px`;
+
+                                chartColorPicker.click(); // Open color picker
                             }
                         },
                         tooltip: {
@@ -1191,8 +1322,13 @@
                     const inputs = row.querySelectorAll('input, select');
                     const cageId = inputs[0].value || '';
                     const animalId = inputs[1].value || '';
-                    const endingDate = inputs[2].value || '';
+                    let endingDate = inputs[2].value || '';
                     const status = inputs[3].value || '0';
+
+                    // If alive and no date, use today's date
+                    if (status === '0' && !endingDate) {
+                        endingDate = new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: '2-digit' });
+                    }
 
                     if (animalId) { // Only include rows with animal ID
                         const cleanCageId = cageId.replace(/\s+/g, '_');
