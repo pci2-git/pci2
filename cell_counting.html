@@ -87,17 +87,17 @@
         /* Custom column widths */
         .col-wide {
             width: 15%;
-            min-width: 120px;
+            min-width: 125px;
         }
 
         .col-narrow {
-            width: 10%;
-            min-width: 80px;
+            width: 8.5%;
+            min-width: 70px;
         }
 
         .col-medium {
-            width: 12%;
-            min-width: 100px;
+            width: 11%;
+            min-width: 90px;
         }
     </style>
 </head>
@@ -606,6 +606,17 @@
                         </tbody>
                     </table>
                 </div>
+                <div class="mt-4 flex justify-end">
+                    <button id="exportIcScBtn"
+                        class="bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        Export to Excel
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -656,18 +667,28 @@
                                 <th class="px-4 py-3 text-left rounded-l-lg col-narrow">Sample ID</th>
                                 <th class="px-4 py-3 text-left col-narrow">Mouse Number</th>
                                 <th class="px-4 py-3 text-left col-wide">Cells per mouse</th>
-                                <th class="px-4 py-3 text-left col-narrow">Vol. per mouse (µL)</th>
-                                <th class="px-4 py-3 text-left col-wide">Total cells (mill)</th>
-                                <th class="px-4 py-3 text-left col-narrow">Vol. of cells required (µL)</th>
+                                <th class="px-4 py-3 text-left col-narrow">Vol. per mouse</th>
+                                <th class="px-4 py-3 text-left col-wide">Total cells</th>
+                                <th class="px-4 py-3 text-left col-narrow">Vol. of cells required</th>
                                 <th class="px-4 py-3 text-left col-narrow">PBS to resuspend</th>
-                                <th class="px-4 py-3 text-left rounded-r-lg col-narrow">Vol. of Methil Cellulose (µL)
-                                </th>
+                                <th class="px-4 py-3 text-left rounded-r-lg col-narrow">Vol. of Methil Cellulose</th>
                             </tr>
                         </thead>
                         <tbody id="icInjCalcTableBody">
                             <!-- Rows will be added here dynamically -->
                         </tbody>
                     </table>
+                </div>
+                <div class="mt-4 flex justify-end">
+                    <button id="exportIcInjBtn"
+                        class="bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        Export to Excel
+                    </button>
                 </div>
             </div>
         </div>
@@ -715,6 +736,17 @@
                         </tbody>
                     </table>
                 </div>
+                <div class="mt-4 flex justify-end">
+                    <button id="exportCultureBtn"
+                        class="bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        Export to Excel
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -757,6 +789,17 @@
                             <!-- Rows will be added here dynamically -->
                         </tbody>
                     </table>
+                </div>
+                <div class="mt-4 flex justify-end">
+                    <button id="exportFlowBtn"
+                        class="bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        Export to Excel
+                    </button>
                 </div>
             </div>
         </div>
@@ -802,6 +845,17 @@
                             <!-- Rows will be added here dynamically -->
                         </tbody>
                     </table>
+                </div>
+                <div class="mt-4 flex justify-end">
+                    <button id="exportCryoBtn"
+                        class="bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        Export to Excel
+                    </button>
                 </div>
             </div>
         </div>
@@ -1011,6 +1065,12 @@
             const cultureCalcChevron = document.getElementById('cultureCalcChevron');
             cultureCalcToggle.addEventListener('click', () => toggleSection(cultureCalcContent, cultureCalcChevron));
 
+            // Export button event listeners
+            document.getElementById('exportIcScBtn').addEventListener('click', () => exportToCSV('icsc'));
+            document.getElementById('exportIcInjBtn').addEventListener('click', () => exportToCSV('icinj'));
+            document.getElementById('exportCultureBtn').addEventListener('click', () => exportToCSV('culture'));
+            document.getElementById('exportFlowBtn').addEventListener('click', () => exportToCSV('flow'));
+            document.getElementById('exportCryoBtn').addEventListener('click', () => exportToCSV('cryo'));
 
             // --- Functions ---
             function toggleSection(content, chevron) {
@@ -1302,6 +1362,12 @@
                     <td class="px-4 py-3" data-value="${totalCells}">${formatNumber(totalCells, true)}</td>
                     <td class="px-4 py-3" data-value="${cellsPerMl}">${formatNumber(cellsPerMl, true)}</td>
                     <td class="px-4 py-3 flex space-x-2">
+                        <button class="duplicate-btn text-green-600 hover:text-green-800" title="Duplicate">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M7 9a2 2 0 012-2h6a2 2 0 012 2v6a2 2 0 01-2 2H9a2 2 0 01-2-2V9z" />
+                                <path d="M5 3a2 2 0 00-2 2v6a2 2 0 002 2V5h8a2 2 0 00-2-2H5z" />
+                            </svg>
+                        </button>
                         <button class="edit-btn text-blue-600 hover:text-blue-800" title="Edit">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                 <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
@@ -1411,7 +1477,138 @@
                 const row = btn.closest('tr');
                 const calcId = row.dataset.calcId;
 
-                if (btn.classList.contains('delete-btn')) {
+                if (btn.classList.contains('duplicate-btn')) {
+                    // Duplicate Logic
+                    const data = JSON.parse(row.dataset.initialData);
+                    const newCalcId = calculationIdCounter++;
+
+                    // Get values from the original row
+                    const viability = parseFloat(row.children[2].textContent);
+                    const totalCells = parseFloat(row.children[3].dataset.value);
+                    const cellsPerMl = parseFloat(row.children[4].dataset.value);
+                    const selectedMethod = data["Counting Method"];
+                    const sampleId = data["Sample ID"];
+
+                    // Create new result row
+                    const newRow = document.createElement('tr');
+                    newRow.className = 'border-b border-gray-200 hover:bg-gray-100';
+                    newRow.dataset.calcId = newCalcId;
+                    newRow.dataset.initialData = JSON.stringify(data);
+                    newRow.innerHTML = `
+                        <td class="px-4 py-3 font-medium text-gray-800">${sampleId}</td>
+                        <td class="px-4 py-3">${selectedMethod.charAt(0).toUpperCase() + selectedMethod.slice(1)}</td>
+                        <td class="px-4 py-3">${viability.toFixed(1)}</td>
+                        <td class="px-4 py-3" data-value="${totalCells}">${formatNumber(totalCells, true)}</td>
+                        <td class="px-4 py-3" data-value="${cellsPerMl}">${formatNumber(cellsPerMl, true)}</td>
+                        <td class="px-4 py-3 flex space-x-2">
+                            <button class="duplicate-btn text-green-600 hover:text-green-800" title="Duplicate">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M7 9a2 2 0 012-2h6a2 2 0 012 2v6a2 2 0 01-2 2H9a2 2 0 01-2-2V9z" />
+                                    <path d="M5 3a2 2 0 00-2 2v6a2 2 0 002 2V5h8a2 2 0 00-2-2H5z" />
+                                </svg>
+                            </button>
+                            <button class="edit-btn text-blue-600 hover:text-blue-800" title="Edit">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                </svg>
+                            </button>
+                            <button class="delete-btn text-red-600 hover:text-red-800" title="Delete">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                        </td>
+                    `;
+                    // Insert the new row right after the current row
+                    row.parentNode.insertBefore(newRow, row.nextSibling);
+
+                    // Duplicate Flow Calc Row
+                    const flowRow = flowCalcTableBody.querySelector(`tr[data-calc-id="${calcId}"]`);
+                    if (flowRow) {
+                        const cellsPerMlInMillions = cellsPerMl / 1e6;
+                        const newFlowRow = document.createElement('tr');
+                        newFlowRow.className = 'border-b border-gray-200';
+                        newFlowRow.dataset.calcId = newCalcId;
+                        newFlowRow.dataset.concentration = cellsPerMlInMillions;
+                        newFlowRow.innerHTML = `
+                            <td class="px-4 py-3 font-medium text-gray-800">${sampleId}</td>
+                            <td><input type="text" class="w-full p-2 border border-gray-300 rounded-lg flow-needed-input formatted-number-input" placeholder="e.g., 5"></td>
+                            <td><input type="text" class="w-full p-2 border border-gray-300 rounded-lg pbs-resusp-input formatted-number-input" placeholder="e.g., 500"></td>
+                            <td><input type="text" class="w-full p-2 rounded-lg read-only-field flow-volume-output" readonly></td>
+                        `;
+                        flowRow.parentNode.insertBefore(newFlowRow, flowRow.nextSibling);
+                    }
+
+                    // Duplicate IC/SC Row
+                    const icScRow = icScCalcTableBody.querySelector(`tr[data-calc-id="${calcId}"]`);
+                    if (icScRow) {
+                        const newIcScRow = document.createElement('tr');
+                        newIcScRow.className = 'border-b border-gray-200';
+                        newIcScRow.dataset.calcId = newCalcId;
+                        newIcScRow.dataset.cellsPerMl = cellsPerMl;
+                        newIcScRow.innerHTML = `
+                            <td class="px-4 py-3 font-medium text-gray-800">${sampleId}</td>
+                            <td><input type="text" class="w-full p-2 border border-gray-300 rounded-lg ic-sc-num-animals formatted-number-input" placeholder="0"></td>
+                            <td><input type="text" class="w-full p-2 border border-gray-300 rounded-lg ic-sc-cells-per-animal formatted-number-input" placeholder="0"></td>
+                            <td><input type="text" class="w-full p-2 border border-gray-300 rounded-lg ic-sc-vol-per-animal formatted-number-input" placeholder="0"></td>
+                            <td><input type="text" class="w-full p-2 rounded-lg read-only-field ic-sc-total-cells" readonly></td>
+                            <td><input type="text" class="w-full p-2 rounded-lg read-only-field ic-sc-vol-required" readonly></td>
+                            <td><input type="text" class="w-full p-2 rounded-lg read-only-field ic-sc-pbs" readonly></td>
+                        `;
+                        icScRow.parentNode.insertBefore(newIcScRow, icScRow.nextSibling);
+                    }
+
+                    // Duplicate IC Injection Row
+                    const icInjRow = icInjCalcTableBody.querySelector(`tr[data-calc-id="${calcId}"]`);
+                    if (icInjRow) {
+                        const newIcInjRow = document.createElement('tr');
+                        newIcInjRow.className = 'border-b border-gray-200';
+                        newIcInjRow.dataset.calcId = newCalcId;
+                        newIcInjRow.dataset.cellsPerMl = cellsPerMl;
+                        newIcInjRow.innerHTML = `
+                            <td class="px-4 py-3 font-medium text-gray-800">${sampleId}</td>
+                            <td><input type="text" class="w-full p-2 border border-gray-300 rounded-lg ic-inj-num-animals formatted-number-input" placeholder="0"></td>
+                            <td><input type="text" class="w-full p-2 border border-gray-300 rounded-lg ic-inj-cells-per-animal formatted-number-input" placeholder="0"></td>
+                            <td><input type="text" class="w-full p-2 border border-gray-300 rounded-lg ic-inj-vol-per-animal formatted-number-input" placeholder="0"></td>
+                            <td><input type="text" class="w-full p-2 rounded-lg read-only-field ic-inj-total-cells" readonly></td>
+                            <td><input type="text" class="w-full p-2 rounded-lg read-only-field ic-inj-vol-required" readonly></td>
+                            <td><input type="text" class="w-full p-2 rounded-lg read-only-field ic-inj-pbs" readonly></td>
+                            <td><input type="text" class="w-full p-2 rounded-lg read-only-field ic-inj-methil" readonly></td>
+                        `;
+                        icInjRow.parentNode.insertBefore(newIcInjRow, icInjRow.nextSibling);
+                    }
+
+                    // Duplicate Culture Row
+                    const cultureRow = cultureCalcTableBody.querySelector(`tr[data-calc-id="${calcId}"]`);
+                    if (cultureRow) {
+                        const newCultureRow = document.createElement('tr');
+                        newCultureRow.className = 'border-b border-gray-200';
+                        newCultureRow.dataset.calcId = newCalcId;
+                        newCultureRow.dataset.cellsPerMl = cellsPerMl;
+                        newCultureRow.innerHTML = `
+                            <td class="px-4 py-3 font-medium text-gray-800">${sampleId}</td>
+                            <td><input type="text" class="w-full p-2 border border-gray-300 rounded-lg culture-num-wells formatted-number-input" placeholder="0"></td>
+                            <td><input type="text" class="w-full p-2 border border-gray-300 rounded-lg culture-cells-per-well formatted-number-input" placeholder="0"></td>
+                            <td><input type="text" class="w-full p-2 border border-gray-300 rounded-lg culture-vol-media formatted-number-input" placeholder="0"></td>
+                            <td><input type="text" class="w-full p-2 rounded-lg read-only-field culture-total-cells" readonly></td>
+                            <td><input type="text" class="w-full p-2 rounded-lg read-only-field culture-vol-needed" readonly></td>
+                            <td><input type="text" class="w-full p-2 rounded-lg read-only-field culture-extra-media" readonly></td>
+                        `;
+                        cultureRow.parentNode.insertBefore(newCultureRow, cultureRow.nextSibling);
+                    }
+
+                    // Duplicate Cryo Row if exists
+                    const cryoRow = cryoCalcTableBody.querySelector(`tr[data-calc-id="${calcId}"]`);
+                    if (cryoRow) {
+                        const newCryoRow = document.createElement('tr');
+                        newCryoRow.className = 'border-b border-gray-200';
+                        newCryoRow.dataset.calcId = newCalcId;
+                        newCryoRow.dataset.totalCells = totalCells;
+                        newCryoRow.innerHTML = cryoRow.innerHTML;
+                        cryoRow.parentNode.insertBefore(newCryoRow, cryoRow.nextSibling);
+                    }
+
+                } else if (btn.classList.contains('delete-btn')) {
                     // Delete Logic
                     const flowRow = flowCalcTableBody.querySelector(`tr[data-calc-id="${calcId}"]`);
                     const cryoRow = cryoCalcTableBody.querySelector(`tr[data-calc-id="${calcId}"]`);
@@ -1772,6 +1969,7 @@
                 const totalCellsOutput = row.querySelector('.ic-inj-total-cells');
                 const volRequiredOutput = row.querySelector('.ic-inj-vol-required');
                 const pbsOutput = row.querySelector('.ic-inj-pbs');
+                const methilOutput = row.querySelector('.ic-inj-methil');
 
                 const totalCells = numAnimals * cellsPerAnimal;
                 // Display in millions with thousand separators
@@ -1784,9 +1982,13 @@
                     volRequiredOutput.value = '';
                 }
 
-                // Calculate PBS for resuspension: Number of animals × Volume per animal
-                const pbsVolume = numAnimals * volPerAnimal;
+                // Calculate PBS for resuspension: (Number of animals × Volume per animal) / 2
+                const pbsVolume = (numAnimals * volPerAnimal) / 2;
                 pbsOutput.value = pbsVolume > 0 ? formatVolumeWithUnit(pbsVolume) : '';
+
+                // Calculate Methil Cellulose volume: (Number of animals × Volume per animal) / 2
+                const methilVolume = (numAnimals * volPerAnimal) / 2;
+                methilOutput.value = methilVolume > 0 ? formatVolumeWithUnit(methilVolume) : '';
             }
 
             function handleCultureInput(event) {
@@ -1937,7 +2139,123 @@
                     }
                 }
             }, true);
+
+            /**
+             * Export section data to CSV
+             * Combines counting preparation data with section-specific data
+             */
+            function exportToCSV(sectionType) {
+                let csvContent = '';
+                let filename = '';
+                let tableBody, headers, sectionName;
+
+                // Define section-specific configurations
+                switch (sectionType) {
+                    case 'icsc':
+                        tableBody = icScCalcTableBody;
+                        sectionName = 'Cells for IV or SC';
+                        filename = 'cells_for_iv_sc.csv';
+                        headers = ['Sample ID', 'Mouse Number', 'Cells per mouse', 'Vol. per mouse (µL)', 'Total cells', 'Vol. of cells required', 'PBS to resuspend'];
+                        break;
+                    case 'icinj':
+                        tableBody = icInjCalcTableBody;
+                        sectionName = 'Cells for IC injections';
+                        filename = 'cells_for_ic_injections.csv';
+                        headers = ['Sample ID', 'Mouse Number', 'Cells per mouse', 'Vol. per mouse', 'Total cells', 'Vol. of cells required', 'PBS to resuspend', 'Vol. of Methil Cellulose'];
+                        break;
+                    case 'culture':
+                        tableBody = cultureCalcTableBody;
+                        sectionName = 'Cells for cell culture';
+                        filename = 'cells_for_culture.csv';
+                        headers = ['Sample ID', 'Number of wells', 'Cells per well', 'Volume of media per well (µL)', 'Total cells', 'Volume of cells needed (µL)', 'Extra volume of media (µL)'];
+                        break;
+                    case 'flow':
+                        tableBody = flowCalcTableBody;
+                        sectionName = 'Cells for Flow';
+                        filename = 'cells_for_flow.csv';
+                        headers = ['Sample ID', 'Cells Needed for Flow (Millions)', 'PBS for Resuspension (µL)', 'Volume of Cells Required (µL)'];
+                        break;
+                    case 'cryo':
+                        tableBody = cryoCalcTableBody;
+                        sectionName = 'Cells for Cryopreservation';
+                        filename = 'cells_for_cryopreservation.csv';
+                        headers = ['Sample ID', 'Total Cells Removed for Flow (Millions)', 'Cells per Aliquot (Millions)', 'Volume per Aliquot (mL)', 'Number of Aliquots', 'CryoStor CS10 Volume (mL)'];
+                        break;
+                    default:
+                        return;
+                }
+
+                // Check if there's data to export
+                if (!tableBody || tableBody.children.length === 0) {
+                    alert(`No data to export for ${sectionName}`);
+                    return;
+                }
+
+                // Add counting preparation headers
+                const prepHeaders = ['Sample ID', 'Total Sample Volume (mL)', 'Trypan Blue Volume (µL)', 'Sample Volume Mixed (µL)', 'Counting Method', 'Live cells (cells/mL)', 'Dead cells (cells/mL)', 'Viability (%)'];
+
+                // Combine headers
+                const allHeaders = [...prepHeaders, ...headers.slice(1)]; // Skip duplicate Sample ID
+                csvContent += allHeaders.join(',') + '\n';
+
+                // Process each row
+                Array.from(tableBody.children).forEach(row => {
+                    const calcId = row.dataset.calcId;
+
+                    // Get the corresponding result row to extract initial data
+                    const resultRow = resultsTableBody.querySelector(`tr[data-calc-id="${calcId}"]`);
+                    if (!resultRow) return;
+
+                    const initialData = JSON.parse(resultRow.dataset.initialData);
+
+                    // Extract counting preparation data
+                    const prepData = [
+                        `"${initialData['Sample ID']}"`,
+                        initialData['Total Sample Volume (mL)'],
+                        initialData['Trypan Blue Volume (uL)'],
+                        initialData['Sample Volume Mixed (uL)'],
+                        initialData['Counting Method'],
+                        initialData['Counting Method'] === 'countless' ? initialData['Countess Live Input'] : initialData['Manual Live Output'],
+                        initialData['Counting Method'] === 'countless' ? initialData['Countess Dead Input'] : initialData['Manual Dead Output'],
+                        resultRow.children[2].textContent // Viability
+                    ];
+
+                    // Extract section-specific data from the row
+                    const rowData = [];
+                    const cells = row.querySelectorAll('td');
+                    cells.forEach((cell, index) => {
+                        if (index === 0) return; // Skip first cell (Sample ID, already in prepData)
+                        const input = cell.querySelector('input');
+                        if (input) {
+                            let value = input.value.trim();
+                            // Remove units and commas for cleaner CSV
+                            value = value.replace(/,/g, '');
+                            value = value.replace(/\s*(µL|mL|cells|mill\.?)$/i, '').trim();
+                            rowData.push(value || '');
+                        } else {
+                            rowData.push(cell.textContent.trim());
+                        }
+                    });
+
+                    // Combine prep data and section data
+                    const combinedRow = [...prepData, ...rowData];
+                    csvContent += combinedRow.join(',') + '\n';
+                });
+
+                // Create download link
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+
+                link.setAttribute('href', url);
+                link.setAttribute('download', filename);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
         });
+
     </script>
     </div>
 </body>
