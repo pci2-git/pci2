@@ -88,33 +88,40 @@
         
         /* Calendar styles */
         .calendar-container {
-            min-width: 300px;
+            min-width: 450px;
+            max-width: 600px;
         }
         
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 1px;
+            gap: 2px;
         }
         
         .calendar-day {
-            aspect-ratio: 1;
+            position: relative;
+            min-height: 90px;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.875rem;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: flex-start;
+            padding: 4px;
+            font-size: 0.75rem;
             cursor: pointer;
             transition: all 0.2s ease;
+            border: 1px solid #e5e7eb;
+            background-color: white;
+            overflow: hidden;
         }
         
         .calendar-day:hover {
-            background-color: #f3f4f6;
+            background-color: #f9fafb;
+            border-color: #d1d5db;
         }
         
         .calendar-day.has-event {
             background-color: #dbeafe;
             border: 1px solid #3b82f6;
-            font-weight: 600;
         }
         
         .calendar-day.has-event:hover {
@@ -123,6 +130,49 @@
         
         .calendar-day.other-month {
             color: #9ca3af;
+            background-color: #fafafa;
+        }
+        
+        .day-number {
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 2px;
+            align-self: flex-end;
+        }
+        
+        .calendar-day.other-month .day-number {
+            color: #9ca3af;
+        }
+        
+        .event-snippet {
+            font-size: 0.65rem;
+            line-height: 1.2;
+            color: #1f2937;
+            margin-top: 2px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            word-break: break-word;
+        }
+        
+        .event-count {
+            font-size: 0.6rem;
+            color: #6b7280;
+            margin-top: 2px;
+            font-style: italic;
+        }
+        
+        .calendar-day.today {
+            border: 2px solid #ef4444 !important;
+            box-shadow: 0 0 0 1px #ef4444;
+        }
+        
+        .calendar-day.today .day-number {
+            color: #ef4444;
+            font-weight: 700;
         }
         
         .calendar-nav-btn {
@@ -386,7 +436,7 @@
 
     
 
-    <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-5xl" id="mainContent">
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-[1800px]" id="mainContent">
 
         <!-- Header Section -->
         <header class="mb-6">
@@ -413,7 +463,10 @@
                 </div>
                                 <div class="flex gap-2 w-full sm:w-auto">
                     <button id="exportExperimentBtn" class="flex-1 sm:flex-none bg-green-600 text-white font-semibold py-3 px-4 rounded-lg shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors">
-                        Export
+                        Export CSV
+                </button>
+                    <button id="exportCalendarPdfBtn" class="flex-1 sm:flex-none bg-purple-600 text-white font-semibold py-3 px-4 rounded-lg shadow-sm hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors">
+                        Export Calendar PDF
                 </button>
                     <button id="importExperimentBtn" class="flex-1 sm:flex-none bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
                         Import
@@ -464,9 +517,9 @@
                         <thead class="bg-gray-50">
                             <tr>
                                 <th scope="col" class="px-2 py-3 w-8"><span class="sr-only">Drag</span></th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider w-20 min-w-20">Day #</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider w-1/3">Calculated Date</th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider w-1/2">Procedure / Notes</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider w-24 min-w-24">Day #</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider min-w-[200px]">Calculated Date</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-600 uppercase tracking-wider min-w-[400px]">Procedure / Notes</th>
                                 <th scope="col" class="relative px-6 py-3 w-16"><span class="sr-only">Delete</span></th>
                             </tr>
                         </thead>
@@ -611,6 +664,7 @@
             
             // Import/Export elements
             const exportExperimentBtn = document.getElementById('exportExperimentBtn');
+            const exportCalendarPdfBtn = document.getElementById('exportCalendarPdfBtn');
             const importExperimentBtn = document.getElementById('importExperimentBtn');
             const csvFileInput = document.getElementById('csvFileInput');
             const experimentIdInput = document.getElementById('experimentId');
@@ -987,21 +1041,58 @@
                     
                     const dayElement = document.createElement('div');
                     dayElement.className = 'calendar-day';
-                    dayElement.textContent = date.getDate();
+                    
+                    // Add day number
+                    const dayNumberEl = document.createElement('div');
+                    dayNumberEl.className = 'day-number';
+                    dayNumberEl.textContent = date.getDate();
+                    dayElement.appendChild(dayNumberEl);
                     
                     // Style for other months
                     if (date.getMonth() !== month) {
                         dayElement.classList.add('other-month');
                     }
                     
+                    // Check if this is today
+                    const today = new Date();
+                    const isToday = date.getDate() === today.getDate() &&
+                                    date.getMonth() === today.getMonth() &&
+                                    date.getFullYear() === today.getFullYear();
+                    
+                    if (isToday) {
+                        dayElement.classList.add('today');
+                    }
+                    
                     // Check if this date has events
-                    const dateStr = date.toDateString();
-                    const dayEvents = events.filter(event => event.date.toDateString() === dateStr);
+                    // Create a UTC date string for comparison (YYYY-MM-DD format)
+                    const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                    const dayEvents = events.filter(event => {
+                        const eventDateStr = `${event.date.getUTCFullYear()}-${String(event.date.getUTCMonth() + 1).padStart(2, '0')}-${String(event.date.getUTCDate()).padStart(2, '0')}`;
+                        return eventDateStr === dateStr;
+                    });
                     
                     if (dayEvents.length > 0) {
                         dayElement.classList.add('has-event');
                         
                         const tooltipText = dayEvents.map(e => `Day ${e.day}: ${e.procedure}`).join('\n');
+                        
+                        // Add event snippets to show in the calendar cell
+                        const maxSnippets = 2; // Show max 2 events per day
+                        dayEvents.slice(0, maxSnippets).forEach(event => {
+                            const snippetEl = document.createElement('div');
+                            snippetEl.className = 'event-snippet';
+                            snippetEl.textContent = `D${event.day}: ${event.procedure}`;
+                            snippetEl.title = `Day ${event.day}: ${event.procedure}`;
+                            dayElement.appendChild(snippetEl);
+                        });
+                        
+                        // If there are more events, show a count
+                        if (dayEvents.length > maxSnippets) {
+                            const countEl = document.createElement('div');
+                            countEl.className = 'event-count';
+                            countEl.textContent = `+${dayEvents.length - maxSnippets} more`;
+                            dayElement.appendChild(countEl);
+                        }
                         
                         // Add hover events for custom tooltip
                         dayElement.addEventListener('mouseenter', (e) => {
@@ -1359,6 +1450,10 @@
                 exportToCSV();
             });
             
+            exportCalendarPdfBtn.addEventListener('click', () => {
+                exportCalendarToPDF();
+            });
+            
             importExperimentBtn.addEventListener('click', () => {
                 csvFileInput.click();
             });
@@ -1634,6 +1729,92 @@
                     `;
                     dataRow.after(adderRow);
                 });
+            };
+            
+            /**
+             * Exports the calendar and timeline table as a PDF
+             */
+            const exportCalendarToPDF = async () => {
+                try {
+                    // Show loading state
+                    exportCalendarPdfBtn.textContent = 'Generating PDF...';
+                    exportCalendarPdfBtn.disabled = true;
+                    
+                    // Dynamically import jsPDF and html2canvas
+                    const [{ jsPDF }, html2canvas] = await Promise.all([
+                        import('https://cdn.skypack.dev/jspdf'),
+                        import('https://cdn.skypack.dev/html2canvas')
+                    ]);
+                    
+                    // Create a new jsPDF instance (landscape orientation for better fit)
+                    const pdf = new jsPDF({
+                        orientation: 'landscape',
+                        unit: 'mm',
+                        format: 'a4'
+                    });
+                    
+                    // Add header with experiment info
+                    const experimentId = experimentIdInput.value.trim() || 'Experiment Timeline';
+                    const gatorId = gatorIdInput.value.trim();
+                    const startDate = startDateInput.value || 'Not set';
+                    
+                    pdf.setFontSize(16);
+                    pdf.text(experimentId, 15, 15);
+                    pdf.setFontSize(10);
+                    pdf.text(`Gator ID: ${gatorId} | Start Date: ${startDate}`, 15, 22);
+                    pdf.text(`Generated: ${new Date().toLocaleDateString()}`, 15, 27);
+                    
+                    // Capture the timeline table
+                    const tableContainer = document.querySelector('.flex-1.bg-white.rounded-xl.shadow-md.overflow-hidden');
+                    const tableCanvas = await html2canvas.default(tableContainer, {
+                        backgroundColor: '#ffffff',
+                        scale: 2,
+                        useCORS: true,
+                        logging: false
+                    });
+                    
+                    // Add table to PDF
+                    const tableImgData = tableCanvas.toDataURL('image/png');
+                    const tableWidth = 135; // Half of landscape A4 width
+                    const tableHeight = (tableCanvas.height * tableWidth) / tableCanvas.width;
+                    pdf.addImage(tableImgData, 'PNG', 15, 35, tableWidth, Math.min(tableHeight, 150));
+                    
+                    // Capture the calendar
+                    const calendarContainer = document.querySelector('.calendar-container');
+                    const calendarCanvas = await html2canvas.default(calendarContainer, {
+                        backgroundColor: '#ffffff',
+                        scale: 2,
+                        useCORS: true,
+                        logging: false
+                    });
+                    
+                    // Add calendar to PDF (right side)
+                    const calendarImgData = calendarCanvas.toDataURL('image/png');
+                    const calendarWidth = 125;
+                    const calendarHeight = (calendarCanvas.height * calendarWidth) / calendarCanvas.width;
+                    pdf.addImage(calendarImgData, 'PNG', 160, 35, calendarWidth, Math.min(calendarHeight, 150));
+                    
+                    // Generate filename
+                    const dateStr = startDateInput.value || new Date().toISOString().split('T')[0];
+                    const expIdClean = experimentId.replace(/\s+/g, '_');
+                    const gatorIdClean = gatorId.replace(/\s+/g, '_');
+                    const filename = gatorIdClean ? `${dateStr}_${expIdClean}_${gatorIdClean}_Calendar.pdf` : `${dateStr}_${expIdClean}_Calendar.pdf`;
+                    
+                    // Save the PDF
+                    pdf.save(filename);
+                    
+                    // Reset button state
+                    exportCalendarPdfBtn.textContent = 'Export Calendar PDF';
+                    exportCalendarPdfBtn.disabled = false;
+                    
+                } catch (error) {
+                    console.error('Error exporting PDF:', error);
+                    alert('Failed to export PDF. Please try again.');
+                    
+                    // Reset button state on error
+                    exportCalendarPdfBtn.textContent = 'Export Calendar PDF';
+                    exportCalendarPdfBtn.disabled = false;
+                }
             };
             
             /**
