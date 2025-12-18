@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IVT Reaction Calculator</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .read-only-field {
+            background-color: #f3f4f6;
+            color: #4b5563;
+            cursor: not-allowed;
+            border-color: #d1d5db;
+        }
+
+        .input-error {
+            border-color: #ef4444;
+        }
+
+        .error-message {
+            display: none;
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Hide spinners */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        input[type=number] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+
+        /* For text inputs acting as numbers */
+        .formatted-number-input {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+
+        /* Dynamic table column widths */
+        table {
+            table-layout: auto;
+            width: 100%;
+        }
+
+        table th {
+            padding: 0.75rem 0.5rem;
+            word-wrap: break-word;
+            max-width: 150px;
+        }
+
+        table td {
+            padding: 0.75rem 0.5rem;
+        }
+
+        table td input {
+            width: 100%;
+            min-width: 60px;
+            font-size: 0.875rem;
+        }
+
+        table td input.read-only-field {
+            min-width: 80px;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50">
+    <div class="w-full max-w-4xl mx-auto p-4 md:p-8">
+        <div class="bg-white rounded-2xl shadow-lg p-6 md:p-10 mb-8">
+
+            <!-- Header Section -->
+            <div class="text-center mb-8">
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-800">IVT Reaction Calculator</h1>
+                <p class="text-gray-500 mt-2">Calculate reagent amounts for your in vitro transcription reactions.</p>
+            </div>
+
+            <!-- IVT Reaction Setup Section -->
+            <fieldset class="border-t border-gray-200 pt-6">
+                <legend class="text-lg font-semibold text-gray-900 px-2">IVT Reaction Setup</legend>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-6 mt-4">
+
+                    <!-- ROW 1: Sample ID, DNA Concentration, DNA Template Type -->
+                    <div>
+                        <label for="sampleId" class="block text-sm font-medium text-gray-700 mb-1">Sample ID</label>
+                        <input type="text" id="sampleId"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="e.g. IVT-001">
+                    </div>
+
+                    <div>
+                        <label for="dnaConcentration" class="block text-sm font-medium text-gray-700 mb-1">DNA
+                            Concentration</label>
+                        <input type="text" id="dnaConcentration"
+                            class="formatted-number-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="e.g. 500 ng/µL">
+                    </div>
+
+                    <div>
+                        <label for="dnaTemplateType" class="block text-sm font-medium text-gray-700 mb-1">DNA Template
+                            Type</label>
+                        <select id="dnaTemplateType"
+                            class="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="" selected>-- Select template type --</option>
+                            <option value="open_plasmid">Open plasmid</option>
+                            <option value="pcr_cleanup">PCR clean up</option>
+                            <option value="elegen">Elegen template</option>
+                        </select>
+                    </div>
+
+                    <!-- ROW 2: IVT Kit (2 columns), Unsilenced/Silenced (1 column) - Highlighted -->
+                    <!-- Wrapper for highlighted background spanning all 3 columns -->
+                    <div class="md:col-span-3 bg-blue-50 rounded-xl p-6 border border-blue-100">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-6">
+                            <div class="md:col-span-2">
+                                <label for="ivtKit" class="block text-sm font-medium text-gray-700 mb-1">IVT Kit</label>
+                                <select id="ivtKit"
+                                    class="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="" selected>-- Select IVT kit --</option>
+                                    <option value="mmessage_t7">mMESSAGE mMACHINE T7 Transcription Kit (AM1344)</option>
+                                    <option value="incognito_t7">INCOGNITO T7 ARCA 5mC- & Ψ-RNA Transcription Kit
+                                        (C-ICTAMY110510)</option>
+                                    <option value="cleancap_ag">CleanCap AG (3'OMe) CleanScript IVT Kit (K-7413)
+                                    </option>
+                                    <option value="mmessage_cleancap">mMESSAGE mMACHINE T7 mRNA Kit with CleanCap
+                                        Reagent AG
+                                        (A57620)</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+
+                            <div id="rnaModificationContainer" class="invisible">
+                                <label for="rnaModification"
+                                    class="block text-sm font-medium text-gray-700 mb-1">Unsilenced/Silenced</label>
+                                <select id="rnaModification"
+                                    class="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="" selected>-- Select RNA modification --</option>
+                                    <option value="uridine">Uridine (unsilenced)</option>
+                                    <option value="n1_methyl_pseudouridine">N1-Methyl-Pseudouridine (silenced)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ROW 3: DNA Template per Reaction, Number of Reactions, Expected RNA Yield -->
+                    <div>
+                        <label for="dnaPerReaction" class="block text-sm font-medium text-gray-700 mb-1">DNA Template
+                            per Reaction</label>
+                        <input type="text" id="dnaPerReaction"
+                            class="formatted-number-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="e.g. 5">
+                    </div>
+
+                    <div>
+                        <label for="numReactions" class="block text-sm font-medium text-gray-700 mb-1">Number of
+                            Reactions</label>
+                        <input type="text" id="numReactions"
+                            class="formatted-number-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="e.g. 3">
+                    </div>
+
+                    <div>
+                        <label for="expectedRnaYield" class="block text-sm font-medium text-gray-700 mb-1">Expected RNA
+                            Yield (µg)</label>
+                        <input type="text" id="expectedRnaYield" class="w-full px-4 py-2 rounded-lg read-only-field"
+                            readonly placeholder="--">
+                    </div>
+
+                </div>
+            </fieldset>
+
+            <!-- Calculate Button -->
+            <div class="text-center border-t border-gray-200 pt-6 mt-8">
+                <button id="calculateBtn"
+                    class="w-full md:w-auto bg-blue-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition-transform transform hover:scale-105 duration-300">
+                    Calculate Reagents
+                </button>
+                <p id="errorMessage" class="error-message">Please fill in all required fields correctly.</p>
+            </div>
+
+        </div>
+
+        <!-- Results Table Section (Hidden by default) -->
+        <div id="tableContainer" class="hidden bg-white rounded-2xl shadow-lg p-6 md:p-8">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-2xl font-bold text-gray-800">IVT Reaction Calculations</h2>
+                <button id="fullViewBtn"
+                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd"
+                            d="M3 4a1 1 0 011-1h4a1 1 0 010 2H6.414l2.293 2.293a1 1 0 11-1.414 1.414L5 6.414V8a1 1 0 01-2 0V4zm9 1a1 1 0 010-2h4a1 1 0 011 1v4a1 1 0 01-2 0V6.414l-2.293 2.293a1 1 0 11-1.414-1.414L13.586 5H12zm-9 7a1 1 0 012 0v1.586l2.293-2.293a1 1 0 111.414 1.414L6.414 15H8a1 1 0 010 2H4a1 1 0 01-1-1v-4zm13-1a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 010-2h1.586l-2.293-2.293a1 1 0 111.414-1.414L15 13.586V12a1 1 0 011-1z"
+                            clip-rule="evenodd" />
+                    </svg>
+                    Full View
+                </button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-gray-600">
+                    <thead class="bg-gray-100 text-gray-700 font-semibold">
+                        <tr>
+                            <th class="px-2 py-3 text-left">Sample ID</th>
+                            <th class="px-2 py-3 text-left">Reactions</th>
+                            <th class="px-2 py-3 text-left">DNA Conc</th>
+                            <th class="px-2 py-3 text-left">DNA Template (µL)</th>
+                            <th class="px-2 py-3 text-left">Water (µL)</th>
+                            <th class="px-2 py-3 text-left">10x IVT Buffer (µL)</th>
+                            <th class="px-2 py-3 text-left">ATP (100mM)</th>
+                            <th class="px-2 py-3 text-left">CTP (100mM)</th>
+                            <th class="px-2 py-3 text-left">GTP (100mM)</th>
+                            <th class="px-2 py-3 text-left">UTP (100mM)</th>
+                            <th class="px-2 py-3 text-left">N1Ψ (100mM)</th>
+                            <th class="px-2 py-3 text-left">CleanCap AG (100mM)</th>
+                            <th class="px-2 py-3 text-left">RNA Polymerase Mix (µL)</th>
+                            <th class="px-2 py-3 text-left">Total Vol (µL)</th>
+                            <th class="px-2 py-3 text-left">Master Mix Vol (µL)</th>
+                            <th class="px-2 py-3 text-left">DNA+Water Mix (µL)</th>
+                            <th class="px-2 py-3 text-left">Turbo DNase (µL)</th>
+                            <th class="px-2 py-3 text-left">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsTableBody">
+                        <!-- Rows will be added here dynamically -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Master Mix Summary Table -->
+            <div id="masterMixContainer" class="mt-8 hidden">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">Master Mix Summary</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-gray-600">
+                        <thead class="bg-blue-100 text-gray-700 font-semibold">
+                            <tr>
+                                <th class="px-4 py-3 text-left">Mix Type</th>
+                                <th class="px-4 py-3 text-left">Reactions</th>
+                                <th class="px-4 py-3 text-left">10x IVT Buffer (µL)</th>
+                                <th class="px-4 py-3 text-left">ATP (100mM)</th>
+                                <th class="px-4 py-3 text-left">CTP (100mM)</th>
+                                <th class="px-4 py-3 text-left">GTP (100mM)</th>
+                                <th class="px-4 py-3 text-left">UTP (100mM)</th>
+                                <th class="px-4 py-3 text-left">N1Ψ (100mM)</th>
+                                <th class="px-4 py-3 text-left">CleanCap AG (100mM)</th>
+                                <th class="px-4 py-3 text-left">RNA Polymerase Mix (µL)</th>
+                                <th class="px-4 py-3 text-left">Total Volume (µL)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="masterMixTableBody">
+                            <!-- Master mix rows will be added here dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Modal -->
+        <div id="editModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+            <div class="relative top-20 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white">
+                <div class="mt-3">
+                    <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Edit IVT Reaction</h3>
+
+                    <!-- Edit Form Fields -->
+                    <fieldset class="border-t border-gray-200 pt-6">
+                        <legend class="text-lg font-semibold text-gray-900 px-2">Reaction Parameters</legend>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-6 mt-4">
+                            <!-- Sample ID -->
+                            <div>
+                                <label for="edit_sampleId" class="block text-sm font-medium text-gray-700 mb-1">Sample
+                                    ID</label>
+                                <input type="text" id="edit_sampleId"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+
+                            <!-- DNA Concentration -->
+                            <div>
+                                <label for="edit_dnaConcentration"
+                                    class="block text-sm font-medium text-gray-700 mb-1">DNA Concentration</label>
+                                <input type="text" id="edit_dnaConcentration"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+
+                            <!-- DNA Template Type -->
+                            <div>
+                                <label for="edit_dnaTemplateType"
+                                    class="block text-sm font-medium text-gray-700 mb-1">DNA Template Type</label>
+                                <select id="edit_dnaTemplateType"
+                                    class="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">-- Select template type --</option>
+                                    <option value="open_plasmid">Open plasmid</option>
+                                    <option value="pcr_cleanup">PCR clean up</option>
+                                    <option value="elegen">Elegen template</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- IVT Kit and RNA Modification Row -->
+                        <div class="md:col-span-3 bg-blue-50 rounded-xl p-6 border border-blue-100 mt-6">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-6">
+                                <div class="md:col-span-2">
+                                    <label for="edit_ivtKit" class="block text-sm font-medium text-gray-700 mb-1">IVT
+                                        Kit</label>
+                                    <select id="edit_ivtKit"
+                                        class="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="">-- Select IVT kit --</option>
+                                        <option value="mmessage_t7">mMESSAGE mMACHINE T7 Transcription Kit (AM1344)
+                                        </option>
+                                        <option value="incognito_t7">INCOGNITO T7 ARCA 5mC- & Ψ-RNA Transcription Kit
+                                            (C-ICTAMY110510)</option>
+                                        <option value="cleancap_ag">CleanCap AG (3'OMe) CleanScript IVT Kit (K-7413)
+                                        </option>
+                                        <option value="mmessage_cleancap">mMESSAGE mMACHINE T7 mRNA Kit with CleanCap
+                                            Reagent AG (A57620)</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+
+                                <div id="edit_rnaModificationContainer">
+                                    <label for="edit_rnaModification"
+                                        class="block text-sm font-medium text-gray-700 mb-1">Unsilenced/Silenced</label>
+                                    <select id="edit_rnaModification"
+                                        class="w-full px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="">-- Select RNA modification --</option>
+                                        <option value="uridine">Uridine (unsilenced)</option>
+                                        <option value="n1_methyl_pseudouridine">N1-Methyl-Pseudouridine (silenced)
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-6 mt-6">
+                            <!-- DNA Template per Reaction -->
+                            <div>
+                                <label for="edit_dnaPerReaction"
+                                    class="block text-sm font-medium text-gray-700 mb-1">DNA Template per
+                                    Reaction</label>
+                                <input type="text" id="edit_dnaPerReaction"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+
+                            <!-- Number of Reactions -->
+                            <div>
+                                <label for="edit_numReactions"
+                                    class="block text-sm font-medium text-gray-700 mb-1">Number of Reactions</label>
+                                <input type="text" id="edit_numReactions"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+
+                            <!-- Expected RNA Yield -->
+                            <div>
+                                <label for="edit_expectedRnaYield"
+                                    class="block text-sm font-medium text-gray-700 mb-1">Expected RNA Yield (µg)</label>
+                                <input type="text" id="edit_expectedRnaYield"
+                                    class="w-full px-4 py-2 rounded-lg read-only-field" readonly>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- Modal Buttons -->
+                    <div class="flex gap-4 justify-end mt-6 pt-6 border-t border-gray-200">
+                        <button id="cancelEditBtn"
+                            class="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                            Cancel
+                        </button>
+                        <button id="updateBtn"
+                            class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            Update
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fullscreen Table Modal -->
+        <div id="fullTableModal"
+            class="fixed inset-0 bg-gray-900 bg-opacity-95 overflow-y-auto h-full w-full hidden z-50">
+            <div class="relative p-8 w-full h-full">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-bold text-white">IVT Reaction Calculations - Full View</h3>
+                    <button id="closeFullViewBtn"
+                        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
+                        Close
+                    </button>
+                </div>
+                <div class="bg-white rounded-lg p-6 overflow-x-auto">
+                    <table id="fullTableClone" class="w-full text-sm text-gray-600">
+                        <!-- Table content will be cloned here -->
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Format number inputs to handle scientific notation and decimals
+        function formatNumberInput(input) {
+            let value = input.value.trim();
+            if (value === '') return;
+
+            // Try to parse the value
+            let num = parseFloat(value);
+            if (!isNaN(num)) {
+                // Keep the original format if it's valid
+                input.value = value;
+            }
+        }
+
+        // Add event listeners to formatted number inputs
+        document.querySelectorAll('.formatted-number-input').forEach(input => {
+            input.addEventListener('blur', function () {
+                formatNumberInput(this);
+            });
+        });
+
+        // Calculate expected RNA yield
+        function calculateExpectedRnaYield() {
+            // Parse value and remove any unit suffixes (µg, ug, etc.)
+            let dnaPerReactionValue = document.getElementById('dnaPerReaction').value;
+            dnaPerReactionValue = dnaPerReactionValue.replace(/\s*(µg|ug)(\s*\(recommended\))?\s*$/i, '').trim();
+            const dnaPerReaction = parseFloat(dnaPerReactionValue);
+
+            const numReactions = parseFloat(document.getElementById('numReactions').value);
+            const expectedRnaYieldField = document.getElementById('expectedRnaYield');
+            const ivtKit = document.getElementById('ivtKit').value;
+
+            // Check if both values are valid
+            if (!isNaN(dnaPerReaction) && dnaPerReaction > 0 && !isNaN(numReactions) && numReactions > 0) {
+                let expectedYield;
+
+                // CleanCap AG kit has specific yield: ~700 µg RNA per reaction
+                if (ivtKit === 'cleancap_ag') {
+                    expectedYield = 700 * numReactions;
+                } else {
+                    // Other kits: typical IVT yield is approximately 30-50 µg RNA per 1 µg DNA template
+                    // Using conservative estimate of 40 µg RNA per µg DNA
+                    const yieldRatio = 40; // µg RNA per µg DNA
+                    const totalDnaMicrograms = dnaPerReaction * numReactions; // Already in µg
+                    expectedYield = totalDnaMicrograms * yieldRatio;
+                }
+
+                // Format with units: convert to mg if >= 1000 µg
+                if (expectedYield >= 1000) {
+                    const yieldInMg = expectedYield / 1000;
+                    expectedRnaYieldField.value = yieldInMg.toFixed(2) + ' mg';
+                } else {
+                    expectedRnaYieldField.value = expectedYield.toFixed(1) + ' µg';
+                }
+            } else {
+                expectedRnaYieldField.value = '--';
+            }
+        }
+
+        // Add event listeners for RNA yield calculation
+        document.getElementById('dnaPerReaction').addEventListener('input', calculateExpectedRnaYield);
+        document.getElementById('numReactions').addEventListener('input', calculateExpectedRnaYield);
+
+        // Format DNA per reaction field with µg unit on blur
+        document.getElementById('dnaPerReaction').addEventListener('blur', function () {
+            let value = this.value.trim();
+            // Remove any existing unit suffix
+            value = value.replace(/\s*(µg|ug)(\s*\(recommended\))?\s*$/i, '').trim();
+            const num = parseFloat(value);
+
+            if (!isNaN(num) && num > 0) {
+                this.dataset.rawValue = num;
+
+                // Check if CleanCap AG is selected and value is 5
+                const ivtKit = document.getElementById('ivtKit').value;
+                if (ivtKit === 'cleancap_ag' && num === 5) {
+                    this.value = num + ' µg (recommended)';
+                } else {
+                    this.value = num + ' µg';
+                }
+            }
+        });
+
+        // Remove µg unit on focus for editing
+        document.getElementById('dnaPerReaction').addEventListener('focus', function () {
+            if (this.dataset.rawValue) {
+                this.value = this.dataset.rawValue;
+            } else {
+                // Fallback: Remove unit suffix and (recommended) text
+                let value = this.value.trim();
+                value = value.replace(/\s*(µg|ug)(\s*\(recommended\))?\s*$/i, '').trim();
+                this.value = value;
+            }
+        });
+
+        // Format DNA concentration field with ng/µL or µg/µL unit on blur
+        document.getElementById('dnaConcentration').addEventListener('blur', function () {
+            let value = this.value.trim();
+            // Remove any existing unit suffix
+            value = value.replace(/\s*(ng\/µL|ng\/uL|µg\/µL|ug\/uL)\s*$/i, '').trim();
+            const num = parseFloat(value);
+
+            if (!isNaN(num) && num > 0) {
+                this.dataset.rawValue = num;
+
+                // Convert to µg/µL if >= 1000 ng/µL
+                if (num >= 1000) {
+                    const concentrationInUg = num / 1000;
+                    this.value = concentrationInUg.toFixed(2) + ' µg/µL';
+                } else {
+                    this.value = num.toFixed(1) + ' ng/µL';
+                }
+            }
+        });
+
+        // Remove unit on focus for editing
+        document.getElementById('dnaConcentration').addEventListener('focus', function () {
+            if (this.dataset.rawValue) {
+                this.value = this.dataset.rawValue;
+            } else {
+                // Fallback: Remove unit suffix
+                let value = this.value.trim();
+                value = value.replace(/\s*(ng\/µL|ng\/uL|µg\/µL|ug\/uL)\s*$/i, '').trim();
+                this.value = value;
+            }
+        });
+
+        // Show/hide RNA modification field based on IVT Kit selection
+        function toggleRnaModificationField() {
+            const ivtKit = document.getElementById('ivtKit').value;
+            const rnaModificationContainer = document.getElementById('rnaModificationContainer');
+            const rnaModificationSelect = document.getElementById('rnaModification');
+
+            if (ivtKit === 'cleancap_ag') {
+                rnaModificationContainer.classList.remove('invisible');
+                rnaModificationContainer.classList.add('visible');
+            } else {
+                rnaModificationContainer.classList.remove('visible');
+                rnaModificationContainer.classList.add('invisible');
+                // Reset the value when hidden
+                rnaModificationSelect.value = '';
+            }
+
+            // Check if we should autopopulate DNA template
+            autopopulateDnaTemplate();
+        }
+
+        // Autopopulate DNA Template per Reaction based on kit and template type
+        function autopopulateDnaTemplate() {
+            const ivtKit = document.getElementById('ivtKit').value;
+            const dnaTemplateType = document.getElementById('dnaTemplateType').value;
+            const dnaPerReactionField = document.getElementById('dnaPerReaction');
+            const numReactionsField = document.getElementById('numReactions');
+
+            // If CleanCap AG is selected with Open Plasmid or PCR Clean Up
+            if (ivtKit === 'cleancap_ag' && (dnaTemplateType === 'open_plasmid' || dnaTemplateType === 'pcr_cleanup')) {
+                dnaPerReactionField.dataset.rawValue = '5';
+                dnaPerReactionField.value = '5 µg (recommended)';
+                numReactionsField.value = '1';
+                // Trigger RNA yield calculation
+                calculateExpectedRnaYield();
+            }
+        }
+
+        // Add event listener for IVT Kit selection
+        document.getElementById('ivtKit').addEventListener('change', toggleRnaModificationField);
+
+        // Add event listener for DNA Template Type selection
+        document.getElementById('dnaTemplateType').addEventListener('change', autopopulateDnaTemplate);
+
+        // Validate form inputs
+        function validateInputs() {
+            const sampleId = document.getElementById('sampleId').value.trim();
+            const dnaTemplateType = document.getElementById('dnaTemplateType').value;
+
+            // Parse dnaConcentration and remove unit suffix
+            let dnaConcentrationValue = document.getElementById('dnaConcentration').value;
+            dnaConcentrationValue = dnaConcentrationValue.replace(/\s*(ng\/µL|ng\/uL|µg\/µL|ug\/uL)\s*$/i, '').trim();
+            const dnaConcentration = parseFloat(dnaConcentrationValue);
+
+            const ivtKit = document.getElementById('ivtKit').value;
+            const rnaModification = document.getElementById('rnaModification').value;
+
+            // Parse dnaPerReaction and remove unit suffix
+            let dnaPerReactionValue = document.getElementById('dnaPerReaction').value;
+            dnaPerReactionValue = dnaPerReactionValue.replace(/\s*(µg|ug)(\s*\(recommended\))?\s*$/i, '').trim();
+            const dnaPerReaction = parseFloat(dnaPerReactionValue);
+
+            const numReactions = parseFloat(document.getElementById('numReactions').value);
+
+            let isValid = true;
+            const errorMessage = document.getElementById('errorMessage');
+
+            // Reset error states
+            document.querySelectorAll('input, select').forEach(el => {
+                el.classList.remove('input-error');
+            });
+
+            if (!sampleId) {
+                document.getElementById('sampleId').classList.add('input-error');
+                isValid = false;
+            }
+            if (!dnaTemplateType) {
+                document.getElementById('dnaTemplateType').classList.add('input-error');
+                isValid = false;
+            }
+            if (isNaN(dnaConcentration) || dnaConcentration <= 0) {
+                document.getElementById('dnaConcentration').classList.add('input-error');
+                isValid = false;
+            }
+            if (!ivtKit) {
+                document.getElementById('ivtKit').classList.add('input-error');
+                isValid = false;
+            }
+            // Only validate RNA modification if CleanCap AG kit is selected
+            if (ivtKit === 'cleancap_ag' && !rnaModification) {
+                document.getElementById('rnaModification').classList.add('input-error');
+                isValid = false;
+            }
+            if (isNaN(dnaPerReaction) || dnaPerReaction <= 0) {
+                document.getElementById('dnaPerReaction').classList.add('input-error');
+                isValid = false;
+            }
+            if (isNaN(numReactions) || numReactions <= 0 || !Number.isInteger(numReactions)) {
+                document.getElementById('numReactions').classList.add('input-error');
+                isValid = false;
+            }
+
+            if (!isValid) {
+                errorMessage.style.display = 'block';
+            } else {
+                errorMessage.style.display = 'none';
+            }
+
+            return isValid;
+        }
+
+        // Calculate button click handler
+        document.getElementById('calculateBtn').addEventListener('click', function () {
+            if (!validateInputs()) {
+                return;
+            }
+
+            // Get form values
+            const sampleId = document.getElementById('sampleId').value.trim();
+
+            // Parse DNA concentration with units
+            let dnaConcentrationValue = document.getElementById('dnaConcentration').value;
+            const dnaConcentrationDisplay = dnaConcentrationValue; // Keep formatted version for display
+
+            // Check if concentration is in µg/µL and convert to ng/µL
+            let dnaConcentrationNgPerUl;
+            if (/µg\/µL|ug\/uL/i.test(dnaConcentrationValue)) {
+                // If in µg/µL, convert to ng/µL
+                const valueInUg = parseFloat(dnaConcentrationValue.replace(/\s*(µg\/µL|ug\/uL)\s*$/i, '').trim());
+                dnaConcentrationNgPerUl = valueInUg * 1000; // Convert µg to ng
+            } else {
+                // Already in ng/µL
+                dnaConcentrationNgPerUl = parseFloat(dnaConcentrationValue.replace(/\s*(ng\/µL|ng\/uL)\s*$/i, '').trim());
+            }
+
+            const rnaModification = document.getElementById('rnaModification').value;
+            const ivtKit = document.getElementById('ivtKit').value;
+
+            // Parse DNA per reaction with units
+            let dnaPerReactionValue = document.getElementById('dnaPerReaction').value;
+            dnaPerReactionValue = dnaPerReactionValue.replace(/\s*(µg|ug)(\s*\(recommended\))?\s*$/i, '').trim();
+            const dnaPerReaction = parseFloat(dnaPerReactionValue);
+
+            const numReactions = parseInt(document.getElementById('numReactions').value);
+
+            // Calculate reagent volumes for 1 reaction (all in µL)
+            const ivtBufferPerReaction = 10;
+            const atpPerReaction = 10;
+            const ctpPerReaction = 10;
+            const gtpPerReaction = 10;
+
+            // For CleanCap AG, use the selected modification; for others, default to UTP
+            let utpPerReaction, n1yPerReaction;
+            if (ivtKit === 'cleancap_ag') {
+                utpPerReaction = (rnaModification === 'uridine') ? 10 : 0;
+                n1yPerReaction = (rnaModification === 'n1_methyl_pseudouridine') ? 10 : 0;
+            } else {
+                // Default to UTP for non-CleanCap AG kits
+                utpPerReaction = 10;
+                n1yPerReaction = 0;
+            }
+
+            const cleanCapAGPerReaction = (ivtKit === 'cleancap_ag') ? 4 : 0;
+            const rnaPolymerasePerReaction = 10;
+
+            // Calculate DNA template volume per reaction
+            // dnaPerReaction is in µg, convert to ng
+            const dnaTemplateNg = dnaPerReaction * 1000; // Convert µg to ng
+            // dnaConcentrationNgPerUl is in ng/µL
+            const dnaTemplateVolPerReaction = dnaTemplateNg / dnaConcentrationNgPerUl;
+
+            // Calculate water per reaction to bring total to 100 µL
+            const totalWithoutWater = ivtBufferPerReaction + atpPerReaction + ctpPerReaction + gtpPerReaction +
+                utpPerReaction + n1yPerReaction + cleanCapAGPerReaction +
+                dnaTemplateVolPerReaction + rnaPolymerasePerReaction;
+            const waterPerReaction = 100 - totalWithoutWater;
+
+            // Multiply all volumes by number of reactions
+            const water = waterPerReaction * numReactions;
+            const ivtBuffer = ivtBufferPerReaction * numReactions;
+            const atp = atpPerReaction * numReactions;
+            const ctp = ctpPerReaction * numReactions;
+            const gtp = gtpPerReaction * numReactions;
+            const utp = utpPerReaction * numReactions;
+            const n1y = n1yPerReaction * numReactions;
+            const cleanCapAG = cleanCapAGPerReaction * numReactions;
+            const dnaTemplateVol = dnaTemplateVolPerReaction * numReactions;
+            const rnaPolymerase = rnaPolymerasePerReaction * numReactions;
+
+            // Total volume for all reactions
+            const totalVol = 100 * numReactions;
+
+            // Master mix (all reagents except water and DNA) for all reactions
+            const masterMixVol = ivtBuffer + atp + ctp + gtp + utp + n1y + cleanCapAG + rnaPolymerase;
+
+            // DNA + Water mix for all reactions
+            const dnaWaterMix = dnaTemplateVol + water;
+
+            // Turbo DNase (5 µL per reaction, added after IVT)
+            const turboDNase = 5 * numReactions;
+
+            // Get original form values for editing
+            const dnaTemplateType = document.getElementById('dnaTemplateType').value;
+
+            // Add row to table - pass both calculated and original values
+            addResultRow(sampleId, dnaConcentrationDisplay, water, ivtBuffer, atp, ctp, gtp, utp, n1y,
+                cleanCapAG, dnaTemplateVol, rnaPolymerase, totalVol, masterMixVol, dnaWaterMix, turboDNase,
+                dnaTemplateType, ivtKit, rnaModification, dnaPerReaction, numReactions);
+
+            // Show table
+            document.getElementById('tableContainer').classList.remove('hidden');
+
+            // Clear form
+            clearForm();
+        });
+
+        function addResultRow(sampleId, dnaConc, water, ivtBuffer, atp, ctp, gtp, utp, n1y,
+            cleanCapAG, dnaTemplate, rnaPolymerase, totalVol, masterMixVol, dnaWaterMix, turboDNase,
+            dnaTemplateType, ivtKit, rnaModification, dnaPerReaction, numReactions) {
+            const tbody = document.getElementById('resultsTableBody');
+            const row = document.createElement('tr');
+            row.className = 'border-b border-gray-200 hover:bg-gray-50';
+
+            row.innerHTML = `
+                <td class="px-2 py-3">${sampleId}</td>
+                <td class="px-2 py-3">${numReactions}</td>
+                <td class="px-2 py-3">${dnaConc}</td>
+                <td class="px-2 py-3">${dnaTemplate.toFixed(2)}</td>
+                <td class="px-2 py-3">${water.toFixed(1)}</td>
+                <td class="px-2 py-3">${ivtBuffer.toFixed(1)}</td>
+                <td class="px-2 py-3">${atp.toFixed(1)}</td>
+                <td class="px-2 py-3">${ctp.toFixed(1)}</td>
+                <td class="px-2 py-3">${gtp.toFixed(1)}</td>
+                <td class="px-2 py-3">${utp > 0 ? utp.toFixed(1) : '-'}</td>
+                <td class="px-2 py-3">${n1y > 0 ? n1y.toFixed(1) : '-'}</td>
+                <td class="px-2 py-3">${cleanCapAG.toFixed(1)}</td>
+                <td class="px-2 py-3">${rnaPolymerase.toFixed(1)}</td>
+                <td class="px-2 py-3">${totalVol.toFixed(1)}</td>
+                <td class="px-2 py-3">${masterMixVol.toFixed(1)}</td>
+                <td class="px-2 py-3">${dnaWaterMix.toFixed(2)}</td>
+                <td class="px-2 py-3">${turboDNase.toFixed(1)}</td>
+                <td class="px-2 py-3">
+                    <div class="flex gap-2">
+                        <button class="duplicate-btn text-green-600 hover:text-green-800" title="Duplicate">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M7 9a2 2 0 012-2h6a2 2 0 012 2v6a2 2 0 01-2 2H9a2 2 0 01-2-2V9z" />
+                                <path d="M5 3a2 2 0 00-2 2v6a2 2 0 002 2V5h8a2 2 0 00-2-2H5z" />
+                            </svg>
+                        </button>
+                        <button class="edit-btn text-blue-600 hover:text-blue-800" title="Edit">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                            </svg>
+                        </button>
+                        <button class="delete-btn text-red-600 hover:text-red-800" title="Delete">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+                </td>
+            `;
+
+            // Store all data in row dataset (both calculated and original values)
+            row.dataset.sampleId = sampleId;
+            row.dataset.dnaConc = dnaConc;
+            row.dataset.dnaTemplateType = String(dnaTemplateType || '');
+            row.dataset.ivtKit = String(ivtKit || '');
+            row.dataset.rnaModification = String(rnaModification || '');
+            row.dataset.dnaPerReaction = String(dnaPerReaction || '');
+            row.dataset.numReactions = String(numReactions || '');
+
+            // Store calculated values
+            row.dataset.water = water;
+            row.dataset.ivtBuffer = ivtBuffer;
+            row.dataset.atp = atp;
+            row.dataset.ctp = ctp;
+            row.dataset.gtp = gtp;
+            row.dataset.utp = utp;
+            row.dataset.n1y = n1y;
+            row.dataset.cleanCapAG = cleanCapAG;
+            row.dataset.dnaTemplate = dnaTemplate;
+            row.dataset.rnaPolymerase = rnaPolymerase;
+            row.dataset.totalVol = totalVol;
+            row.dataset.masterMixVol = masterMixVol;
+            row.dataset.dnaWaterMix = dnaWaterMix;
+            row.dataset.turboDNase = turboDNase;
+
+            // Add duplicate functionality
+            row.querySelector('.duplicate-btn').addEventListener('click', function () {
+                addResultRow(sampleId, dnaConc, water, ivtBuffer, atp, ctp, gtp, utp, n1y,
+                    cleanCapAG, dnaTemplate, rnaPolymerase, totalVol, masterMixVol, dnaWaterMix, turboDNase,
+                    dnaTemplateType, ivtKit, rnaModification, dnaPerReaction, numReactions);
+            });
+
+            // Add edit functionality
+            row.querySelector('.edit-btn').addEventListener('click', function () {
+                const editModal = document.getElementById('editModal');
+
+                // Store reference to the row being edited
+                editModal.dataset.editingRow = Array.from(tbody.children).indexOf(row);
+
+                // Populate modal fields with original input values
+                document.getElementById('edit_sampleId').value = row.dataset.sampleId;
+                document.getElementById('edit_dnaConcentration').value = row.dataset.dnaConc;
+                document.getElementById('edit_dnaTemplateType').value = row.dataset.dnaTemplateType;
+                document.getElementById('edit_ivtKit').value = row.dataset.ivtKit;
+                document.getElementById('edit_rnaModification').value = row.dataset.rnaModification;
+                document.getElementById('edit_dnaPerReaction').value = row.dataset.dnaPerReaction;
+                document.getElementById('edit_numReactions').value = row.dataset.numReactions;
+
+                // Calculate and show expected RNA yield in modal
+                calculateEditExpectedRnaYield();
+
+                // Show modal
+                editModal.classList.remove('hidden');
+            });
+
+            // Add delete functionality
+            row.querySelector('.delete-btn').addEventListener('click', function () {
+                row.remove();
+                // Hide table if no rows left
+                if (tbody.children.length === 0) {
+                    document.getElementById('tableContainer').classList.add('hidden');
+                }
+                // Update master mix summary
+                updateMasterMixSummary();
+            });
+
+            tbody.appendChild(row);
+
+            // Update master mix summary after adding row
+            updateMasterMixSummary();
+        }
+
+        // Calculate and display master mix summary
+        function updateMasterMixSummary() {
+            const tbody = document.getElementById('resultsTableBody');
+            const masterMixTableBody = document.getElementById('masterMixTableBody');
+            const masterMixContainer = document.getElementById('masterMixContainer');
+
+            // Clear existing master mix rows
+            masterMixTableBody.innerHTML = '';
+
+            if (tbody.children.length === 0) {
+                masterMixContainer.classList.add('hidden');
+                return;
+            }
+
+            // Group reactions by type (silenced/unsilenced for CleanCap AG)
+            const groups = {};
+
+            Array.from(tbody.children).forEach(row => {
+                const ivtKit = row.dataset.ivtKit;
+                const rnaModification = row.dataset.rnaModification;
+                const ivtBuffer = parseFloat(row.dataset.ivtBuffer);
+                const atp = parseFloat(row.dataset.atp);
+                const ctp = parseFloat(row.dataset.ctp);
+                const gtp = parseFloat(row.dataset.gtp);
+                const utp = parseFloat(row.dataset.utp);
+                const n1y = parseFloat(row.dataset.n1y);
+                const cleanCapAG = parseFloat(row.dataset.cleanCapAG);
+                const rnaPolymerase = parseFloat(row.dataset.rnaPolymerase);
+                const numReactions = parseInt(row.dataset.numReactions || '0');
+                const sampleId = row.dataset.sampleId;
+
+                // Create group key based on kit and modification
+                let groupKey;
+                // Ensure we have valid values (not empty strings or 'undefined')
+                const hasValidKit = ivtKit && ivtKit !== '' && ivtKit !== 'undefined';
+                const hasValidMod = rnaModification && rnaModification !== '' && rnaModification !== 'undefined';
+
+                if (hasValidKit && ivtKit === 'cleancap_ag') {
+                    if (hasValidMod && rnaModification === 'n1_methyl_pseudouridine') {
+                        groupKey = 'CleanScript Silenced Mix';
+                    } else if (hasValidMod && rnaModification === 'uridine') {
+                        groupKey = 'CleanScript Unsilenced Mix';
+                    } else {
+                        // CleanCap AG but no valid modification - shouldn't happen
+                        groupKey = 'CleanScript Mix (Unknown)';
+                    }
+                } else {
+                    groupKey = 'Standard IVT Mix';
+                }
+
+                if (!groups[groupKey]) {
+                    groups[groupKey] = {
+                        samples: [],
+                        totalReactions: 0,
+                        ivtBuffer: 0,
+                        atp: 0,
+                        ctp: 0,
+                        gtp: 0,
+                        utp: 0,
+                        n1y: 0,
+                        cleanCapAG: 0,
+                        rnaPolymerase: 0
+                    };
+                }
+
+                groups[groupKey].samples.push(sampleId);
+                groups[groupKey].totalReactions += numReactions;
+                groups[groupKey].ivtBuffer += ivtBuffer;
+                groups[groupKey].atp += atp;
+                groups[groupKey].ctp += ctp;
+                groups[groupKey].gtp += gtp;
+                groups[groupKey].utp += utp;
+                groups[groupKey].n1y += n1y;
+                groups[groupKey].cleanCapAG += cleanCapAG;
+                groups[groupKey].rnaPolymerase += rnaPolymerase;
+            });
+
+            // Add rows for each group
+            Object.keys(groups).forEach(groupName => {
+                const group = groups[groupName];
+                const totalVol = group.ivtBuffer + group.atp + group.ctp + group.gtp +
+                    group.utp + group.n1y + group.cleanCapAG + group.rnaPolymerase;
+
+                const row = document.createElement('tr');
+                row.className = 'border-b border-gray-200 hover:bg-blue-50';
+
+                row.innerHTML = `
+                    <td class="px-4 py-3 font-semibold">${groupName}</td>
+                    <td class="px-4 py-3">${group.totalReactions}</td>
+                    <td class="px-4 py-3">${group.ivtBuffer.toFixed(1)}</td>
+                    <td class="px-4 py-3">${group.atp.toFixed(1)}</td>
+                    <td class="px-4 py-3">${group.ctp.toFixed(1)}</td>
+                    <td class="px-4 py-3">${group.gtp.toFixed(1)}</td>
+                    <td class="px-4 py-3">${group.utp > 0 ? group.utp.toFixed(1) : '-'}</td>
+                    <td class="px-4 py-3">${group.n1y > 0 ? group.n1y.toFixed(1) : '-'}</td>
+                    <td class="px-4 py-3">${group.cleanCapAG > 0 ? group.cleanCapAG.toFixed(1) : '-'}</td>
+                    <td class="px-4 py-3">${group.rnaPolymerase.toFixed(1)}</td>
+                    <td class="px-4 py-3 font-semibold">${totalVol.toFixed(1)}</td>
+                `;
+
+                masterMixTableBody.appendChild(row);
+            });
+
+            // Show master mix container
+            masterMixContainer.classList.remove('hidden');
+        }
+
+        function clearForm() {
+            document.getElementById('sampleId').value = '';
+            document.getElementById('dnaTemplateType').value = '';
+            document.getElementById('dnaConcentration').value = '';
+            document.getElementById('ivtKit').value = '';
+            document.getElementById('rnaModification').value = '';
+            document.getElementById('dnaPerReaction').value = '';
+            document.getElementById('numReactions').value = '';
+            document.getElementById('expectedRnaYield').value = '--';
+        }
+
+        // Edit modal field handlers
+        // DNA Concentration focus/blur for edit modal
+        document.getElementById('edit_dnaConcentration').addEventListener('blur', function () {
+            let value = this.value.trim();
+            value = value.replace(/\s*(ng\/µL|ng\/uL|µg\/µL|ug\/uL)\s*$/i, '').trim();
+            const num = parseFloat(value);
+
+            if (!isNaN(num) && num > 0) {
+                this.dataset.rawValue = num;
+                if (num >= 1000) {
+                    const concentrationInUg = num / 1000;
+                    this.value = concentrationInUg.toFixed(2) + ' µg/µL';
+                } else {
+                    this.value = num.toFixed(1) + ' ng/µL';
+                }
+            }
+            calculateEditExpectedRnaYield();
+        });
+
+        document.getElementById('edit_dnaConcentration').addEventListener('focus', function () {
+            if (this.dataset.rawValue) {
+                this.value = this.dataset.rawValue;
+            } else {
+                let value = this.value.trim();
+                value = value.replace(/\s*(ng\/µL|ng\/uL|µg\/µL|ug\/uL)\s*$/i, '').trim();
+                this.value = value;
+            }
+        });
+
+        // DNA per reaction focus/blur for edit modal
+        document.getElementById('edit_dnaPerReaction').addEventListener('blur', function () {
+            let value = this.value.trim();
+            value = value.replace(/\s*(µg|ug)(\s*\(recommended\))?\s*$/i, '').trim();
+            const num = parseFloat(value);
+
+            if (!isNaN(num) && num > 0) {
+                this.dataset.rawValue = num;
+                const ivtKit = document.getElementById('edit_ivtKit').value;
+                if (ivtKit === 'cleancap_ag' && num === 5) {
+                    this.value = num + ' µg (recommended)';
+                } else {
+                    this.value = num + ' µg';
+                }
+            }
+            calculateEditExpectedRnaYield();
+        });
+
+        document.getElementById('edit_dnaPerReaction').addEventListener('focus', function () {
+            if (this.dataset.rawValue) {
+                this.value = this.dataset.rawValue;
+            } else {
+                let value = this.value.trim();
+                value = value.replace(/\s*(µg|ug)(\s*\(recommended\))?\s*$/i, '').trim();
+                this.value = value;
+            }
+        });
+
+        // Calculate expected RNA yield in edit modal
+        function calculateEditExpectedRnaYield() {
+            let dnaPerReactionValue = document.getElementById('edit_dnaPerReaction').value;
+            dnaPerReactionValue = dnaPerReactionValue.replace(/\s*(µg|ug)(\s*\(recommended\))?\s*$/i, '').trim();
+            const dnaPerReaction = parseFloat(dnaPerReactionValue);
+
+            const numReactions = parseInt(document.getElementById('edit_numReactions').value);
+            const expectedRnaYieldField = document.getElementById('edit_expectedRnaYield');
+            const ivtKit = document.getElementById('edit_ivtKit').value;
+
+            if (!isNaN(dnaPerReaction) && dnaPerReaction > 0 && !isNaN(numReactions) && numReactions > 0) {
+                let expectedYield;
+
+                if (ivtKit === 'cleancap_ag') {
+                    expectedYield = 700 * numReactions;
+                } else {
+                    const yieldRatio = 40;
+                    const totalDnaMicrograms = dnaPerReaction * numReactions;
+                    expectedYield = totalDnaMicrograms * yieldRatio;
+                }
+
+                if (expectedYield >= 1000) {
+                    const yieldInMg = expectedYield / 1000;
+                    expectedRnaYieldField.value = yieldInMg.toFixed(2) + ' mg';
+                } else {
+                    expectedRnaYieldField.value = expectedYield.toFixed(1) + ' µg';
+                }
+            } else {
+                expectedRnaYieldField.value = '--';
+            }
+        }
+
+        // Add event listeners for edit modal RNA yield calculation
+        document.getElementById('edit_dnaPerReaction').addEventListener('input', calculateEditExpectedRnaYield);
+        document.getElementById('edit_numReactions').addEventListener('input', calculateEditExpectedRnaYield);
+        document.getElementById('edit_ivtKit').addEventListener('change', calculateEditExpectedRnaYield);
+
+        // Modal handlers
+        const editModal = document.getElementById('editModal');
+        const cancelEditBtn = document.getElementById('cancelEditBtn');
+        const updateBtn = document.getElementById('updateBtn');
+
+        // Close modal on cancel
+        cancelEditBtn.addEventListener('click', function () {
+            editModal.classList.add('hidden');
+        });
+
+        // Update row on save
+        updateBtn.addEventListener('click', function () {
+            const rowIndex = parseInt(editModal.dataset.editingRow);
+            const tbody = document.getElementById('resultsTableBody');
+            const row = tbody.children[rowIndex];
+
+            if (!row) return;
+
+            // Get updated values from modal
+            const sampleId = document.getElementById('edit_sampleId').value.trim();
+            const dnaConc = document.getElementById('edit_dnaConcentration').value.trim();
+            const dnaTemplateType = document.getElementById('edit_dnaTemplateType').value;
+            const ivtKit = document.getElementById('edit_ivtKit').value;
+            const rnaModification = document.getElementById('edit_rnaModification').value;
+
+            let dnaPerReaction = document.getElementById('edit_dnaPerReaction').value.trim();
+            dnaPerReaction = dnaPerReaction.replace(/\s*(µg|ug)(\s*\(recommended\))?\s*$/i, '').trim();
+            const dnaPerReactionNum = parseFloat(dnaPerReaction);
+
+            const numReactions = parseInt(document.getElementById('edit_numReactions').value);
+
+            // Recalculate all values (same logic as main calculation)
+            const ivtBufferPerReaction = 10;
+            const atpPerReaction = 10;
+            const ctpPerReaction = 10;
+            const gtpPerReaction = 10;
+
+            let utpPerReaction, n1yPerReaction;
+            if (ivtKit === 'cleancap_ag') {
+                utpPerReaction = (rnaModification === 'uridine') ? 10 : 0;
+                n1yPerReaction = (rnaModification === 'n1_methyl_pseudouridine') ? 10 : 0;
+            } else {
+                utpPerReaction = 10;
+                n1yPerReaction = 0;
+            }
+
+            const cleanCapAGPerReaction = (ivtKit === 'cleancap_ag') ? 4 : 0;
+            const rnaPolymerasePerReaction = 10;
+
+            // Calculate DNA template volume with unit conversion
+            let dnaConcentrationNgPerUl;
+            if (/µg\/µL|ug\/uL/i.test(dnaConc)) {
+                const valueInUg = parseFloat(dnaConc.replace(/\s*(µg\/µL|ug\/uL)\s*$/i, '').trim());
+                dnaConcentrationNgPerUl = valueInUg * 1000;
+            } else {
+                dnaConcentrationNgPerUl = parseFloat(dnaConc.replace(/\s*(ng\/µL|ng\/uL)\s*$/i, '').trim());
+            }
+
+            const dnaTemplateNg = dnaPerReactionNum * 1000;
+            const dnaTemplateVolPerReaction = dnaTemplateNg / dnaConcentrationNgPerUl;
+
+            const totalWithoutWater = ivtBufferPerReaction + atpPerReaction + ctpPerReaction + gtpPerReaction +
+                utpPerReaction + n1yPerReaction + cleanCapAGPerReaction +
+                dnaTemplateVolPerReaction + rnaPolymerasePerReaction;
+            const waterPerReaction = 100 - totalWithoutWater;
+
+            // Multiply all volumes by number of reactions
+            const water = waterPerReaction * numReactions;
+            const ivtBuffer = ivtBufferPerReaction * numReactions;
+            const atp = atpPerReaction * numReactions;
+            const ctp = ctpPerReaction * numReactions;
+            const gtp = gtpPerReaction * numReactions;
+            const utp = utpPerReaction * numReactions;
+            const n1y = n1yPerReaction * numReactions;
+            const cleanCapAG = cleanCapAGPerReaction * numReactions;
+            const dnaTemplateVol = dnaTemplateVolPerReaction * numReactions;
+            const rnaPolymerase = rnaPolymerasePerReaction * numReactions;
+
+            const totalVol = 100 * numReactions;
+            const masterMixVol = ivtBuffer + atp + ctp + gtp + utp + n1y + cleanCapAG + rnaPolymerase;
+            const dnaWaterMix = dnaTemplateVol + water;
+            const turboDNase = 5 * numReactions;
+
+            // Update the row's dataset with new values
+            row.dataset.sampleId = sampleId;
+            row.dataset.dnaConc = dnaConc;
+            row.dataset.dnaTemplateType = String(dnaTemplateType || '');
+            row.dataset.ivtKit = String(ivtKit || '');
+            row.dataset.rnaModification = String(rnaModification || '');
+            row.dataset.dnaPerReaction = String(dnaPerReactionNum || '');
+            row.dataset.numReactions = String(numReactions || '');
+            row.dataset.water = water;
+            row.dataset.ivtBuffer = ivtBuffer;
+            row.dataset.atp = atp;
+            row.dataset.ctp = ctp;
+            row.dataset.gtp = gtp;
+            row.dataset.utp = utp;
+            row.dataset.n1y = n1y;
+            row.dataset.cleanCapAG = cleanCapAG;
+            row.dataset.dnaTemplate = dnaTemplateVol;
+            row.dataset.rnaPolymerase = rnaPolymerase;
+            row.dataset.totalVol = totalVol;
+            row.dataset.masterMixVol = masterMixVol;
+            row.dataset.dnaWaterMix = dnaWaterMix;
+            row.dataset.turboDNase = turboDNase;
+
+            // Update the row's HTML content
+            row.innerHTML = `
+                <td class="px-2 py-3">${sampleId}</td>
+                <td class="px-2 py-3">${numReactions}</td>
+                <td class="px-2 py-3">${dnaConc}</td>
+                <td class="px-2 py-3">${dnaTemplateVol.toFixed(2)}</td>
+                <td class="px-2 py-3">${water.toFixed(1)}</td>
+                <td class="px-2 py-3">${ivtBuffer.toFixed(1)}</td>
+                <td class="px-2 py-3">${atp.toFixed(1)}</td>
+                <td class="px-2 py-3">${ctp.toFixed(1)}</td>
+                <td class="px-2 py-3">${gtp.toFixed(1)}</td>
+                <td class="px-2 py-3">${utp > 0 ? utp.toFixed(1) : '-'}</td>
+                <td class="px-2 py-3">${n1y > 0 ? n1y.toFixed(1) : '-'}</td>
+                <td class="px-2 py-3">${cleanCapAG.toFixed(1)}</td>
+                <td class="px-2 py-3">${rnaPolymerase.toFixed(1)}</td>
+                <td class="px-2 py-3">${totalVol.toFixed(1)}</td>
+                <td class="px-2 py-3">${masterMixVol.toFixed(1)}</td>
+                <td class="px-2 py-3">${dnaWaterMix.toFixed(2)}</td>
+                <td class="px-2 py-3">${turboDNase.toFixed(1)}</td>
+                <td class="px-2 py-3">
+                    <div class="flex gap-2">
+                        <button class="duplicate-btn text-green-600 hover:text-green-800" title="Duplicate">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M7 9a2 2 0 012-2h6a2 2 0 012 2v6a2 2 0 01-2 2H9a2 2 0 01-2-2V9z" />
+                                <path d="M5 3a2 2 0 00-2 2v6a2 2 0 002 2V5h8a2 2 0 00-2-2H5z" />
+                            </svg>
+                        </button>
+                        <button class="edit-btn text-blue-600 hover:text-blue-800" title="Edit">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                            </svg>
+                        </button>
+                        <button class="delete-btn text-red-600 hover:text-red-800" title="Delete">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+                </td>
+            `;
+
+            // Re-attach event listeners to the updated row's buttons
+            row.querySelector('.duplicate-btn').addEventListener('click', function () {
+                addResultRow(sampleId, dnaConc, water, ivtBuffer, atp, ctp, gtp, utp, n1y,
+                    cleanCapAG, dnaTemplateVol, rnaPolymerase, totalVol, masterMixVol, dnaWaterMix, turboDNase,
+                    dnaTemplateType, ivtKit, rnaModification, dnaPerReactionNum, numReactions);
+            });
+
+            row.querySelector('.edit-btn').addEventListener('click', function () {
+                const editModal = document.getElementById('editModal');
+                editModal.dataset.editingRow = Array.from(tbody.children).indexOf(row);
+                document.getElementById('edit_sampleId').value = row.dataset.sampleId;
+                document.getElementById('edit_dnaConcentration').value = row.dataset.dnaConc;
+                document.getElementById('edit_dnaTemplateType').value = row.dataset.dnaTemplateType;
+                document.getElementById('edit_ivtKit').value = row.dataset.ivtKit;
+                document.getElementById('edit_rnaModification').value = row.dataset.rnaModification;
+                document.getElementById('edit_dnaPerReaction').value = row.dataset.dnaPerReaction;
+                document.getElementById('edit_numReactions').value = row.dataset.numReactions;
+                calculateEditExpectedRnaYield();
+                editModal.classList.remove('hidden');
+            });
+
+            row.querySelector('.delete-btn').addEventListener('click', function () {
+                row.remove();
+                if (tbody.children.length === 0) {
+                    document.getElementById('tableContainer').classList.add('hidden');
+                }
+                updateMasterMixSummary();
+            });
+
+            // Update master mix summary
+            updateMasterMixSummary();
+
+            // Close modal
+            editModal.classList.add('hidden');
+        });
+
+        // Fullscreen table modal handlers
+        const fullViewBtn = document.getElementById('fullViewBtn');
+        const fullTableModal = document.getElementById('fullTableModal');
+        const closeFullViewBtn = document.getElementById('closeFullViewBtn');
+        const fullTableClone = document.getElementById('fullTableClone');
+
+        // Open fullscreen view
+        fullViewBtn.addEventListener('click', function () {
+            // Clone the table
+            const originalTable = document.querySelector('#tableContainer table');
+            fullTableClone.innerHTML = originalTable.innerHTML;
+
+            // Attach event listeners to cloned table buttons
+            const clonedTbody = fullTableClone.querySelector('tbody');
+            const originalTbody = document.getElementById('resultsTableBody');
+
+            Array.from(clonedTbody.children).forEach((clonedRow, index) => {
+                const originalRow = originalTbody.children[index];
+
+                // Duplicate button
+                const duplicateBtn = clonedRow.querySelector('.duplicate-btn');
+                if (duplicateBtn && originalRow) {
+                    duplicateBtn.addEventListener('click', function () {
+                        // Trigger click on original duplicate button
+                        originalRow.querySelector('.duplicate-btn').click();
+                        // Refresh the fullscreen view
+                        setTimeout(() => {
+                            fullTableClone.innerHTML = originalTable.innerHTML;
+                            attachFullscreenListeners();
+                        }, 100);
+                    });
+                }
+
+                // Edit button
+                const editBtn = clonedRow.querySelector('.edit-btn');
+                if (editBtn && originalRow) {
+                    editBtn.addEventListener('click', function () {
+                        // Close fullscreen modal
+                        fullTableModal.classList.add('hidden');
+                        // Trigger click on original edit button
+                        originalRow.querySelector('.edit-btn').click();
+                    });
+                }
+
+                // Delete button
+                const deleteBtn = clonedRow.querySelector('.delete-btn');
+                if (deleteBtn && originalRow) {
+                    deleteBtn.addEventListener('click', function () {
+                        // Trigger click on original delete button
+                        originalRow.querySelector('.delete-btn').click();
+                        // Refresh the fullscreen view
+                        setTimeout(() => {
+                            const updatedTable = document.querySelector('#tableContainer table');
+                            fullTableClone.innerHTML = updatedTable.innerHTML;
+                            attachFullscreenListeners();
+
+                            // Close modal if no rows left
+                            if (originalTbody.children.length === 0) {
+                                fullTableModal.classList.add('hidden');
+                            }
+                        }, 100);
+                    });
+                }
+            });
+
+            // Show modal
+            fullTableModal.classList.remove('hidden');
+        });
+
+        // Helper function to attach listeners (for refresh after duplicate/delete)
+        function attachFullscreenListeners() {
+            const clonedTbody = fullTableClone.querySelector('tbody');
+            const originalTbody = document.getElementById('resultsTableBody');
+            const originalTable = document.querySelector('#tableContainer table');
+
+            Array.from(clonedTbody.children).forEach((clonedRow, index) => {
+                const originalRow = originalTbody.children[index];
+
+                const duplicateBtn = clonedRow.querySelector('.duplicate-btn');
+                if (duplicateBtn && originalRow) {
+                    duplicateBtn.addEventListener('click', function () {
+                        originalRow.querySelector('.duplicate-btn').click();
+                        setTimeout(() => {
+                            fullTableClone.innerHTML = originalTable.innerHTML;
+                            attachFullscreenListeners();
+                        }, 100);
+                    });
+                }
+
+                const editBtn = clonedRow.querySelector('.edit-btn');
+                if (editBtn && originalRow) {
+                    editBtn.addEventListener('click', function () {
+                        fullTableModal.classList.add('hidden');
+                        originalRow.querySelector('.edit-btn').click();
+                    });
+                }
+
+                const deleteBtn = clonedRow.querySelector('.delete-btn');
+                if (deleteBtn && originalRow) {
+                    deleteBtn.addEventListener('click', function () {
+                        originalRow.querySelector('.delete-btn').click();
+                        setTimeout(() => {
+                            const updatedTable = document.querySelector('#tableContainer table');
+                            fullTableClone.innerHTML = updatedTable.innerHTML;
+                            attachFullscreenListeners();
+
+                            if (originalTbody.children.length === 0) {
+                                fullTableModal.classList.add('hidden');
+                            }
+                        }, 100);
+                    });
+                }
+            });
+        }
+
+        // Close fullscreen view
+        closeFullViewBtn.addEventListener('click', function () {
+            fullTableModal.classList.add('hidden');
+        });
+
+        // Close on escape key
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && !fullTableModal.classList.contains('hidden')) {
+                fullTableModal.classList.add('hidden');
+            }
+        });
+    </script>
+
+</body>
+
+</html>
