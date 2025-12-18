@@ -77,6 +77,74 @@
         table td input.read-only-field {
             min-width: 80px;
         }
+
+        /* Print styles */
+        @media print {
+            @page {
+                size: landscape;
+                margin: 0.5cm;
+            }
+
+            body * {
+                visibility: hidden;
+            }
+
+            #fullTableModal,
+            #fullTableModal * {
+                visibility: visible;
+            }
+
+            #fullTableModal {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                background-color: white !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                display: block !important;
+            }
+
+            #fullTableModal .no-print {
+                display: none !important;
+            }
+
+            .bg-gray-900 {
+                background-color: white !important;
+            }
+
+            .text-white {
+                color: black !important;
+            }
+
+            .bg-white {
+                box-shadow: none !important;
+                border: 1px solid #e5e7eb !important;
+            }
+
+            .actions-column {
+                display: none !important;
+                width: 0 !important;
+                padding: 0 !important;
+            }
+
+            table {
+                font-size: 10px !important;
+                table-layout: fixed !important;
+                width: 100% !important;
+            }
+
+            th,
+            td {
+                padding: 4px 2px !important;
+                border: 1px solid #e5e7eb !important;
+            }
+
+            h3 {
+                color: black !important;
+                margin-bottom: 1rem !important;
+            }
+        }
     </style>
 </head>
 
@@ -230,7 +298,7 @@
                             <th class="px-2 py-3 text-left">Master Mix Vol (µL)</th>
                             <th class="px-2 py-3 text-left">DNA+Water Mix (µL)</th>
                             <th class="px-2 py-3 text-left">Turbo DNase (µL)</th>
-                            <th class="px-2 py-3 text-left">Actions</th>
+                            <th class="px-2 py-3 text-left actions-column">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="resultsTableBody">
@@ -389,16 +457,35 @@
         <div id="fullTableModal"
             class="fixed inset-0 bg-gray-900 bg-opacity-95 overflow-y-auto h-full w-full hidden z-50">
             <div class="relative p-8 w-full h-full">
-                <div class="flex justify-between items-center mb-6">
+                <div class="flex justify-between items-center mb-6 no-print">
                     <h3 class="text-2xl font-bold text-white">IVT Reaction Calculations - Full View</h3>
-                    <button id="closeFullViewBtn"
-                        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
-                        Close
-                    </button>
+                    <div class="flex gap-4">
+                        <button id="printFullViewBtn"
+                            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                            Print
+                        </button>
+                        <button id="closeFullViewBtn"
+                            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
+                            Close
+                        </button>
+                    </div>
                 </div>
                 <div class="bg-white rounded-lg p-6 overflow-x-auto">
                     <table id="fullTableClone" class="w-full text-sm text-gray-600">
                         <!-- Table content will be cloned here -->
+                    </table>
+                </div>
+                <!-- Master Mix Summary in Full View -->
+                <div id="fullMasterMixContainer" class="mt-8 bg-white rounded-lg p-6 overflow-x-auto hidden">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">Master Mix Summary</h3>
+                    <table id="fullMasterMixClone" class="w-full text-sm text-gray-600">
+                        <!-- Master mix content will be cloned here -->
                     </table>
                 </div>
             </div>
@@ -773,7 +860,7 @@
                 <td class="px-2 py-3">${masterMixVol.toFixed(1)}</td>
                 <td class="px-2 py-3">${dnaWaterMix.toFixed(2)}</td>
                 <td class="px-2 py-3">${turboDNase.toFixed(1)}</td>
-                <td class="px-2 py-3">
+                <td class="px-2 py-3 actions-column">
                     <div class="flex gap-2">
                         <button class="duplicate-btn text-green-600 hover:text-green-800" title="Duplicate">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -1204,7 +1291,7 @@
                 <td class="px-2 py-3">${masterMixVol.toFixed(1)}</td>
                 <td class="px-2 py-3">${dnaWaterMix.toFixed(2)}</td>
                 <td class="px-2 py-3">${turboDNase.toFixed(1)}</td>
-                <td class="px-2 py-3">
+                <td class="px-2 py-3 actions-column">
                     <div class="flex gap-2">
                         <button class="duplicate-btn text-green-600 hover:text-green-800" title="Duplicate">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -1267,12 +1354,30 @@
         const fullTableModal = document.getElementById('fullTableModal');
         const closeFullViewBtn = document.getElementById('closeFullViewBtn');
         const fullTableClone = document.getElementById('fullTableClone');
+        const fullMasterMixContainer = document.getElementById('fullMasterMixContainer');
+        const fullMasterMixClone = document.getElementById('fullMasterMixClone');
+
+        // Function to sync Master Mix Summary in Full View
+        function syncFullViewMasterMix() {
+            const originalMasterMixContainer = document.getElementById('masterMixContainer');
+            const originalMasterMixTable = document.querySelector('#masterMixContainer table');
+
+            if (originalMasterMixContainer && !originalMasterMixContainer.classList.contains('hidden')) {
+                fullMasterMixClone.innerHTML = originalMasterMixTable.innerHTML;
+                fullMasterMixContainer.classList.remove('hidden');
+            } else {
+                fullMasterMixContainer.classList.add('hidden');
+            }
+        }
 
         // Open fullscreen view
         fullViewBtn.addEventListener('click', function () {
             // Clone the table
             const originalTable = document.querySelector('#tableContainer table');
             fullTableClone.innerHTML = originalTable.innerHTML;
+
+            // Sync Master Mix
+            syncFullViewMasterMix();
 
             // Attach event listeners to cloned table buttons
             const clonedTbody = fullTableClone.querySelector('tbody');
@@ -1290,6 +1395,7 @@
                         // Refresh the fullscreen view
                         setTimeout(() => {
                             fullTableClone.innerHTML = originalTable.innerHTML;
+                            syncFullViewMasterMix();
                             attachFullscreenListeners();
                         }, 100);
                     });
@@ -1316,6 +1422,7 @@
                         setTimeout(() => {
                             const updatedTable = document.querySelector('#tableContainer table');
                             fullTableClone.innerHTML = updatedTable.innerHTML;
+                            syncFullViewMasterMix();
                             attachFullscreenListeners();
 
                             // Close modal if no rows left
@@ -1346,6 +1453,7 @@
                         originalRow.querySelector('.duplicate-btn').click();
                         setTimeout(() => {
                             fullTableClone.innerHTML = originalTable.innerHTML;
+                            syncFullViewMasterMix();
                             attachFullscreenListeners();
                         }, 100);
                     });
@@ -1366,6 +1474,7 @@
                         setTimeout(() => {
                             const updatedTable = document.querySelector('#tableContainer table');
                             fullTableClone.innerHTML = updatedTable.innerHTML;
+                            syncFullViewMasterMix();
                             attachFullscreenListeners();
 
                             if (originalTbody.children.length === 0) {
@@ -1380,6 +1489,11 @@
         // Close fullscreen view
         closeFullViewBtn.addEventListener('click', function () {
             fullTableModal.classList.add('hidden');
+        });
+
+        // Print functionality
+        document.getElementById('printFullViewBtn').addEventListener('click', function () {
+            window.print();
         });
 
         // Close on escape key
