@@ -85,64 +85,77 @@
                 margin: 0.5cm;
             }
 
-            body * {
-                visibility: hidden;
+            body {
+                background: white !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
 
-            #fullTableModal,
-            #fullTableModal * {
-                visibility: visible;
-            }
-
-            #fullTableModal {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                background-color: white !important;
-                padding: 0 !important;
-                margin: 0 !important;
-                display: block !important;
-            }
-
-            #fullTableModal .no-print {
+            /* Standard method to hide everything except the modal */
+            body>*:not(#fullTableModal) {
                 display: none !important;
             }
 
-            .bg-gray-900 {
-                background-color: white !important;
+            #fullTableModal {
+                display: block !important;
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                height: auto !important;
+                background: white !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                visibility: visible !important;
+                overflow: visible !important;
             }
 
-            .text-white {
-                color: black !important;
+            #fullTableModal * {
+                visibility: visible !important;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            /* Container inside modal */
+            #fullTableModal>div {
+                position: static !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 100% !important;
             }
 
             .bg-white {
                 box-shadow: none !important;
-                border: 1px solid #e5e7eb !important;
+                border: 0 !important;
+                padding: 0 !important;
+                margin-bottom: 1.5rem !important;
             }
 
             .actions-column {
                 display: none !important;
-                width: 0 !important;
-                padding: 0 !important;
             }
 
             table {
-                font-size: 10px !important;
-                table-layout: fixed !important;
+                font-size: 9pt !important;
                 width: 100% !important;
+                border-collapse: collapse !important;
+                table-layout: auto !important;
             }
 
             th,
             td {
-                padding: 4px 2px !important;
-                border: 1px solid #e5e7eb !important;
+                padding: 4px !important;
+                border: 1px solid #ddd !important;
+                word-wrap: break-word !important;
             }
 
             h3 {
                 color: black !important;
-                margin-bottom: 1rem !important;
+                margin-top: 1rem !important;
+                margin-bottom: 0.5rem !important;
+                font-size: 14pt !important;
             }
         }
     </style>
@@ -281,24 +294,24 @@
                 <table class="w-full text-sm text-gray-600">
                     <thead class="bg-gray-100 text-gray-700 font-semibold">
                         <tr>
+                            <th class="px-2 py-3 text-left actions-column">Actions</th>
                             <th class="px-2 py-3 text-left">Sample ID</th>
                             <th class="px-2 py-3 text-left">Reactions</th>
                             <th class="px-2 py-3 text-left">DNA Conc</th>
-                            <th class="px-2 py-3 text-left">DNA Template (µL)</th>
-                            <th class="px-2 py-3 text-left">Water (µL)</th>
-                            <th class="px-2 py-3 text-left">10x IVT Buffer (µL)</th>
-                            <th class="px-2 py-3 text-left">ATP (100mM)</th>
-                            <th class="px-2 py-3 text-left">CTP (100mM)</th>
-                            <th class="px-2 py-3 text-left">GTP (100mM)</th>
-                            <th class="px-2 py-3 text-left">UTP (100mM)</th>
-                            <th class="px-2 py-3 text-left">N1Ψ (100mM)</th>
-                            <th class="px-2 py-3 text-left">CleanCap AG (100mM)</th>
-                            <th class="px-2 py-3 text-left">RNA Polymerase Mix (µL)</th>
-                            <th class="px-2 py-3 text-left">Total Vol (µL)</th>
-                            <th class="px-2 py-3 text-left">Master Mix Vol (µL)</th>
-                            <th class="px-2 py-3 text-left">DNA+Water Mix (µL)</th>
-                            <th class="px-2 py-3 text-left">Turbo DNase (µL)</th>
-                            <th class="px-2 py-3 text-left actions-column">Actions</th>
+                            <th class="px-2 py-3 text-left bg-green-100">DNA Template (µL)</th>
+                            <th class="px-2 py-3 text-left bg-green-100">Water (µL)</th>
+                            <th class="px-2 py-3 text-left bg-yellow-100">10x IVT Buffer (µL)</th>
+                            <th class="px-2 py-3 text-left bg-yellow-100">ATP (100mM)</th>
+                            <th class="px-2 py-3 text-left bg-yellow-100">CTP (100mM)</th>
+                            <th class="px-2 py-3 text-left bg-yellow-100">GTP (100mM)</th>
+                            <th class="px-2 py-3 text-left bg-yellow-100">UTP (100mM)</th>
+                            <th class="px-2 py-3 text-left bg-yellow-100">N1Ψ (100mM)</th>
+                            <th class="px-2 py-3 text-left bg-yellow-100">CleanCap AG (100mM)</th>
+                            <th class="px-2 py-3 text-left bg-yellow-100">RNA Polymerase Mix (µL)</th>
+                            <th class="px-2 py-3 text-left bg-gray-200">Total Vol (µL)</th>
+                            <th class="px-2 py-3 text-left bg-gray-200">Master Mix Vol (µL)</th>
+                            <th class="px-2 py-3 text-left bg-gray-200">DNA+Water Mix (µL)</th>
+                            <th class="px-2 py-3 text-left bg-red-100">Turbo DNase (µL)</th>
                         </tr>
                     </thead>
                     <tbody id="resultsTableBody">
@@ -316,6 +329,7 @@
                             <tr>
                                 <th class="px-4 py-3 text-left">Mix Type</th>
                                 <th class="px-4 py-3 text-left">Reactions</th>
+                                <th class="px-4 py-3 text-left">Vol. per reaction (µL)</th>
                                 <th class="px-4 py-3 text-left">10x IVT Buffer (µL)</th>
                                 <th class="px-4 py-3 text-left">ATP (100mM)</th>
                                 <th class="px-4 py-3 text-left">CTP (100mM)</th>
@@ -453,47 +467,94 @@
             </div>
         </div>
 
-        <!-- Fullscreen Table Modal -->
-        <div id="fullTableModal"
-            class="fixed inset-0 bg-gray-900 bg-opacity-95 overflow-y-auto h-full w-full hidden z-50">
-            <div class="relative p-8 w-full h-full">
-                <div class="flex justify-between items-center mb-6 no-print">
-                    <h3 class="text-2xl font-bold text-white">IVT Reaction Calculations - Full View</h3>
-                    <div class="flex gap-4">
-                        <button id="printFullViewBtn"
-                            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20"
-                                fill="currentColor">
-                                <path fill-rule="evenodd"
-                                    d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z"
-                                    clip-rule="evenodd" />
-                            </svg>
-                            Print
-                        </button>
-                        <button id="closeFullViewBtn"
-                            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
-                            Close
-                        </button>
-                    </div>
-                </div>
-                <div class="bg-white rounded-lg p-6 overflow-x-auto">
-                    <table id="fullTableClone" class="w-full text-sm text-gray-600">
-                        <!-- Table content will be cloned here -->
-                    </table>
-                </div>
-                <!-- Master Mix Summary in Full View -->
-                <div id="fullMasterMixContainer" class="mt-8 bg-white rounded-lg p-6 overflow-x-auto hidden">
-                    <h3 class="text-xl font-bold text-gray-800 mb-4">Master Mix Summary</h3>
-                    <table id="fullMasterMixClone" class="w-full text-sm text-gray-600">
-                        <!-- Master mix content will be cloned here -->
-                    </table>
-                </div>
-            </div>
-        </div>
+    </div>
+    </div>
 
     </div>
 
+    <!-- Fullscreen Table Modal (Moved to body level for printing) -->
+    <div id="fullTableModal" class="fixed inset-0 bg-gray-900 bg-opacity-95 overflow-y-auto h-full w-full hidden z-50">
+        <div class="relative p-8 w-full h-full">
+            <div class="flex justify-between items-center mb-6 no-print">
+                <h3 class="text-2xl font-bold text-white">IVT Reaction Calculations - Full View</h3>
+                <div class="flex gap-4">
+                    <button id="printFullViewBtn"
+                        class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        Print
+                    </button>
+                    <button id="closeFullViewBtn"
+                        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
+                        Close
+                    </button>
+                </div>
+            </div>
+            <div class="bg-white rounded-lg p-6 overflow-x-auto mb-8">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">IVT Reactions</h3>
+                <table id="fullTableClone" class="w-full text-sm text-gray-600 border-collapse">
+                    <!-- Table content will be cloned here -->
+                </table>
+            </div>
+            <!-- Master Mix Summary in Full View -->
+            <div id="fullMasterMixContainer" class="mt-8 bg-white rounded-lg p-6 overflow-x-auto hidden">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">Master Mix Summary</h3>
+                <table id="fullMasterMixClone" class="w-full text-sm text-gray-600">
+                    <!-- Master mix content will be cloned here -->
+                </table>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // Save table data to LocalStorage
+        function saveToLocalStorage() {
+            const tbody = document.getElementById('resultsTableBody');
+            const data = Array.from(tbody.children).map(row => row.dataset);
+            localStorage.setItem('ivtCalculations', JSON.stringify(data));
+        }
+
+        // Load table data from LocalStorage
+        function loadFromLocalStorage() {
+            const savedData = localStorage.getItem('ivtCalculations');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                data.forEach(item => {
+                    // Convert dataset strings back to numbers where appropriate
+                    addResultRow(
+                        item.sampleId,
+                        item.dnaConc,
+                        parseFloat(item.water),
+                        parseFloat(item.ivtBuffer),
+                        parseFloat(item.atp),
+                        parseFloat(item.ctp),
+                        parseFloat(item.gtp),
+                        parseFloat(item.utp),
+                        parseFloat(item.n1y),
+                        parseFloat(item.cleanCapAG),
+                        parseFloat(item.dnaTemplate),
+                        parseFloat(item.rnaPolymerase),
+                        parseFloat(item.totalVol),
+                        parseFloat(item.masterMixVol),
+                        parseFloat(item.dnaWaterMix),
+                        parseFloat(item.turboDNase),
+                        item.dnaTemplateType,
+                        item.ivtKit,
+                        item.rnaModification,
+                        parseFloat(item.dnaPerReaction),
+                        parseInt(item.numReactions)
+                    );
+                });
+
+                if (data.length > 0) {
+                    document.getElementById('tableContainer').classList.remove('hidden');
+                }
+            }
+        }
+
         // Format number inputs to handle scientific notation and decimals
         function formatNumberInput(input) {
             let value = input.value.trim();
@@ -843,26 +904,19 @@
             row.className = 'border-b border-gray-200 hover:bg-gray-50';
 
             row.innerHTML = `
-                <td class="px-2 py-3">${sampleId}</td>
-                <td class="px-2 py-3">${numReactions}</td>
-                <td class="px-2 py-3">${dnaConc}</td>
-                <td class="px-2 py-3">${dnaTemplate.toFixed(2)}</td>
-                <td class="px-2 py-3">${water.toFixed(1)}</td>
-                <td class="px-2 py-3">${ivtBuffer.toFixed(1)}</td>
-                <td class="px-2 py-3">${atp.toFixed(1)}</td>
-                <td class="px-2 py-3">${ctp.toFixed(1)}</td>
-                <td class="px-2 py-3">${gtp.toFixed(1)}</td>
-                <td class="px-2 py-3">${utp > 0 ? utp.toFixed(1) : '-'}</td>
-                <td class="px-2 py-3">${n1y > 0 ? n1y.toFixed(1) : '-'}</td>
-                <td class="px-2 py-3">${cleanCapAG.toFixed(1)}</td>
-                <td class="px-2 py-3">${rnaPolymerase.toFixed(1)}</td>
-                <td class="px-2 py-3">${totalVol.toFixed(1)}</td>
-                <td class="px-2 py-3">${masterMixVol.toFixed(1)}</td>
-                <td class="px-2 py-3">${dnaWaterMix.toFixed(2)}</td>
-                <td class="px-2 py-3">${turboDNase.toFixed(1)}</td>
                 <td class="px-2 py-3 actions-column">
-                    <div class="flex gap-2">
-                        <button class="duplicate-btn text-green-600 hover:text-green-800" title="Duplicate">
+                    <div class="flex gap-1 items-center">
+                        <button class="up-btn text-gray-500 hover:text-gray-700" title="Move Up">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                            </svg>
+                        </button>
+                        <button class="down-btn text-gray-500 hover:text-gray-700" title="Move Down">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <button class="duplicate-btn text-green-600 hover:text-green-800 ml-1" title="Duplicate">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                 <path d="M7 9a2 2 0 012-2h6a2 2 0 012 2v6a2 2 0 01-2 2H9a2 2 0 01-2-2V9z" />
                                 <path d="M5 3a2 2 0 00-2 2v6a2 2 0 002 2V5h8a2 2 0 00-2-2H5z" />
@@ -880,6 +934,23 @@
                         </button>
                     </div>
                 </td>
+                <td class="px-2 py-3">${sampleId}</td>
+                <td class="px-2 py-3">${numReactions}</td>
+                <td class="px-2 py-3">${dnaConc}</td>
+                <td class="px-2 py-3 bg-green-50">${dnaTemplate.toFixed(2)}</td>
+                <td class="px-2 py-3 bg-green-50">${water.toFixed(1)}</td>
+                <td class="px-2 py-3 bg-yellow-50">${ivtBuffer.toFixed(1)}</td>
+                <td class="px-2 py-3 bg-yellow-50">${atp.toFixed(1)}</td>
+                <td class="px-2 py-3 bg-yellow-50">${ctp.toFixed(1)}</td>
+                <td class="px-2 py-3 bg-yellow-50">${gtp.toFixed(1)}</td>
+                <td class="px-2 py-3 bg-yellow-50">${utp > 0 ? utp.toFixed(1) : '-'}</td>
+                <td class="px-2 py-3 bg-yellow-50">${n1y > 0 ? n1y.toFixed(1) : '-'}</td>
+                <td class="px-2 py-3 bg-yellow-50">${cleanCapAG.toFixed(1)}</td>
+                <td class="px-2 py-3 bg-yellow-50">${rnaPolymerase.toFixed(1)}</td>
+                <td class="px-2 py-3 bg-gray-100">${totalVol.toFixed(1)}</td>
+                <td class="px-2 py-3 bg-gray-100">${masterMixVol.toFixed(1)}</td>
+                <td class="px-2 py-3 bg-gray-100">${dnaWaterMix.toFixed(2)}</td>
+                <td class="px-2 py-3 bg-red-50">${turboDNase.toFixed(1)}</td>
             `;
 
             // Store all data in row dataset (both calculated and original values)
@@ -937,6 +1008,24 @@
                 editModal.classList.remove('hidden');
             });
 
+            // Add Move Up functionality
+            row.querySelector('.up-btn').addEventListener('click', function () {
+                const prevRow = row.previousElementSibling;
+                if (prevRow) {
+                    tbody.insertBefore(row, prevRow);
+                    updateMasterMixSummary(); // Triggers save and MM update
+                }
+            });
+
+            // Add Move Down functionality
+            row.querySelector('.down-btn').addEventListener('click', function () {
+                const nextRow = row.nextElementSibling;
+                if (nextRow) {
+                    tbody.insertBefore(nextRow, row);
+                    updateMasterMixSummary(); // Triggers save and MM update
+                }
+            });
+
             // Add delete functionality
             row.querySelector('.delete-btn').addEventListener('click', function () {
                 row.remove();
@@ -965,6 +1054,7 @@
 
             if (tbody.children.length === 0) {
                 masterMixContainer.classList.add('hidden');
+                saveToLocalStorage();
                 return;
             }
 
@@ -1036,6 +1126,7 @@
                 const group = groups[groupName];
                 const totalVol = group.ivtBuffer + group.atp + group.ctp + group.gtp +
                     group.utp + group.n1y + group.cleanCapAG + group.rnaPolymerase;
+                const volPerReaction = group.totalReactions > 0 ? (totalVol / group.totalReactions) : 0;
 
                 const row = document.createElement('tr');
                 row.className = 'border-b border-gray-200 hover:bg-blue-50';
@@ -1043,6 +1134,7 @@
                 row.innerHTML = `
                     <td class="px-4 py-3 font-semibold">${groupName}</td>
                     <td class="px-4 py-3">${group.totalReactions}</td>
+                    <td class="px-4 py-3">${volPerReaction.toFixed(1)}</td>
                     <td class="px-4 py-3">${group.ivtBuffer.toFixed(1)}</td>
                     <td class="px-4 py-3">${group.atp.toFixed(1)}</td>
                     <td class="px-4 py-3">${group.ctp.toFixed(1)}</td>
@@ -1059,6 +1151,9 @@
 
             // Show master mix container
             masterMixContainer.classList.remove('hidden');
+
+            // Save to LocalStorage
+            saveToLocalStorage();
         }
 
         function clearForm() {
@@ -1274,26 +1369,19 @@
 
             // Update the row's HTML content
             row.innerHTML = `
-                <td class="px-2 py-3">${sampleId}</td>
-                <td class="px-2 py-3">${numReactions}</td>
-                <td class="px-2 py-3">${dnaConc}</td>
-                <td class="px-2 py-3">${dnaTemplateVol.toFixed(2)}</td>
-                <td class="px-2 py-3">${water.toFixed(1)}</td>
-                <td class="px-2 py-3">${ivtBuffer.toFixed(1)}</td>
-                <td class="px-2 py-3">${atp.toFixed(1)}</td>
-                <td class="px-2 py-3">${ctp.toFixed(1)}</td>
-                <td class="px-2 py-3">${gtp.toFixed(1)}</td>
-                <td class="px-2 py-3">${utp > 0 ? utp.toFixed(1) : '-'}</td>
-                <td class="px-2 py-3">${n1y > 0 ? n1y.toFixed(1) : '-'}</td>
-                <td class="px-2 py-3">${cleanCapAG.toFixed(1)}</td>
-                <td class="px-2 py-3">${rnaPolymerase.toFixed(1)}</td>
-                <td class="px-2 py-3">${totalVol.toFixed(1)}</td>
-                <td class="px-2 py-3">${masterMixVol.toFixed(1)}</td>
-                <td class="px-2 py-3">${dnaWaterMix.toFixed(2)}</td>
-                <td class="px-2 py-3">${turboDNase.toFixed(1)}</td>
                 <td class="px-2 py-3 actions-column">
-                    <div class="flex gap-2">
-                        <button class="duplicate-btn text-green-600 hover:text-green-800" title="Duplicate">
+                    <div class="flex gap-1 items-center">
+                        <button class="up-btn text-gray-500 hover:text-gray-700" title="Move Up">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                            </svg>
+                        </button>
+                        <button class="down-btn text-gray-500 hover:text-gray-700" title="Move Down">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </button>
+                        <button class="duplicate-btn text-green-600 hover:text-green-800 ml-1" title="Duplicate">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                 <path d="M7 9a2 2 0 012-2h6a2 2 0 012 2v6a2 2 0 01-2 2H9a2 2 0 01-2-2V9z" />
                                 <path d="M5 3a2 2 0 00-2 2v6a2 2 0 002 2V5h8a2 2 0 00-2-2H5z" />
@@ -1311,9 +1399,42 @@
                         </button>
                     </div>
                 </td>
+                <td class="px-2 py-3">${sampleId}</td>
+                <td class="px-2 py-3">${numReactions}</td>
+                <td class="px-2 py-3">${dnaConc}</td>
+                <td class="px-2 py-3 bg-green-50">${dnaTemplateVol.toFixed(2)}</td>
+                <td class="px-2 py-3 bg-green-50">${water.toFixed(1)}</td>
+                <td class="px-2 py-3 bg-yellow-50">${ivtBuffer.toFixed(1)}</td>
+                <td class="px-2 py-3 bg-yellow-50">${atp.toFixed(1)}</td>
+                <td class="px-2 py-3 bg-yellow-50">${ctp.toFixed(1)}</td>
+                <td class="px-2 py-3 bg-yellow-50">${gtp.toFixed(1)}</td>
+                <td class="px-2 py-3 bg-yellow-50">${utp > 0 ? utp.toFixed(1) : '-'}</td>
+                <td class="px-2 py-3 bg-yellow-50">${n1y > 0 ? n1y.toFixed(1) : '-'}</td>
+                <td class="px-2 py-3 bg-yellow-50">${cleanCapAG.toFixed(1)}</td>
+                <td class="px-2 py-3 bg-yellow-50">${rnaPolymerase.toFixed(1)}</td>
+                <td class="px-2 py-3 bg-gray-100">${totalVol.toFixed(1)}</td>
+                <td class="px-2 py-3 bg-gray-100">${masterMixVol.toFixed(1)}</td>
+                <td class="px-2 py-3 bg-gray-100">${dnaWaterMix.toFixed(2)}</td>
+                <td class="px-2 py-3 bg-red-50">${turboDNase.toFixed(1)}</td>
             `;
 
             // Re-attach event listeners to the updated row's buttons
+            row.querySelector('.up-btn').addEventListener('click', function () {
+                const prevRow = row.previousElementSibling;
+                if (prevRow) {
+                    tbody.insertBefore(row, prevRow);
+                    updateMasterMixSummary();
+                }
+            });
+
+            row.querySelector('.down-btn').addEventListener('click', function () {
+                const nextRow = row.nextElementSibling;
+                if (nextRow) {
+                    tbody.insertBefore(nextRow, row);
+                    updateMasterMixSummary();
+                }
+            });
+
             row.querySelector('.duplicate-btn').addEventListener('click', function () {
                 addResultRow(sampleId, dnaConc, water, ivtBuffer, atp, ctp, gtp, utp, n1y,
                     cleanCapAG, dnaTemplateVol, rnaPolymerase, totalVol, masterMixVol, dnaWaterMix, turboDNase,
@@ -1380,59 +1501,7 @@
             syncFullViewMasterMix();
 
             // Attach event listeners to cloned table buttons
-            const clonedTbody = fullTableClone.querySelector('tbody');
-            const originalTbody = document.getElementById('resultsTableBody');
-
-            Array.from(clonedTbody.children).forEach((clonedRow, index) => {
-                const originalRow = originalTbody.children[index];
-
-                // Duplicate button
-                const duplicateBtn = clonedRow.querySelector('.duplicate-btn');
-                if (duplicateBtn && originalRow) {
-                    duplicateBtn.addEventListener('click', function () {
-                        // Trigger click on original duplicate button
-                        originalRow.querySelector('.duplicate-btn').click();
-                        // Refresh the fullscreen view
-                        setTimeout(() => {
-                            fullTableClone.innerHTML = originalTable.innerHTML;
-                            syncFullViewMasterMix();
-                            attachFullscreenListeners();
-                        }, 100);
-                    });
-                }
-
-                // Edit button
-                const editBtn = clonedRow.querySelector('.edit-btn');
-                if (editBtn && originalRow) {
-                    editBtn.addEventListener('click', function () {
-                        // Close fullscreen modal
-                        fullTableModal.classList.add('hidden');
-                        // Trigger click on original edit button
-                        originalRow.querySelector('.edit-btn').click();
-                    });
-                }
-
-                // Delete button
-                const deleteBtn = clonedRow.querySelector('.delete-btn');
-                if (deleteBtn && originalRow) {
-                    deleteBtn.addEventListener('click', function () {
-                        // Trigger click on original delete button
-                        originalRow.querySelector('.delete-btn').click();
-                        // Refresh the fullscreen view
-                        setTimeout(() => {
-                            const updatedTable = document.querySelector('#tableContainer table');
-                            fullTableClone.innerHTML = updatedTable.innerHTML;
-                            syncFullViewMasterMix();
-                            attachFullscreenListeners();
-
-                            // Close modal if no rows left
-                            if (originalTbody.children.length === 0) {
-                                fullTableModal.classList.add('hidden');
-                            }
-                        }, 100);
-                    });
-                }
-            });
+            attachFullscreenListeners();
 
             // Show modal
             fullTableModal.classList.remove('hidden');
@@ -1446,9 +1515,36 @@
 
             Array.from(clonedTbody.children).forEach((clonedRow, index) => {
                 const originalRow = originalTbody.children[index];
+                if (!originalRow) return;
+
+                // Move Up button
+                const upBtn = clonedRow.querySelector('.up-btn');
+                if (upBtn) {
+                    upBtn.addEventListener('click', function () {
+                        originalRow.querySelector('.up-btn').click();
+                        setTimeout(() => {
+                            fullTableClone.innerHTML = originalTable.innerHTML;
+                            syncFullViewMasterMix();
+                            attachFullscreenListeners();
+                        }, 50);
+                    });
+                }
+
+                // Move Down button
+                const downBtn = clonedRow.querySelector('.down-btn');
+                if (downBtn) {
+                    downBtn.addEventListener('click', function () {
+                        originalRow.querySelector('.down-btn').click();
+                        setTimeout(() => {
+                            fullTableClone.innerHTML = originalTable.innerHTML;
+                            syncFullViewMasterMix();
+                            attachFullscreenListeners();
+                        }, 50);
+                    });
+                }
 
                 const duplicateBtn = clonedRow.querySelector('.duplicate-btn');
-                if (duplicateBtn && originalRow) {
+                if (duplicateBtn) {
                     duplicateBtn.addEventListener('click', function () {
                         originalRow.querySelector('.duplicate-btn').click();
                         setTimeout(() => {
@@ -1460,7 +1556,7 @@
                 }
 
                 const editBtn = clonedRow.querySelector('.edit-btn');
-                if (editBtn && originalRow) {
+                if (editBtn) {
                     editBtn.addEventListener('click', function () {
                         fullTableModal.classList.add('hidden');
                         originalRow.querySelector('.edit-btn').click();
@@ -1468,7 +1564,7 @@
                 }
 
                 const deleteBtn = clonedRow.querySelector('.delete-btn');
-                if (deleteBtn && originalRow) {
+                if (deleteBtn) {
                     deleteBtn.addEventListener('click', function () {
                         originalRow.querySelector('.delete-btn').click();
                         setTimeout(() => {
@@ -1502,6 +1598,9 @@
                 fullTableModal.classList.add('hidden');
             }
         });
+
+        // Load data on page init
+        loadFromLocalStorage();
     </script>
 
 </body>
