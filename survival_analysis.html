@@ -44,6 +44,11 @@
             background-color: #7f1d1d !important;
             color: white !important;
         }
+
+        .group-toggle-btn {
+            cursor: pointer;
+            user-select: none;
+        }
     </style>
 </head>
 
@@ -158,21 +163,30 @@
             <!-- Summary Stats -->
             <div class="bg-gray-800 rounded-lg shadow-lg p-6 mb-8 border border-gray-700">
                 <h2 class="text-2xl font-bold text-white mb-4">Experiment Summary</h2>
-                <p class="text-gray-300"><strong>Experiment ID:</strong> <span id="experimentIdDisplay"></span></p>
-                <p class="text-gray-300"><strong>Start Date:</strong> <span id="startDate"></span></p>
-                <div class="mt-4">
+                <div class="flex flex-wrap items-center justify-between gap-4">
+                    <div class="space-y-1">
+                        <p class="text-gray-300"><strong>Experiment ID:</strong> <span id="experimentIdDisplay"></span>
+                        </p>
+                        <p class="text-gray-300"><strong>Start Date:</strong> <span id="startDate"></span></p>
+                    </div>
                     <button id="exportPrismBtn"
-                        class="bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded-lg transition-colors">
+                        class="bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-6 rounded-lg transition-colors">
                         Export data for Prism
                     </button>
                 </div>
             </div>
 
-            <!-- Statistical Analysis -->
+            <!-- Groups to Display Toggle Menu -->
             <div class="bg-gray-800 rounded-lg shadow-lg p-6 mb-8 border border-gray-700">
-                <h2 class="text-2xl font-bold text-white mb-4">Statistical Analysis</h2>
-                <div id="statisticalResults" class="space-y-4">
-                    <!-- Statistical results will be inserted here -->
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-white mb-1">Groups to Display</h2>
+                        <p class="text-sm text-gray-400 italic">Toggle groups to compare specific samples in the chart
+                            and statistics.</p>
+                    </div>
+                    <div id="groupTogglesContainer" class="flex flex-wrap gap-2">
+                        <!-- Toggle buttons will be dynamically inserted here -->
+                    </div>
                 </div>
             </div>
 
@@ -194,6 +208,14 @@
                 </div>
                 <div class="chart-container">
                     <canvas id="survivalChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Statistical Analysis -->
+            <div class="bg-gray-800 rounded-lg shadow-lg p-6 mb-8 border border-gray-700">
+                <h2 class="text-2xl font-bold text-white mb-4">Statistical Analysis</h2>
+                <div id="statisticalResults" class="space-y-4">
+                    <!-- Statistical results will be inserted here -->
                 </div>
             </div>
 
@@ -270,6 +292,7 @@
         const errorTextSpan = document.getElementById('error-text');
         const jitterCheckbox = document.getElementById('jitterCheckbox');
         const chartColorPicker = document.getElementById('chartColorPicker');
+        const groupTogglesContainer = document.getElementById('groupTogglesContainer');
 
         // Experiment Browser Modal
         const browserModal = document.getElementById('experimentBrowserModal');
@@ -286,7 +309,9 @@
 
         let survivalChart = null;
         let groupCounter = 0;
-        let currentChartDatasets = []; // Store datasets for re-rendering
+        let currentChartDatasets = []; // Store currently rendered datasets
+        let allChartDatasets = []; // Store ALL datasets base state
+        let allParsedGroups = {}; // Store ALL groups base state
         let selectedDatasetIndex = -1; // Track which dataset is being colored
 
         // Persistence Constants
@@ -318,9 +343,29 @@
         chartColorPicker.addEventListener('input', (e) => {
             if (selectedDatasetIndex !== -1 && survivalChart) {
                 const newColor = e.target.value;
+                const datasetLabel = survivalChart.data.datasets[selectedDatasetIndex].label;
+
+                // Update current chart
                 survivalChart.data.datasets[selectedDatasetIndex].borderColor = newColor;
                 survivalChart.data.datasets[selectedDatasetIndex].backgroundColor = newColor + '33';
                 survivalChart.update();
+
+                // Persistence: Update the master dataset color
+                const masterDataset = allChartDatasets.find(ds => ds.label === datasetLabel);
+                if (masterDataset) {
+                    masterDataset.borderColor = newColor;
+                    masterDataset.backgroundColor = newColor + '33';
+                }
+
+                // Update the toggle button color too
+                const toggleBtn = document.querySelector(`.group-toggle-btn[data-group-name="${datasetLabel}"]`);
+                if (toggleBtn) {
+                    toggleBtn.style.borderColor = newColor;
+                    if (toggleBtn.classList.contains('active-toggle')) {
+                        toggleBtn.style.backgroundColor = newColor + '22';
+                    }
+                    toggleBtn.querySelector('span').style.backgroundColor = newColor;
+                }
             }
         });
 
@@ -705,17 +750,96 @@
                 colorIndex++;
             }
 
-            // --- 4. Display Everything ---
+            // --- 4. Store and Display Everything ---
             if (chartDatasets.length === 0) {
                 showError("No valid data found to analyze. Please check your entries.");
                 return;
             }
-            displayDataTables(groups);
-            const statisticalData = performStatisticalAnalysis(groups);
-            currentChartDatasets = JSON.parse(JSON.stringify(chartDatasets)); // Deep copy for jittering
-            renderSurvivalChart(currentChartDatasets, statisticalData);
+
+            // Save global state
+            allParsedGroups = groups;
+            allChartDatasets = JSON.parse(JSON.stringify(chartDatasets));
+
+            // Create toggles
+            createGroupToggles(Object.keys(groups));
+
+            // Run initial update
+            updateAnalysisUI();
+
             resultsSection.classList.remove('hidden');
             window.scrollTo({ top: resultsSection.offsetTop, behavior: 'smooth' });
+        }
+
+        function createGroupToggles(groupNames) {
+            groupTogglesContainer.innerHTML = '';
+            groupNames.forEach(groupName => {
+                const dataset = allChartDatasets.find(ds => ds.label === groupName);
+                if (!dataset) return;
+
+                const button = document.createElement('button');
+                button.className = 'group-toggle-btn px-4 py-2 rounded-full text-sm font-semibold transition-all border-2 active-toggle hover:scale-105 active:scale-95';
+                button.dataset.groupName = groupName;
+                button.style.borderColor = dataset.borderColor;
+                button.style.backgroundColor = dataset.borderColor + '22';
+                button.style.color = 'white';
+
+                button.innerHTML = `
+                    <span class="inline-block w-3 h-3 rounded-full mr-2" style="background-color: ${dataset.borderColor}"></span>
+                    ${groupName}
+                `;
+
+                button.onclick = () => {
+                    button.classList.toggle('active-toggle');
+                    button.classList.toggle('inactive-toggle');
+
+                    if (button.classList.contains('active-toggle')) {
+                        button.style.backgroundColor = dataset.borderColor + '22';
+                        button.style.opacity = '1';
+                    } else {
+                        button.style.backgroundColor = 'transparent';
+                        button.style.opacity = '0.4';
+                    }
+
+                    updateAnalysisUI();
+                };
+
+                groupTogglesContainer.appendChild(button);
+            });
+        }
+
+        function updateAnalysisUI() {
+            // Get active groups from toggles
+            const activeGroupButtons = Array.from(document.querySelectorAll('.group-toggle-btn.active-toggle'));
+            const activeGroupNames = activeGroupButtons.map(btn => btn.dataset.groupName);
+
+            if (activeGroupNames.length === 0) {
+                // Show error or empty state if no groups selected
+                dataTablesContainer.innerHTML = '<p class="text-gray-400 col-span-full text-center py-8">Select at least one group to display results.</p>';
+                statisticalResults.innerHTML = '<p class="text-gray-400">Select groups to see statistical analysis.</p>';
+                if (survivalChart) survivalChart.destroy();
+                survivalChart = null;
+                return;
+            }
+
+            // Filter groups
+            const filteredGroups = {};
+            activeGroupNames.forEach(name => {
+                filteredGroups[name] = allParsedGroups[name];
+            });
+
+            // Filter datasets (keeping original colors)
+            const filteredDatasets = allChartDatasets
+                .filter(ds => activeGroupNames.includes(ds.label))
+                .map(ds => JSON.parse(JSON.stringify(ds))); // Deep copy for jittering
+
+            // Display components
+            displayDataTables(filteredGroups);
+            const statisticalData = performStatisticalAnalysis(filteredGroups);
+
+            // Set currentChartDatasets for jitter handling
+            currentChartDatasets = filteredDatasets;
+
+            renderSurvivalChart(currentChartDatasets, statisticalData);
         }
 
         function performStatisticalAnalysis(groups) {
@@ -729,29 +853,9 @@
             let resultsHTML = '';
             const comparisonResults = [];
 
-            // Calculate median survival for each group
-            resultsHTML += '<div class="mb-6"><h3 class="text-lg font-semibold text-white mb-3">Median Survival Times</h3>';
-            resultsHTML += '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">';
-
-            const medianSurvivalTimes = {};
-            groupNames.forEach(groupName => {
-                const groupData = groups[groupName].data;
-                const medianSurvival = calculateMedianSurvival(groupData);
-                medianSurvivalTimes[groupName] = medianSurvival;
-
-                resultsHTML += `
-                    <div class="bg-gray-700/50 p-4 rounded-lg border border-gray-600">
-                        <h4 class="font-semibold text-white">${groupName}</h4>
-                        <p class="text-2xl font-bold text-blue-400">${medianSurvival !== null ? medianSurvival + ' days' : 'Not reached'}</p>
-                        <p class="text-sm text-gray-400">n = ${groupData.length}</p>
-                    </div>
-                `;
-            });
-            resultsHTML += '</div></div>';
-
-            // Perform pairwise log-rank tests if there are multiple groups
+            // 1. Perform pairwise log-rank tests if there are multiple groups
             if (groupNames.length > 1) {
-                resultsHTML += '<div class="mb-6"><h3 class="text-lg font-semibold text-white mb-3">Statistical Comparisons (Log-rank Test)</h3>';
+                resultsHTML += '<div class="mb-8"><h3 class="text-lg font-semibold text-white mb-3">Statistical Comparisons (Log-rank Test)</h3>';
                 resultsHTML += '<div class="overflow-x-auto"><table class="w-full text-sm text-left text-gray-400">';
                 resultsHTML += '<thead class="text-xs text-gray-300 uppercase bg-gray-700"><tr><th class="px-4 py-2">Comparison</th><th class="px-4 py-2">n</th><th class="px-4 py-2">Chi-square</th><th class="px-4 py-2">P-value</th><th class="px-4 py-2">Significance</th></tr></thead><tbody>';
 
@@ -795,6 +899,24 @@
                 resultsHTML += '<p class="text-xs text-gray-400 mt-2">*** p < 0.001, ** p < 0.01, * p < 0.05, † p < 0.1, NS = Not Significant</p>';
                 resultsHTML += '</div>';
             }
+
+            // 2. Calculate median survival for each group
+            resultsHTML += '<div class="mb-6"><h3 class="text-lg font-semibold text-white mb-3">Median Survival Times</h3>';
+            resultsHTML += '<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">';
+
+            groupNames.forEach(groupName => {
+                const groupData = groups[groupName].data;
+                const medianSurvival = calculateMedianSurvival(groupData);
+
+                resultsHTML += `
+                    <div class="bg-gray-700/50 p-4 rounded-lg border border-gray-600">
+                        <h4 class="font-semibold text-white">${groupName}</h4>
+                        <p class="text-2xl font-bold text-blue-400">${medianSurvival !== null ? medianSurvival + ' days' : 'Not reached'}</p>
+                        <p class="text-sm text-gray-400">n = ${groupData.length}</p>
+                    </div>
+                `;
+            });
+            resultsHTML += '</div></div>';
 
             statisticalResults.innerHTML = resultsHTML;
             return { comparisons: comparisonResults };
