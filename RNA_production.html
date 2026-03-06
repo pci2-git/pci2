@@ -1,0 +1,2043 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RNA Production</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        /* Dropdown */
+        .custom-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 44px;
+        }
+
+        .custom-select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+
+        /* Diagram panel */
+        #diagram-panel {
+            display: none;
+        }
+
+        #diagram-panel.visible {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* SVG scroll */
+        .svg-scroll {
+            overflow-x: auto;
+            padding-bottom: 6px;
+        }
+
+        .svg-scroll::-webkit-scrollbar {
+            height: 5px;
+        }
+
+        .svg-scroll::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 3px;
+        }
+
+        .svg-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        /* Step boxes */
+        .step-box {
+            cursor: pointer;
+        }
+
+        .step-box rect {
+            transition: fill 0.18s ease, stroke 0.18s ease;
+        }
+
+        /* Step sections */
+        .step-section {
+            animation: secIn 0.2s ease;
+        }
+
+        @keyframes secIn {
+            from {
+                opacity: 0;
+                transform: translateY(-4px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Calculation table */
+        .calc-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8125rem;
+        }
+
+        .calc-table th {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 0.5rem 0.75rem;
+            text-align: left;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: none;
+            letter-spacing: 0.06em;
+            color: #64748b;
+            position: sticky;
+            left: 0;
+            z-index: 10;
+        }
+
+        .calc-table td {
+            border: 1px solid #e2e8f0;
+            padding: 0.5rem 0.75rem;
+            color: #374151;
+            vertical-align: middle;
+            min-width: 140px;
+        }
+
+        .calc-table input[type="number"],
+        .calc-table input[type="text"] {
+            width: 100%;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            padding: 0.3rem 0.5rem;
+            font-size: 0.8125rem;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+
+        .calc-table input:focus {
+            border-color: #22c55e;
+            box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.12);
+        }
+
+        .calc-table input[type=number]::-webkit-inner-spin-button,
+        .calc-table input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .calc-table input[type=number] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+
+        .calc-table .read-only {
+            background: #f3f4f6;
+            color: #6b7280;
+            cursor: not-allowed;
+            border-color: #e5e7eb;
+        }
+
+        /* IVT Table Cell Coloring */
+        .bg-yellow-input {
+            background-color: #fefce8 !important;
+        }
+
+        .bg-green-mix {
+            background-color: #f0fdf4 !important;
+        }
+
+        .bg-gray-final {
+            background-color: #f1f5f9 !important;
+        }
+
+        .row-separator th {
+            background-color: #f8fafc !important;
+            font-size: 0.65rem;
+            color: #94a3b8;
+            text-align: left;
+            border-bottom: 2px solid #e2e8f0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .row-separator td {
+            background-color: #f8fafc !important;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .bg-purple-yield {
+            background-color: #faf5ff !important;
+        }
+
+        .row-rna-yield th,
+        .row-final-vol th {
+            background-color: #faf5ff !important;
+            color: #7e22ce;
+            font-weight: 600;
+        }
+
+        .row-rna-yield td,
+        .row-final-vol td {
+            background-color: #faf5ff !important;
+        }
+
+        .row-rna-yield input.read-only,
+        .row-final-vol input.read-only {
+            color: #7e22ce;
+            font-style: italic;
+        }
+
+        /* Segmented Toggles */
+        .toggle-group {
+            display: flex;
+            background: #f1f5f9;
+            padding: 3px;
+            border-radius: 9px;
+            gap: 2px;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: 8px 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-align: center;
+            border-radius: 7px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.25;
+            min-height: 44px;
+        }
+
+        .toggle-btn.active {
+            background: white;
+            color: #1e293b;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Green active state for the silenced nucleotide toggle */
+        .toggle-btn.active-silenced {
+            background: #f0fdf4;
+            color: #15803d;
+            box-shadow: 0 1px 2px rgba(21, 128, 61, 0.15);
+            border: 1px solid #86efac;
+        }
+
+        /* Green header for the N1Ψ row when silenced is selected */
+        .row-utp.nuc-silenced th {
+            background-color: #dcfce7 !important;
+            color: #15803d;
+        }
+
+        .kit-am1344 .col-ntp-only {
+            display: none;
+        }
+
+        .sub-section-header {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: none;
+            color: #64748b;
+            letter-spacing: 0.05em;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            margin-top: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2;
+        }
+
+        .sub-section-header:first-child {
+            margin-top: 0;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen">
+
+    <!-- Shared SVG arrow marker -->
+    <svg width="0" height="0" style="position:absolute;overflow:hidden;">
+        <defs>
+            <marker id="arr" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto"
+                markerUnits="userSpaceOnUse">
+                <polygon points="0 0, 10 3.5, 0 7" fill="#94a3b8" />
+            </marker>
+        </defs>
+    </svg>
+
+    <!-- ── Header ── -->
+    <header class="bg-white border-b border-slate-200 shadow-sm">
+        <div class="max-w-6xl mx-auto px-6 py-5 flex items-center gap-4">
+            <div
+                class="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-600 text-white text-xl font-bold shadow">
+                ⚗</div>
+            <div>
+                <h1 class="text-2xl font-extrabold text-slate-800 leading-tight">RNA Production</h1>
+                <p class="text-sm text-slate-500">Sayour Lab · PCI2 Calculators</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- ── Main ── -->
+    <main class="max-w-6xl mx-auto px-6 py-10">
+
+        <!-- Dropdown -->
+        <div class="flex flex-wrap items-center gap-4 mb-8">
+            <label for="route-select" class="text-sm font-semibold text-slate-600 whitespace-nowrap">
+                Select RNA production route:
+            </label>
+            <select id="route-select"
+                class="custom-select px-4 py-2.5 border-2 border-slate-200 rounded-xl bg-white text-slate-700 font-medium text-sm cursor-pointer transition-colors hover:border-slate-300"
+                onchange="selectRoute(this.value)">
+                <option value="">— Choose a route —</option>
+                <option value="tissue">ttRNA from Tissue / Cells</option>
+                <option value="plasmid">sRNA from Plasmid</option>
+                <option value="pcr">sRNA from PCR or DNA Template</option>
+            </select>
+        </div>
+
+        <!-- Diagram panel -->
+        <div id="diagram-panel">
+            <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+
+                <h3 id="diagram-title" class="font-bold text-slate-800 text-base mb-5 pb-4 border-b border-slate-100">
+                </h3>
+
+                <!-- ══════════════════════════════════════════
+                     ROUTE: ttRNA from Tissue / Cells
+                     Steps (4): RNA extraction | cDNA production
+                               | PCR Amplification and Clean Up
+                               | IVT Reaction and Clean Up
+                ══════════════════════════════════════════ -->
+                <div id="svg-tissue" class="diagram-svg" style="display:none;">
+                    <div class="svg-scroll">
+                        <!-- box_w=130, gap=45, step=175, margin=20 → 4 boxes → w=695 -->
+                        <svg viewBox="0 0 695 130" xmlns="http://www.w3.org/2000/svg"
+                            style="min-width:500px;width:100%;max-width:695px;height:130px;display:block;overflow:visible;">
+
+                            <!-- Box 0: RNA extraction -->
+                            <g class="step-box" id="box-tissue-0" onclick="toggleSection('tissue',0)"
+                                onmouseenter="hoverBox('tissue',0,true)" onmouseleave="hoverBox('tissue',0,false)">
+                                <rect id="rect-tissue-0" x="20" y="30" width="130" height="70" rx="10" fill="#e2e8f0"
+                                    stroke="#94a3b8" stroke-width="2" />
+                                <text x="85" y="65" font-family="Inter,sans-serif" font-size="13" font-weight="700"
+                                    fill="#475569" text-anchor="middle">RNA extraction</text>
+                            </g>
+
+                            <line x1="150" y1="65" x2="195" y2="65" stroke="#94a3b8" stroke-width="2"
+                                marker-end="url(#arr)" />
+
+                            <!-- Box 1: cDNA production -->
+                            <g class="step-box" id="box-tissue-1" onclick="toggleSection('tissue',1)"
+                                onmouseenter="hoverBox('tissue',1,true)" onmouseleave="hoverBox('tissue',1,false)">
+                                <rect id="rect-tissue-1" x="195" y="30" width="130" height="70" rx="10" fill="#e2e8f0"
+                                    stroke="#94a3b8" stroke-width="2" />
+                                <text x="260" y="57" font-family="Inter,sans-serif" font-size="13" font-weight="600"
+                                    fill="#475569" text-anchor="middle">cDNA</text>
+                                <text x="260" y="74" font-family="Inter,sans-serif" font-size="13" font-weight="600"
+                                    fill="#475569" text-anchor="middle">production</text>
+                            </g>
+
+                            <line x1="325" y1="65" x2="370" y2="65" stroke="#94a3b8" stroke-width="2"
+                                marker-end="url(#arr)" />
+
+                            <!-- Box 2: PCR Amplification and Clean Up -->
+                            <g class="step-box" id="box-tissue-2" onclick="toggleSection('tissue',2)"
+                                onmouseenter="hoverBox('tissue',2,true)" onmouseleave="hoverBox('tissue',2,false)">
+                                <rect id="rect-tissue-2" x="370" y="30" width="130" height="70" rx="10" fill="#e2e8f0"
+                                    stroke="#94a3b8" stroke-width="2" />
+                                <text x="435" y="50" font-family="Inter,sans-serif" font-size="12" font-weight="600"
+                                    fill="#475569" text-anchor="middle">PCR</text>
+                                <text x="435" y="65" font-family="Inter,sans-serif" font-size="12" font-weight="600"
+                                    fill="#475569" text-anchor="middle">Amplification</text>
+                                <text x="435" y="80" font-family="Inter,sans-serif" font-size="12" font-weight="600"
+                                    fill="#475569" text-anchor="middle">and Clean Up</text>
+                            </g>
+
+                            <line x1="500" y1="65" x2="545" y2="65" stroke="#94a3b8" stroke-width="2"
+                                marker-end="url(#arr)" />
+
+                            <!-- Box 3: IVT Reaction and Clean Up -->
+                            <g class="step-box" id="box-tissue-3" onclick="toggleSection('tissue',3)"
+                                onmouseenter="hoverBox('tissue',3,true)" onmouseleave="hoverBox('tissue',3,false)">
+                                <rect id="rect-tissue-3" x="545" y="30" width="130" height="70" rx="10" fill="#e2e8f0"
+                                    stroke="#94a3b8" stroke-width="2" />
+                                <text x="610" y="57" font-family="Inter,sans-serif" font-size="12" font-weight="600"
+                                    fill="#475569" text-anchor="middle">IVT Reaction</text>
+                                <text x="610" y="74" font-family="Inter,sans-serif" font-size="12" font-weight="600"
+                                    fill="#475569" text-anchor="middle">and Clean Up</text>
+                            </g>
+                        </svg>
+                    </div>
+
+                    <!-- Step sections — tissue -->
+                    <div class="mt-5 space-y-3">
+
+                        <div id="section-tissue-0" class="step-section" style="display:none;">
+                            <div
+                                class="flex items-center justify-between bg-green-50 border border-green-200 rounded-t-xl px-4 py-3">
+                                <div class="flex items-center gap-2">
+                                    <span
+                                        class="w-5 h-5 rounded-full bg-green-600 text-white text-xs font-bold flex items-center justify-center">1</span>
+                                    <span class="font-semibold text-green-900 text-sm">RNA extraction</span>
+                                </div>
+                                <button onclick="closeSection('tissue',0)"
+                                    class="text-green-400 hover:text-green-700 text-xl leading-none px-1"
+                                    title="Close">×</button>
+                            </div>
+                            <div class="border border-t-0 border-green-200 rounded-b-xl p-4 bg-white">
+                                <table class="calc-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Parameter</th>
+                                            <th>Value</th>
+                                            <th>Unit</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td colspan="3" class="text-slate-400 italic text-xs py-3">Calculations for
+                                                RNA extraction will be added here.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div id="section-tissue-1" class="step-section" style="display:none;">
+                            <div
+                                class="flex items-center justify-between bg-green-50 border border-green-200 rounded-t-xl px-4 py-3">
+                                <div class="flex items-center gap-2">
+                                    <span
+                                        class="w-5 h-5 rounded-full bg-green-600 text-white text-xs font-bold flex items-center justify-center">2</span>
+                                    <span class="font-semibold text-green-900 text-sm">cDNA production</span>
+                                </div>
+                                <button onclick="closeSection('tissue',1)"
+                                    class="text-green-400 hover:text-green-700 text-xl leading-none px-1"
+                                    title="Close">×</button>
+                            </div>
+                            <div class="border border-t-0 border-green-200 rounded-b-xl p-4 bg-white">
+                                <table class="calc-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Parameter</th>
+                                            <th>Value</th>
+                                            <th>Unit</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td colspan="3" class="text-slate-400 italic text-xs py-3">Calculations for
+                                                cDNA production will be added here.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div id="section-tissue-2" class="step-section" style="display:none;">
+                            <div
+                                class="flex items-center justify-between bg-green-50 border border-green-200 rounded-t-xl px-4 py-3">
+                                <div class="flex items-center gap-2">
+                                    <span
+                                        class="w-5 h-5 rounded-full bg-green-600 text-white text-xs font-bold flex items-center justify-center">3</span>
+                                    <span class="font-semibold text-green-900 text-sm">PCR Amplification and Clean
+                                        Up</span>
+                                </div>
+                                <button onclick="closeSection('tissue',2)"
+                                    class="text-green-400 hover:text-green-700 text-xl leading-none px-1"
+                                    title="Close">×</button>
+                            </div>
+                            <div class="border border-t-0 border-green-200 rounded-b-xl p-4 bg-white">
+                                <table class="calc-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Parameter</th>
+                                            <th>Value</th>
+                                            <th>Unit</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td colspan="3" class="text-slate-400 italic text-xs py-3">Calculations for
+                                                PCR Amplification and Clean Up will be added here.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div id="section-tissue-3" class="step-section" style="display:none;" data-dna-base="2.5">
+                            <div
+                                class="flex items-center justify-between bg-green-50 border border-green-200 rounded-t-xl px-4 py-3">
+                                <div class="flex items-center gap-2">
+                                    <span
+                                        class="w-5 h-5 rounded-full bg-green-600 text-white text-xs font-bold flex items-center justify-center">4</span>
+                                    <span class="font-semibold text-green-900 text-sm">IVT Reaction and Clean Up</span>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <button onclick="addIVTRow('tissue')"
+                                        class="text-xs bg-green-600 hover:bg-green-700 text-white font-bold py-1 px-3 rounded-lg shadow-sm transition-colors cursor-pointer">+
+                                        Add Sample</button>
+                                    <button onclick="closeSection('tissue',3)"
+                                        class="text-green-400 hover:text-green-700 text-xl leading-none px-1"
+                                        title="Close">×</button>
+                                </div>
+                            </div>
+                            <div class="border border-t-0 border-green-200 rounded-b-xl p-6 bg-white space-y-8">
+                                <!-- Sub-section: IVT Reaction -->
+                                <div>
+                                    <div class="sub-section-header">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a2 2 0 00-1.96 1.414l-.477 2.387a2 2 0 001.414 1.96l2.387.477a2 2 0 001.96-1.414l.477-2.387a2 2 0 00-1.414-1.96l-2.387-.477z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19l-1 1M17 5l1-1M5 5L4 4m15 15l1 1" />
+                                        </svg>
+                                        IVT Reaction
+                                    </div>
+                                    <!-- Toggles -->
+                                    <div class="flex items-center gap-6 mb-5">
+                                        <div class="flex flex-col gap-1.5">
+                                            <label class="text-[0.7rem] font-bold text-slate-400 tracking-wider">Ivt
+                                                Kit</label>
+                                            <div class="toggle-group w-64" id="kit-toggle-tissue">
+                                                <div onclick="setIVTKit('tissue', 'am1344')" class="toggle-btn active"
+                                                    id="btn-tissue-am1344">mMESSAGE<br>(AM1344)</div>
+                                                <div onclick="setIVTKit('tissue', 'k7413')" class="toggle-btn"
+                                                    id="btn-tissue-k7413">CleanScript<br>(K7413)</div>
+                                            </div>
+                                        </div>
+                                        <div class="flex flex-col gap-1.5" id="nuc-toggle-container-tissue">
+                                            <label
+                                                class="text-[0.7rem] font-bold text-slate-400 tracking-wider">Nucleotide
+                                                Type</label>
+                                            <div class="toggle-group w-[400px]" id="nuc-toggle-tissue">
+                                                <div onclick="setNucleotide('tissue', 'normal')"
+                                                    class="toggle-btn active" id="btn-tissue-normal">Uridine<br>(normal)
+                                                </div>
+                                                <div onclick="setNucleotide('tissue', 'silenced')" class="toggle-btn"
+                                                    id="btn-tissue-silenced">N1-Methyl-Pseudouridine<br>(silenced)</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="overflow-x-auto">
+                                        <table class="calc-table w-full" id="ivt-table-tissue">
+                                            <tbody>
+                                                <tr class="row-actions">
+                                                    <th>Actions</th>
+                                                </tr>
+                                                <tr class="row-id">
+                                                    <th>Sample ID</th>
+                                                </tr>
+                                                <tr class="row-reac">
+                                                    <th id="reac-head-tissue">Number of Reactions</th>
+                                                </tr>
+                                                <tr class="row-conc">
+                                                    <th>DNA Concentration</th>
+                                                </tr>
+                                                <tr class="row-dna-base">
+                                                    <th id="dna-base-head-tissue">DNA Template Per Reaction</th>
+                                                </tr>
+                                                <tr class="row-separator">
+                                                    <th>Mix to prepare</th>
+                                                </tr>
+                                                <tr class="row-water">
+                                                    <th>DNase/RNase-free water</th>
+                                                </tr>
+                                                <tr class="row-buff">
+                                                    <th id="buff-head-tissue">10X IVT Buffer (yellow cap)</th>
+                                                </tr>
+                                                <tr class="row-ntp">
+                                                    <th id="ntp-head-tissue">ATP (100 mM)</th>
+                                                </tr>
+                                                <tr class="row-ctp col-ntp-only">
+                                                    <th>CTP (100 mM)</th>
+                                                </tr>
+                                                <tr class="row-gtp col-ntp-only">
+                                                    <th>GTP (100 mM)</th>
+                                                </tr>
+                                                <tr class="row-utp col-ntp-only">
+                                                    <th id="nuc-col-tissue">UTP (100 mM)</th>
+                                                </tr>
+                                                <tr class="row-cap col-ntp-only">
+                                                    <th id="cap-col-tissue">CleanCap AG (3' OMe) (100 mM) (blue cap)
+                                                    </th>
+                                                </tr>
+                                                <tr class="row-dna-vol">
+                                                    <th>DNA Template Volume</th>
+                                                </tr>
+                                                <tr class="row-pol">
+                                                    <th id="pol-head-tissue">CleanScribe RNA Pol Mix (10X) (orange cap)
+                                                    </th>
+                                                </tr>
+                                                <tr class="row-final bg-slate-50 italic font-bold">
+                                                    <th>Final Vol</th>
+                                                </tr>
+                                                <tr class="row-rna-yield">
+                                                    <th>≈ Expected RNA Yield</th>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- Sub-section: Nanodrop QC Analysis -->
+                                <div>
+                                    <div class="sub-section-header">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                        </svg>
+                                        Nanodrop QC Analysis
+                                    </div>
+                                    <div
+                                        class="bg-slate-50 border border-slate-200 rounded-xl p-8 text-center text-slate-400 italic text-sm">
+                                        Calculations for Nanodrop QC Analysis will be added here.
+                                    </div>
+                                </div>
+
+                                <!-- Sub-section: DNase Treatment -->
+                                <div>
+                                    <div class="sub-section-header">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a2 2 0 00-1.96 1.414l-.477 2.387a2 2 0 001.414 1.96l2.387.477a2 2 0 001.96-1.414l.477-2.387a2 2 0 00-1.414-1.96l-2.387-.477z" />
+                                        </svg>
+                                        DNase Treatment
+                                    </div>
+                                    <div id="dnase-container-tissue" class="overflow-x-auto"></div>
+                                    <table class="calc-table w-full" id="dnase-table-tissue">
+                                        <tbody>
+                                            <tr class="row-actions">
+                                                <th>Actions</th>
+                                            </tr>
+                                            <tr class="row-id">
+                                                <th>Sample ID</th>
+                                            </tr>
+                                            <tr class="row-ivt-vol">
+                                                <th>IVT reaction vol</th>
+                                            </tr>
+                                            <tr class="row-dnase">
+                                                <th>TURBO DNase (2 Units/µL) </th>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Sub-section: IVT Clean Up -->
+                            <div>
+                                <div class="sub-section-header">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                                    </svg>
+                                    IVT Clean Up
+                                </div>
+                                <div id="cleanup-container-tissue" class="overflow-x-auto"></div>
+                                <table class="calc-table w-full" id="cleanup-table-tissue">
+                                    <tbody>
+                                        <tr class="row-actions">
+                                            <th>Actions</th>
+                                        </tr>
+                                        <tr class="row-id">
+                                            <th>Sample ID</th>
+                                        </tr>
+                                        <tr class="row-kit">
+                                            <th>RNeasy Kit</th>
+                                        </tr>
+                                        <tr class="row-num-cols">
+                                            <th>Number of Columns per Sample</th>
+                                        </tr>
+                                        <tr class="row-sample-vol">
+                                            <th>Sample Volume</th>
+                                        </tr>
+                                        <tr class="row-water-add">
+                                            <th>Water to Add</th>
+                                        </tr>
+                                        <tr class="row-rlt">
+                                            <th>RLT Buffer</th>
+                                        </tr>
+                                        <tr class="row-eth">
+                                            <th>100% Ethanol</th>
+                                        </tr>
+                                        <tr class="row-rpe1">
+                                            <th>RPE (Wash 1)</th>
+                                        </tr>
+                                        <tr class="row-rpe2">
+                                            <th>RPE (Wash 2)</th>
+                                        </tr>
+                                        <tr class="row-water-dil">
+                                            <th>Water for Elution</th>
+                                        </tr>
+                                        <tr class="row-final-vol bg-purple-yield italic font-bold">
+                                            <th>≈ Expected final Clean RNA Vol</th>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div><!-- /svg-tissue -->
+
+        <!-- ══════════════════════════════════════════
+                     ROUTE: sRNA from Plasmid
+                     Steps (4): Plasmid Maxi Preparation | Plasmid Restriction
+                               | Open Plasmid Precipitation | IVT Reaction and Clean Up
+                ══════════════════════════════════════════ -->
+        <div id="svg-plasmid" class="diagram-svg" style="display:none;">
+            <div class="svg-scroll">
+                <svg viewBox="0 0 695 130" xmlns="http://www.w3.org/2000/svg"
+                    style="min-width:500px;width:100%;max-width:695px;height:130px;display:block;overflow:visible;">
+
+                    <!-- Box 0: Plasmid Maxi Preparation -->
+                    <g class="step-box" id="box-plasmid-0" onclick="toggleSection('plasmid',0)"
+                        onmouseenter="hoverBox('plasmid',0,true)" onmouseleave="hoverBox('plasmid',0,false)">
+                        <rect id="rect-plasmid-0" x="20" y="30" width="130" height="70" rx="10" fill="#e2e8f0"
+                            stroke="#94a3b8" stroke-width="2" />
+                        <text x="85" y="52" font-family="Inter,sans-serif" font-size="12" font-weight="700"
+                            fill="#475569" text-anchor="middle">Plasmid Maxi</text>
+                        <text x="85" y="68" font-family="Inter,sans-serif" font-size="12" font-weight="700"
+                            fill="#475569" text-anchor="middle">Preparation</text>
+                    </g>
+
+                    <line x1="150" y1="65" x2="195" y2="65" stroke="#94a3b8" stroke-width="2" marker-end="url(#arr)" />
+
+                    <!-- Box 1: Plasmid Restriction -->
+                    <g class="step-box" id="box-plasmid-1" onclick="toggleSection('plasmid',1)"
+                        onmouseenter="hoverBox('plasmid',1,true)" onmouseleave="hoverBox('plasmid',1,false)">
+                        <rect id="rect-plasmid-1" x="195" y="30" width="130" height="70" rx="10" fill="#e2e8f0"
+                            stroke="#94a3b8" stroke-width="2" />
+                        <text x="260" y="57" font-family="Inter,sans-serif" font-size="13" font-weight="600"
+                            fill="#475569" text-anchor="middle">Plasmid</text>
+                        <text x="260" y="74" font-family="Inter,sans-serif" font-size="13" font-weight="600"
+                            fill="#475569" text-anchor="middle">Restriction</text>
+                    </g>
+
+                    <line x1="325" y1="65" x2="370" y2="65" stroke="#94a3b8" stroke-width="2" marker-end="url(#arr)" />
+
+                    <!-- Box 2: Open Plasmid Precipitation -->
+                    <g class="step-box" id="box-plasmid-2" onclick="toggleSection('plasmid',2)"
+                        onmouseenter="hoverBox('plasmid',2,true)" onmouseleave="hoverBox('plasmid',2,false)">
+                        <rect id="rect-plasmid-2" x="370" y="30" width="130" height="70" rx="10" fill="#e2e8f0"
+                            stroke="#94a3b8" stroke-width="2" />
+                        <text x="435" y="52" font-family="Inter,sans-serif" font-size="12" font-weight="600"
+                            fill="#475569" text-anchor="middle">Open Plasmid</text>
+                        <text x="435" y="68" font-family="Inter,sans-serif" font-size="12" font-weight="600"
+                            fill="#475569" text-anchor="middle">Precipitation</text>
+                    </g>
+
+                    <line x1="500" y1="65" x2="545" y2="65" stroke="#94a3b8" stroke-width="2" marker-end="url(#arr)" />
+
+                    <!-- Box 3: IVT Reaction and Clean Up -->
+                    <g class="step-box" id="box-plasmid-3" onclick="toggleSection('plasmid',3)"
+                        onmouseenter="hoverBox('plasmid',3,true)" onmouseleave="hoverBox('plasmid',3,false)">
+                        <rect id="rect-plasmid-3" x="545" y="30" width="130" height="70" rx="10" fill="#e2e8f0"
+                            stroke="#94a3b8" stroke-width="2" />
+                        <text x="610" y="57" font-family="Inter,sans-serif" font-size="12" font-weight="600"
+                            fill="#475569" text-anchor="middle">IVT Reaction</text>
+                        <text x="610" y="74" font-family="Inter,sans-serif" font-size="12" font-weight="600"
+                            fill="#475569" text-anchor="middle">and Clean Up</text>
+                    </g>
+                </svg>
+            </div>
+
+            <!-- Step sections — plasmid -->
+            <div class="mt-5 space-y-3">
+
+                <div id="section-plasmid-0" class="step-section" style="display:none;">
+                    <div
+                        class="flex items-center justify-between bg-green-50 border border-green-200 rounded-t-xl px-4 py-3">
+                        <div class="flex items-center gap-2">
+                            <span
+                                class="w-5 h-5 rounded-full bg-green-600 text-white text-xs font-bold flex items-center justify-center">1</span>
+                            <span class="font-semibold text-green-900 text-sm">Plasmid Maxi Preparation</span>
+                        </div>
+                        <button onclick="closeSection('plasmid',0)"
+                            class="text-green-400 hover:text-green-700 text-xl leading-none px-1"
+                            title="Close">×</button>
+                    </div>
+                    <div class="border border-t-0 border-green-200 rounded-b-xl p-4 bg-white">
+                        <table class="calc-table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Value</th>
+                                    <th>Unit</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="3" class="text-slate-400 italic text-xs py-3">Calculations for
+                                        Plasmid Maxi Preparation will be added here.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="section-plasmid-1" class="step-section" style="display:none;">
+                    <div
+                        class="flex items-center justify-between bg-green-50 border border-green-200 rounded-t-xl px-4 py-3">
+                        <div class="flex items-center gap-2">
+                            <span
+                                class="w-5 h-5 rounded-full bg-green-600 text-white text-xs font-bold flex items-center justify-center">2</span>
+                            <span class="font-semibold text-green-900 text-sm">Plasmid Restriction</span>
+                        </div>
+                        <button onclick="closeSection('plasmid',1)"
+                            class="text-green-400 hover:text-green-700 text-xl leading-none px-1"
+                            title="Close">×</button>
+                    </div>
+                    <div class="border border-t-0 border-green-200 rounded-b-xl p-4 bg-white">
+                        <table class="calc-table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Value</th>
+                                    <th>Unit</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="3" class="text-slate-400 italic text-xs py-3">Calculations for
+                                        Plasmid Restriction will be added here.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="section-plasmid-2" class="step-section" style="display:none;">
+                    <div
+                        class="flex items-center justify-between bg-green-50 border border-green-200 rounded-t-xl px-4 py-3">
+                        <div class="flex items-center gap-2">
+                            <span
+                                class="w-5 h-5 rounded-full bg-green-600 text-white text-xs font-bold flex items-center justify-center">3</span>
+                            <span class="font-semibold text-green-900 text-sm">Open Plasmid Precipitation</span>
+                        </div>
+                        <button onclick="closeSection('plasmid',2)"
+                            class="text-green-400 hover:text-green-700 text-xl leading-none px-1"
+                            title="Close">×</button>
+                    </div>
+                    <div class="border border-t-0 border-green-200 rounded-b-xl p-4 bg-white">
+                        <table class="calc-table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Value</th>
+                                    <th>Unit</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td colspan="3" class="text-slate-400 italic text-xs py-3">Calculations for
+                                        Open Plasmid Precipitation will be added here.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="section-plasmid-3" class="step-section" style="display:none;" data-dna-base="5.0">
+                    <div
+                        class="flex items-center justify-between bg-green-50 border border-green-200 rounded-t-xl px-4 py-3">
+                        <div class="flex items-center gap-2">
+                            <span
+                                class="w-5 h-5 rounded-full bg-green-600 text-white text-xs font-bold flex items-center justify-center">4</span>
+                            <span class="font-semibold text-green-900 text-sm">IVT Reaction and Clean Up</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button onclick="addIVTRow('plasmid')"
+                                class="text-xs bg-green-600 hover:bg-green-700 text-white font-bold py-1 px-3 rounded-lg shadow-sm transition-colors cursor-pointer">+
+                                Add Sample</button>
+                            <button onclick="closeSection('plasmid',3)"
+                                class="text-green-400 hover:text-green-700 text-xl leading-none px-1"
+                                title="Close">×</button>
+                        </div>
+                    </div>
+                    <div class="border border-t-0 border-green-200 rounded-b-xl p-6 bg-white space-y-8">
+                        <!-- Sub-section: IVT Reaction -->
+                        <div>
+                            <div class="sub-section-header">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a2 2 0 00-1.96 1.414l-.477 2.387a2 2 0 001.414 1.96l2.387.477a2 2 0 001.96-1.414l.477-2.387a2 2 0 00-1.414-1.96l-2.387-.477z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19l-1 1M17 5l1-1M5 5L4 4m15 15l1 1" />
+                                </svg>
+                                IVT Reaction
+                            </div>
+                            <!-- Toggles -->
+                            <div class="flex items-center gap-6 mb-5">
+                                <div class="flex flex-col gap-1.5">
+                                    <label class="text-[0.7rem] font-bold text-slate-400 tracking-wider">Ivt
+                                        Kit</label>
+                                    <div class="toggle-group w-64" id="kit-toggle-plasmid">
+                                        <div onclick="setIVTKit('plasmid', 'am1344')" class="toggle-btn active"
+                                            id="btn-plasmid-am1344">mMESSAGE<br>(AM1344)</div>
+                                        <div onclick="setIVTKit('plasmid', 'k7413')" class="toggle-btn"
+                                            id="btn-plasmid-k7413">CleanScript<br>(K7413)</div>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col gap-1.5" id="nuc-toggle-container-plasmid">
+                                    <label class="text-[0.7rem] font-bold text-slate-400 tracking-wider">Nucleotide
+                                        Type</label>
+                                    <div class="toggle-group w-[400px]" id="nuc-toggle-plasmid">
+                                        <div onclick="setNucleotide('plasmid', 'normal')" class="toggle-btn active"
+                                            id="btn-plasmid-normal">
+                                            Uridine<br>(normal)</div>
+                                        <div onclick="setNucleotide('plasmid', 'silenced')" class="toggle-btn"
+                                            id="btn-plasmid-silenced">N1-Methyl-Pseudouridine<br>(silenced)
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="overflow-x-auto">
+                                <table class="calc-table w-full" id="ivt-table-plasmid">
+                                    <tbody>
+                                        <tr class="row-actions">
+                                            <th>Actions</th>
+                                        </tr>
+                                        <tr class="row-id">
+                                            <th>Sample Id</th>
+                                        </tr>
+                                        <tr class="row-reac">
+                                            <th id="reac-head-plasmid">Num Reac</th>
+                                        </tr>
+                                        <tr class="row-conc">
+                                            <th>DNA Template Concentration</th>
+                                        </tr>
+                                        <tr class="row-dna-base">
+                                            <th id="dna-base-head-plasmid">DNA Template Per Reaction</th>
+                                        </tr>
+                                        <tr class="row-separator">
+                                            <th>Mix to prepare</th>
+                                        </tr>
+                                        <tr class="row-water">
+                                            <th> DNase/RNase-free water</th>
+                                        </tr>
+                                        <tr class="row-buff">
+                                            <th id="buff-head-plasmid">10X IVT Buffer (yellow cap)</th>
+                                        </tr>
+                                        <tr class="row-ntp">
+                                            <th id="ntp-head-plasmid">ATP (100 mM)</th>
+                                        </tr>
+                                        <tr class="row-ctp col-ntp-only">
+                                            <th>CTP (100 mM)</th>
+                                        </tr>
+                                        <tr class="row-gtp col-ntp-only">
+                                            <th>GTP (100 mM)</th>
+                                        </tr>
+                                        <tr class="row-utp col-ntp-only">
+                                            <th id="nuc-col-plasmid">UTP (100 mM)</th>
+                                        </tr>
+                                        <tr class="row-cap col-ntp-only">
+                                            <th id="cap-col-plasmid">CleanCap AG (3' OMe) (100 mM) (blue cap)</th>
+                                        </tr>
+                                        <tr class="row-dna-vol">
+                                            <th>DNA Template Volume</th>
+                                        </tr>
+                                        <tr class="row-pol">
+                                            <th id="pol-head-plasmid">Rna Pol</th>
+                                        </tr>
+                                        <tr class="row-final bg-slate-50 italic font-bold">
+                                            <th>Final Vol</th>
+                                        </tr>
+                                        <tr class="row-rna-yield">
+                                            <th>≈ Expected RNA Yield</th>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Sub-section: Nanodrop QC Analysis -->
+                        <div>
+                            <div class="sub-section-header">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                                Nanodrop QC Analysis
+                            </div>
+                            <div
+                                class="bg-slate-50 border border-slate-200 rounded-xl p-8 text-center text-slate-400 italic text-sm">
+                                Calculations for Nanodrop QC Analysis will be added here.
+                            </div>
+                        </div>
+
+                        <!-- Sub-section: DNase Treatment -->
+                        <div>
+                            <div class="sub-section-header">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a2 2 0 00-1.96 1.414l-.477 2.387a2 2 0 001.414 1.96l2.387.477a2 2 0 001.96-1.414l.477-2.387a2 2 0 00-1.414-1.96l-2.387-.477z" />
+                                </svg>
+                                DNase Treatment
+                            </div>
+                            <div id="dnase-container-plasmid" class="overflow-x-auto">
+                                <table class="calc-table w-full" id="dnase-table-plasmid">
+                                    <tbody>
+                                        <tr class="row-actions">
+                                            <th>Actions</th>
+                                        </tr>
+                                        <tr class="row-id">
+                                            <th>Sample ID</th>
+                                        </tr>
+                                        <tr class="row-ivt-vol">
+                                            <th>IVT reaction vol</th>
+                                        </tr>
+                                        <tr class="row-dnase">
+                                            <th>TURBO DNase (2 Units/µL) </th>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Sub-section: IVT Clean Up -->
+                        <div>
+                            <div class="sub-section-header">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                                </svg>
+                                IVT Clean Up
+                            </div>
+                            <div id="cleanup-container-plasmid" class="overflow-x-auto"></div>
+                            <table class="calc-table w-full" id="cleanup-table-plasmid">
+                                <tbody>
+                                    <tr class="row-actions">
+                                        <th>Actions</th>
+                                    </tr>
+                                    <tr class="row-id">
+                                        <th>Sample ID</th>
+                                    </tr>
+                                    <tr class="row-kit">
+                                        <th>RNeasy Kit</th>
+                                    </tr>
+                                    <tr class="row-num-cols">
+                                        <th>Number of Columns per Sample</th>
+                                    </tr>
+                                    <tr class="row-sample-vol">
+                                        <th>Sample Volume</th>
+                                    </tr>
+                                    <tr class="row-water-add">
+                                        <th>Water to Add</th>
+                                    </tr>
+                                    <tr class="row-rlt">
+                                        <th>RLT Buffer</th>
+                                    </tr>
+                                    <tr class="row-eth">
+                                        <th>100% Ethanol</th>
+                                    </tr>
+                                    <tr class="row-rpe1">
+                                        <th>RPE (Wash 1)</th>
+                                    </tr>
+                                    <tr class="row-rpe2">
+                                        <th>RPE (Wash 2)</th>
+                                    </tr>
+                                    <tr class="row-water-dil">
+                                        <th>Water for Elution</th>
+                                    </tr>
+                                    <tr class="row-final-vol bg-purple-yield italic font-bold">
+                                        <th>≈ Expected final Clean RNA Vol</th>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        </div><!-- /svg-plasmid -->
+
+        <!-- ══════════════════════════════════════════
+                     ROUTE: sRNA from PCR or DNA Template
+                     Steps (1): IVT Reaction and Clean Up
+                ══════════════════════════════════════════ -->
+        <div id="svg-pcr" class="diagram-svg" style="display:none;">
+            <div class="svg-scroll">
+                <svg viewBox="0 0 200 130" xmlns="http://www.w3.org/2000/svg"
+                    style="min-width:200px;width:200px;height:130px;display:block;overflow:visible;">
+
+                    <!-- Box 0: IVT Reaction and Clean Up -->
+                    <g class="step-box" id="box-pcr-0" onclick="toggleSection('pcr',0)"
+                        onmouseenter="hoverBox('pcr',0,true)" onmouseleave="hoverBox('pcr',0,false)">
+                        <rect id="rect-pcr-0" x="35" y="30" width="130" height="70" rx="10" fill="#e2e8f0"
+                            stroke="#94a3b8" stroke-width="2" />
+                        <text x="100" y="52" font-family="Inter,sans-serif" font-size="12" font-weight="600"
+                            fill="#475569" text-anchor="middle">IVT Reaction</text>
+                        <text x="100" y="68" font-family="Inter,sans-serif" font-size="12" font-weight="600"
+                            fill="#475569" text-anchor="middle">and Clean Up</text>
+                    </g>
+                </svg>
+            </div>
+
+            <!-- Step section — pcr -->
+            <div class="mt-5 space-y-3">
+
+                <div id="section-pcr-0" class="step-section" style="display:none;" data-dna-base="2.5">
+                    <div
+                        class="flex items-center justify-between bg-green-50 border border-green-200 rounded-t-xl px-4 py-3">
+                        <div class="flex items-center gap-2">
+                            <span
+                                class="w-5 h-5 rounded-full bg-green-600 text-white text-xs font-bold flex items-center justify-center">1</span>
+                            <span class="font-semibold text-green-900 text-sm">IVT Reaction and Clean Up</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button onclick="addIVTRow('pcr')"
+                                class="text-xs bg-green-600 hover:bg-green-700 text-white font-bold py-1 px-3 rounded-lg shadow-sm transition-colors cursor-pointer">+
+                                Add Sample</button>
+                            <button onclick="closeSection('pcr',0)"
+                                class="text-green-400 hover:text-green-700 text-xl leading-none px-1"
+                                title="Close">×</button>
+                        </div>
+                    </div>
+                    <div class="border border-t-0 border-green-200 rounded-b-xl p-6 bg-white space-y-8">
+                        <!-- Sub-section: IVT Reaction -->
+                        <div>
+                            <div class="sub-section-header">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a2 2 0 00-1.96 1.414l-.477 2.387a2 2 0 001.414 1.96l2.387.477a2 2 0 001.96-1.414l.477-2.387a2 2 0 00-1.414-1.96l-2.387-.477z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19l-1 1M17 5l1-1M5 5L4 4m15 15l1 1" />
+                                </svg>
+                                IVT Reaction
+                            </div>
+                            <!-- Toggles -->
+                            <div class="flex items-center gap-6 mb-5">
+                                <div class="flex flex-col gap-1.5">
+                                    <label class="text-[0.7rem] font-bold text-slate-400 tracking-wider">Ivt
+                                        Kit</label>
+                                    <div class="toggle-group w-64" id="kit-toggle-pcr">
+                                        <div onclick="setIVTKit('pcr', 'am1344')" class="toggle-btn active"
+                                            id="btn-pcr-am1344">mMESSAGE<br>(AM1344)</div>
+                                        <div onclick="setIVTKit('pcr', 'k7413')" class="toggle-btn" id="btn-pcr-k7413">
+                                            CleanScript<br>(K7413)</div>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col gap-1.5" id="nuc-toggle-container-pcr">
+                                    <label class="text-[0.7rem] font-bold text-slate-400 tracking-wider">Nucleotide
+                                        Type</label>
+                                    <div class="toggle-group w-[400px]" id="nuc-toggle-pcr">
+                                        <div onclick="setNucleotide('pcr', 'normal')" class="toggle-btn active"
+                                            id="btn-pcr-normal">Uridine<br>(normal)</div>
+                                        <div onclick="setNucleotide('pcr', 'silenced')" class="toggle-btn"
+                                            id="btn-pcr-silenced">N1-Methyl-Pseudouridine<br>(silenced)</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="overflow-x-auto">
+                                <table class="calc-table w-full" id="ivt-table-pcr">
+                                    <tbody>
+                                        <tr class="row-actions">
+                                            <th>Actions</th>
+                                        </tr>
+                                        <tr class="row-id">
+                                            <th>Sample Id</th>
+                                        </tr>
+                                        <tr class="row-reac">
+                                            <th id="reac-head-pcr">Num Reac</th>
+                                        </tr>
+                                        <tr class="row-conc">
+                                            <th>DNA Template Concentration</th>
+                                        </tr>
+                                        <tr class="row-dna-base">
+                                            <th id="dna-base-head-pcr">DNA Template Per Reaction</th>
+                                        </tr>
+                                        <tr class="row-separator">
+                                            <th>Mix to prepare</th>
+                                        </tr>
+                                        <tr class="row-water">
+                                            <th>DNase/RNase-free water</th>
+                                        </tr>
+                                        <tr class="row-buff">
+                                            <th id="buff-head-pcr">10X Reaction Buffer</th>
+                                        </tr>
+                                        <tr class="row-ntp">
+                                            <th id="ntp-head-pcr">ATP (100 mM)</th>
+                                        </tr>
+                                        <tr class="row-ctp col-ntp-only">
+                                            <th>CTP (100 mM)</th>
+                                        </tr>
+                                        <tr class="row-gtp col-ntp-only">
+                                            <th>GTP (100 mM)</th>
+                                        </tr>
+                                        <tr class="row-utp col-ntp-only">
+                                            <th id="nuc-col-pcr">UTP (100 mM)</th>
+                                        </tr>
+                                        <tr class="row-cap col-ntp-only">
+                                            <th id="cap-col-pcr">CleanCap AG (3' OMe) (100 mM) (blue cap)</th>
+                                        </tr>
+                                        <tr class="row-dna-vol">
+                                            <th>DNA Template Volume</th>
+                                        </tr>
+                                        <tr class="row-pol">
+                                            <th id="pol-head-pcr">Rna Pol</th>
+                                        </tr>
+                                        <tr class="row-final bg-slate-50 italic font-bold">
+                                            <th>Final Vol</th>
+                                        </tr>
+                                        <tr class="row-rna-yield">
+                                            <th>≈ Expected RNA Yield</th>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Sub-section: Nanodrop QC Analysis -->
+                        <div>
+                            <div class="sub-section-header">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                                Nanodrop QC Analysis
+                            </div>
+                            <div
+                                class="bg-slate-50 border border-slate-200 rounded-xl p-8 text-center text-slate-400 italic text-sm">
+                                Calculations for Nanodrop QC Analysis will be added here.
+                            </div>
+                        </div>
+
+                        <!-- Sub-section: DNase Treatment -->
+                        <div>
+                            <div class="sub-section-header">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a2 2 0 00-1.96 1.414l-.477 2.387a2 2 0 001.414 1.96l2.387.477a2 2 0 001.96-1.414l.477-2.387a2 2 0 00-1.414-1.96l-2.387-.477z" />
+                                </svg>
+                                DNase Treatment
+                            </div>
+                            <div id="dnase-container-pcr" class="overflow-x-auto">
+                                <table class="calc-table w-full" id="dnase-table-pcr">
+                                    <tbody>
+                                        <tr class="row-actions">
+                                            <th>Actions</th>
+                                        </tr>
+                                        <tr class="row-id">
+                                            <th>Sample ID</th>
+                                        </tr>
+                                        <tr class="row-ivt-vol">
+                                            <th>IVT reaction vol</th>
+                                        </tr>
+                                        <tr class="row-dnase">
+                                            <th>TURBO DNase (2 Units/µL) </th>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Sub-section: IVT Clean Up -->
+                        <div>
+                            <div class="sub-section-header">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                                </svg>
+                                IVT Clean Up
+                            </div>
+                            <div id="cleanup-container-pcr" class="overflow-x-auto"></div>
+                            <table class="calc-table w-full" id="cleanup-table-pcr">
+                                <tbody>
+                                    <tr class="row-actions">
+                                        <th>Actions</th>
+                                    </tr>
+                                    <tr class="row-id">
+                                        <th>Sample ID</th>
+                                    </tr>
+                                    <tr class="row-kit">
+                                        <th>RNeasy Kit</th>
+                                    </tr>
+                                    <tr class="row-num-cols">
+                                        <th>Number of Columns per Sample</th>
+                                    </tr>
+                                    <tr class="row-sample-vol">
+                                        <th>Sample Volume</th>
+                                    </tr>
+                                    <tr class="row-water-add">
+                                        <th>Water to Add</th>
+                                    </tr>
+                                    <tr class="row-rlt">
+                                        <th>RLT Buffer</th>
+                                    </tr>
+                                    <tr class="row-eth">
+                                        <th>100% Ethanol</th>
+                                    </tr>
+                                    <tr class="row-rpe1">
+                                        <th>RPE (Wash 1)</th>
+                                    </tr>
+                                    <tr class="row-rpe2">
+                                        <th>RPE (Wash 2)</th>
+                                    </tr>
+                                    <tr class="row-water-dil">
+                                        <th>Water for Elution</th>
+                                    </tr>
+                                    <tr class="row-final-vol bg-purple-yield italic font-bold">
+                                        <th>≈ Expected final Clean RNA Vol</th>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        </div><!-- /svg-pcr -->
+
+        </div>
+        </div>
+
+    </main>
+
+    <script>
+        // ── Colour constants ───────────────────────────────────
+        const FILL = { def: '#e2e8f0', hover: '#cbd5e1', active: '#bbf7d0' };
+        const STROKE = { def: '#94a3b8', active: '#16a34a' };
+        const SW = { def: '2', active: '2.5' };
+        const TCOLOR = { def: '#475569', active: '#14532d' };
+
+        // Number of steps per route
+        const ROUTE_STEPS = { tissue: 4, plasmid: 4, pcr: 1 };
+
+        // Current open/closed state per box
+        const openState = { tissue: {}, plasmid: {}, pcr: {} };
+
+        // ── Visual helpers ─────────────────────────────────────
+        function setBoxState(route, idx, state) {
+            const rect = document.getElementById(`rect-${route}-${idx}`);
+            const group = document.getElementById(`box-${route}-${idx}`);
+            if (!rect || !group) return;
+
+            const isActive = state === 'active';
+            rect.setAttribute('fill', FILL[state] ?? FILL.def);
+            rect.setAttribute('stroke', isActive ? STROKE.active : STROKE.def);
+            rect.setAttribute('stroke-width', isActive ? SW.active : SW.def);
+
+            const textFill = isActive ? TCOLOR.active : TCOLOR.def;
+            group.querySelectorAll('text').forEach(t => t.setAttribute('fill', textFill));
+        }
+
+        function hoverBox(route, idx, entering) {
+            if (openState[route][idx]) return;   // keep active colour if section is open
+            setBoxState(route, idx, entering ? 'hover' : 'def');
+        }
+
+        // ── Toggle: activate/deactivate from idx → last step ──
+        function toggleSection(route, idx) {
+            const isOpen = !!openState[route][idx];
+
+            if (isOpen) {
+                // Deactivate ONLY this step
+                openState[route][idx] = false;
+                const sec = document.getElementById(`section-${route}-${idx}`);
+                if (sec) sec.style.display = 'none';
+                setBoxState(route, idx, 'def');
+            } else {
+                // Activate ONLY this step
+                openState[route][idx] = true;
+                const sec = document.getElementById(`section-${route}-${idx}`);
+                if (sec) sec.style.display = 'block';
+                setBoxState(route, idx, 'active');
+
+                // Scroll to this newly opened section
+                setTimeout(() => {
+                    const sec = document.getElementById(`section-${route}-${idx}`);
+                    if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 80);
+            }
+        }
+
+        // × button: close this step and all that follow
+        function closeSection(route, idx) {
+            openState[route][idx] = false;
+            const sec = document.getElementById(`section-${route}-${idx}`);
+            if (sec) sec.style.display = 'none';
+            setBoxState(route, idx, 'def');
+        }
+
+        // ── IVT Configuration & Toggles ────────────────────────
+        const ivtConfig = {
+            tissue: { kit: 'am1344', nuc: 'normal' },
+            plasmid: { kit: 'am1344', nuc: 'normal' },
+            pcr: { kit: 'am1344', nuc: 'normal' }
+        };
+
+        function setIVTKit(route, kitId) {
+            if (!route) return;
+            ivtConfig[route].kit = kitId;
+            // Update UI
+            document.querySelectorAll(`#kit-toggle-${route} .toggle-btn`).forEach(b => b.classList.remove('active'));
+            const btn = document.getElementById(`btn-${route}-${kitId}`);
+            if (btn) btn.classList.add('active');
+
+            // Apply kit-specific table style
+            const table = document.getElementById(`ivt-table-${route}`);
+            if (table) {
+                if (kitId === 'am1344') table.classList.add('kit-am1344');
+                else table.classList.remove('kit-am1344');
+            }
+
+            // mMESSAGE special logic: default to normal UTP and hide toggle
+            const nucToggleContainer = document.getElementById(`nuc-toggle-container-${route}`);
+            if (kitId === 'am1344') {
+                setNucleotide(route, 'normal');
+                if (nucToggleContainer) nucToggleContainer.style.display = 'none';
+            } else {
+                if (nucToggleContainer) nucToggleContainer.style.display = 'flex';
+            }
+
+            // Update Table Header and column visibility
+            const reacCol = document.getElementById(`reac-head-${route}`);
+            const buffCol = document.getElementById(`buff-head-${route}`);
+            const ntpCol = document.getElementById(`ntp-head-${route}`);
+            const capCol = document.getElementById(`cap-col-${route}`);
+            const polCol = document.getElementById(`pol-head-${route}`);
+            const dnaBaseCol = document.getElementById(`dna-base-head-${route}`);
+            const ntpOnlyCols = document.querySelectorAll(`#ivt-table-${route} .col-ntp-only`);
+
+            if (kitId === 'am1344') {
+                if (reacCol) reacCol.textContent = 'Number of Kits';
+                if (buffCol) buffCol.textContent = '10X Reaction Buffer';
+                if (ntpCol) ntpCol.textContent = '2X NTP/CAP';
+                if (capCol) capCol.textContent = 'ARCA Cap';
+                if (polCol) polCol.textContent = 'Enzyme Mix';
+                if (dnaBaseCol) dnaBaseCol.textContent = 'DNA Template Per kit';
+                ntpOnlyCols.forEach(col => col.style.display = 'none');
+            } else { // k7413
+                if (reacCol) reacCol.textContent = 'Number of Reactions';
+                if (buffCol) buffCol.textContent = '10X IVT Buffer (yellow cap)';
+                if (ntpCol) ntpCol.textContent = 'ATP (100 mM)';
+                if (capCol) capCol.textContent = 'CleanCap AG (3\' OMe) (100 mM) (blue cap)';
+                if (polCol) polCol.textContent = 'CleanScribe RNA Pol Mix (10X) (orange cap)';
+                if (dnaBaseCol) dnaBaseCol.textContent = 'DNA Template Per Reaction';
+                ntpOnlyCols.forEach(col => col.style.display = ''); // Show them
+            }
+
+            // Toggle DNase container visibility and update header
+            const dnaseContainer = document.getElementById(`dnase-container-${route}`);
+            if (dnaseContainer) {
+                // Show for both kits now
+                dnaseContainer.parentElement.style.display = 'block';
+                const dnaseHeader = dnaseContainer.querySelector('.row-dnase th');
+                if (dnaseHeader) {
+                    dnaseHeader.textContent = (kitId === 'am1344') ? 'Turbo DNase I' : 'TURBO DNase, 2 Units/µL ';
+                }
+            }
+
+            // Update DNA Template Per Reaction defaults and recalc all existing columns
+            const newDefaultNum = kitId === 'am1344' ? 25 : (route === 'pcr' ? 2.5 : 5);
+            const newDefaultFormatted = formatMass(newDefaultNum);
+            if (table) {
+                const dnaBaseRow = table.querySelector('.row-dna-base');
+                if (dnaBaseRow) {
+                    dnaBaseRow.querySelectorAll('td input').forEach(input => {
+                        // Only reset if the value matches a known default (don't override user-entered values)
+                        const raw = input.value.trim();
+                        const cur = parseMass(raw);
+                        const knownDefaults = [25, 5, 2.5];
+                        if (knownDefaults.includes(cur)) {
+                            input.value = newDefaultFormatted;
+                        }
+                    });
+                }
+            }
+
+            // Recalc
+            if (table) {
+                const idRow = table.querySelector('.row-id');
+                if (idRow) {
+                    idRow.querySelectorAll('td').forEach(cell => {
+                        const rid = parseInt(cell.getAttribute('data-rid'));
+                        calcIVTRow(route, rid);
+                    });
+                }
+            }
+        }
+
+        function setNucleotide(route, nucId) {
+            if (!route) return;
+            ivtConfig[route].nuc = nucId;
+            // Update UI
+            // Update toggle button styling
+            document.querySelectorAll(`#nuc-toggle-${route} .toggle-btn`).forEach(b => {
+                b.classList.remove('active', 'active-silenced');
+            });
+            const btn = document.getElementById(`btn-${route}-${nucId}`);
+            if (btn) btn.classList.add(nucId === 'silenced' ? 'active-silenced' : 'active');
+
+            // Update Table Label and row highlight
+            const nucCol = document.getElementById(`nuc-col-${route}`);
+            if (nucCol) nucCol.textContent = (nucId === 'normal') ? 'UTP (100 mM)' : 'N1Ψ (100 mM) (green cap)';
+
+            const table = document.getElementById(`ivt-table-${route}`);
+            if (table) {
+                // Update row highlight
+                const utpRow = table.querySelector('.row-utp');
+                if (utpRow) {
+                    utpRow.classList.toggle('nuc-silenced', nucId === 'silenced');
+                }
+
+                // Recalc
+                const idRow = table.querySelector('.row-id');
+                if (idRow) {
+                    idRow.querySelectorAll('td').forEach(cell => {
+                        const rid = parseInt(cell.getAttribute('data-rid'));
+                        calcIVTRow(route, rid);
+                    });
+                }
+            }
+        }
+
+        // ── Route switching ────────────────────────────────────
+        const TITLES = {
+            tissue: 'ttRNA from Tissue / Cells',
+            plasmid: 'sRNA from Plasmid',
+            pcr: 'sRNA from PCR or DNA Template'
+        };
+
+        function resetAll() {
+            ['tissue', 'plasmid', 'pcr'].forEach(route => {
+                const total = ROUTE_STEPS[route];
+                for (let i = 0; i < total; i++) {
+                    openState[route][i] = false;
+                    setBoxState(route, i, 'def');
+                }
+            });
+            document.querySelectorAll('.step-section').forEach(s => s.style.display = 'none');
+        }
+
+        function selectRoute(val) {
+            const panel = document.getElementById('diagram-panel');
+            resetAll();
+            if (!val) { panel.classList.remove('visible'); return; }
+
+            document.getElementById('diagram-title').textContent = TITLES[val];
+            document.querySelectorAll('.diagram-svg').forEach(s => s.style.display = 'none');
+            document.getElementById('svg-' + val).style.display = 'block';
+
+            // Activate all steps for this route by default
+            const total = ROUTE_STEPS[val];
+            for (let i = 0; i < total; i++) {
+                openState[val][i] = true;
+                const sec = document.getElementById(`section-${val}-${i}`);
+                if (sec) sec.style.display = 'block';
+                setBoxState(val, i, 'active');
+            }
+
+            panel.classList.remove('visible');
+            void panel.offsetWidth;
+            panel.classList.add('visible');
+
+            // Initialize IVT tables if they are empty
+            const table = document.getElementById(`ivt-table-${val}`);
+            if (table && table.querySelector('.row-id').querySelectorAll('td').length === 0) {
+                addIVTRow(val);
+            }
+
+            // Set initial toggle states and recalculate
+            setIVTKit(val, ivtConfig[val].kit);
+            setNucleotide(val, ivtConfig[val].nuc);
+
+            setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+        }
+
+        // ── IVT Calculations ──────────────────────────────────
+        let ivtRowCount = { tissue: 0, plasmid: 0, pcr: 0 };
+
+        function addIVTRow(route) {
+            ivtRowCount[route]++;
+            const rid = ivtRowCount[route];
+
+            const actionHtml = `
+                <div class="flex items-center justify-center gap-1.5 py-1 px-2">
+                    <button onclick="duplicateIVTColumn('${route}', ${rid})" class="text-green-500 hover:text-green-700 p-1 bg-green-50 rounded" title="Duplicate">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" /></svg>
+                    </button>
+                    <button onclick="moveColumn('${route}', ${rid}, 'left')" class="text-blue-500 hover:text-blue-700 p-1 bg-blue-50 rounded" title="Move Left">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                    </button>
+                    <button onclick="moveColumn('${route}', ${rid}, 'right')" class="text-blue-500 hover:text-blue-700 p-1 bg-blue-50 rounded" title="Move Right">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                    </button>
+                    <button onclick="removeIVTRow('${route}', ${rid})" class="text-red-500 hover:text-red-700 p-1 bg-red-50 rounded" title="Delete">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                </div>
+            `;
+
+            // 1. Update IVT Table
+            const ivtTable = document.getElementById(`ivt-table-${route}`);
+            const ivtRows = ivtTable.querySelectorAll('tr');
+            const addIvtCell = (rowIdx, content, className = '') => {
+                const td = document.createElement('td');
+                td.setAttribute('data-rid', rid);
+                if (className) td.className = className;
+                td.innerHTML = content;
+                ivtRows[rowIdx].appendChild(td);
+            };
+
+            addIvtCell(0, actionHtml, 'text-center p-2 border-b border-l');
+            addIvtCell(1, `<input type="text" placeholder="Sample ${rid}">`, 'bg-yellow-input');
+            addIvtCell(2, `<input type="number" value="1" min="1" oninput="calcIVTRow('${route}', ${rid})">`, 'bg-yellow-input');
+            const currentKit = ivtConfig[route].kit;
+            const defValNum = currentKit === 'am1344' ? 25 : (route === 'pcr' ? 2.5 : 5);
+            const defVal = formatMass(defValNum);
+            addIvtCell(3, `<input type="text" placeholder="ng/μl" oninput="calcIVTRow('${route}', ${rid})" onblur="formatDnaConc(this, '${route}', ${rid})">`, 'bg-yellow-input');
+            addIvtCell(4, `<input type="text" value="${defVal}" placeholder="μg" oninput="calcIVTRow('${route}', ${rid})" onblur="formatDnaPerReac(this, '${route}', ${rid})">`, 'bg-yellow-input');
+            addIvtCell(5, '', 'bg-slate-50');
+            for (let i = 6; i <= 14; i++) {
+                addIvtCell(i, `<input type="text" class="read-only" readonly value="-">`, 'bg-green-mix');
+            }
+            addIvtCell(15, `<input type="text" class="read-only" readonly value="-">`, 'bg-gray-final');
+            addIvtCell(16, `<input type="text" class="read-only" readonly value="-">`, 'bg-purple-yield');
+
+            // 2. Update DNase Table
+            const dnaseTable = document.getElementById(`dnase-table-${route}`);
+            if (dnaseTable) {
+                const dnaseRows = dnaseTable.querySelectorAll('tr');
+                const addDnaseCell = (rowIdx, content, className = '') => {
+                    const td = document.createElement('td');
+                    td.setAttribute('data-rid', rid);
+                    if (className) td.className = className;
+                    td.innerHTML = content;
+                    dnaseRows[rowIdx].appendChild(td);
+                };
+                addDnaseCell(0, actionHtml, 'text-center p-2 border-b border-l');
+                addDnaseCell(1, `<input type="text" class="read-only" readonly value="-">`);
+                addDnaseCell(2, `<input type="text" class="read-only" readonly value="-">`);
+                addDnaseCell(3, `<input type="text" class="read-only" readonly value="-">`);
+            }
+
+            // 3. Update Cleanup Table
+            const cleanupTable = document.getElementById(`cleanup-table-${route}`);
+            if (cleanupTable) {
+                const cleanupRows = cleanupTable.querySelectorAll('tr');
+                const addCleanupCell = (rowIdx, content, className = '') => {
+                    const td = document.createElement('td');
+                    td.setAttribute('data-rid', rid);
+                    if (className) td.className = className;
+                    td.innerHTML = content;
+                    cleanupRows[rowIdx].appendChild(td);
+                };
+                addCleanupCell(0, actionHtml, 'text-center p-2 border-b border-l');
+                addCleanupCell(1, `<input type="text" class="read-only" readonly value="-">`);
+                addCleanupCell(2, `<input type="text" class="read-only" readonly value="-">`);
+                addCleanupCell(3, `<input type="text" class="read-only" readonly value="-">`);
+                addCleanupCell(4, `<input type="text" class="read-only" readonly value="-">`);
+                addCleanupCell(5, `<input type="text" class="read-only" readonly value="-">`);
+                addCleanupCell(6, `<input type="text" class="read-only" readonly value="-">`);
+                addCleanupCell(7, `<input type="text" class="read-only" readonly value="-">`);
+                addCleanupCell(8, `<input type="text" class="read-only" readonly value="-">`);
+                addCleanupCell(9, `<input type="text" class="read-only" readonly value="-">`);
+                addCleanupCell(10, `<input type="text" class="read-only" readonly value="-">`);
+                addCleanupCell(11, `<input type="text" class="read-only" readonly value="-">`);
+            }
+
+            calcIVTRow(route, rid);
+        }
+
+        function removeIVTRow(route, rid) {
+            if (confirm('Are you sure you want to delete this sample?')) {
+                document.querySelectorAll(`[data-rid="${rid}"]`).forEach(c => c.remove());
+                refreshCleanupHeaders(route);
+            }
+        }
+
+        function refreshCleanupHeaders(route) {
+            const cleanupTable = document.getElementById(`cleanup-table-${route}`);
+            if (!cleanupTable) return;
+            const numColsInputs = cleanupTable.querySelectorAll('.row-num-cols input');
+            let anySplit = false;
+            numColsInputs.forEach(inp => {
+                if (parseInt(inp.value) > 1) anySplit = true;
+            });
+
+            const suffix = anySplit ? ' per column' : '';
+            const rowClasses = ['row-sample-vol', 'row-water-add', 'row-rlt', 'row-eth', 'row-rpe1', 'row-rpe2'];
+            rowClasses.forEach(cls => {
+                const row = cleanupTable.querySelector(`.${cls}`);
+                if (row) {
+                    const th = row.querySelector('th');
+                    if (th) {
+                        // Get base text by removing " per column" if it exists
+                        let baseText = th.textContent.replace(' per column', '');
+                        th.textContent = baseText + suffix;
+                    }
+                }
+            });
+        }
+
+        function moveColumn(route, rid, dir) {
+            [`ivt-table-${route}`, `dnase-table-${route}`, `cleanup-table-${route}`].forEach(tableId => {
+                const table = document.getElementById(tableId);
+                if (!table) return;
+                const rows = table.querySelectorAll('tr');
+                rows.forEach(row => {
+                    const cells = Array.from(row.children);
+                    const targetCell = row.querySelector(`[data-rid="${rid}"]`);
+                    if (!targetCell) return;
+                    const idx = cells.indexOf(targetCell);
+                    if (dir === 'left' && idx > 1) {
+                        row.insertBefore(targetCell, cells[idx - 1]);
+                    } else if (dir === 'right' && idx < cells.length - 1) {
+                        row.insertBefore(targetCell, cells[idx + 1].nextSibling);
+                    }
+                });
+            });
+        }
+
+        function duplicateIVTColumn(route, rid) {
+            ivtRowCount[route]++;
+            const newRid = ivtRowCount[route];
+
+            [`ivt-table-${route}`, `dnase-table-${route}`, `cleanup-table-${route}`].forEach(tableId => {
+                const table = document.getElementById(tableId);
+                if (!table) return;
+                const rows = table.querySelectorAll('tr');
+                rows.forEach(row => {
+                    const targetCell = row.querySelector(`[data-rid="${rid}"]`);
+                    if (!targetCell) return;
+                    const newCell = targetCell.cloneNode(true);
+                    newCell.setAttribute('data-rid', newRid);
+
+                    // Update inputs
+                    const input = newCell.querySelector('input, select');
+                    const oldInput = targetCell.querySelector('input, select');
+                    if (input && oldInput) input.value = oldInput.value;
+
+                    // Update handlers
+                    const elements = newCell.querySelectorAll('[onclick], [oninput]');
+                    const updateAttr = (el, attr) => {
+                        let val = el.getAttribute(attr);
+                        if (val) el.setAttribute(attr, val.replace(new RegExp(rid, 'g'), newRid));
+                    };
+                    elements.forEach(el => {
+                        updateAttr(el, 'onclick');
+                        updateAttr(el, 'oninput');
+                    });
+
+                    row.insertBefore(newCell, targetCell.nextSibling);
+                });
+            });
+            calcIVTRow(route, newRid);
+        }
+
+        // ── DNA Concentration helpers ────────────────────
+
+        // Returns mass in μg from raw input string.
+        function parseMass(raw) {
+            if (!raw) return 0;
+            raw = raw.trim();
+            const isMg = /mg/i.test(raw);
+            const num = parseFloat(raw.replace(/[^\d.]/g, ''));
+            if (isNaN(num)) return 0;
+            return isMg ? num * 1000 : num;
+        }
+
+        // Returns concentration in ng/μl from raw input string.
+        // Handles: "250", "250 ng/μl", "1.2 μg/μl", "1.2 ug/ul", "1200ng/mL" etc.
+        function parseDnaConc(raw) {
+            if (!raw) return 0;
+            raw = raw.trim();
+            // Detect if user specified μg (μ|u)(g)
+            const isUg = /(μg|ug)/i.test(raw);
+            const num = parseFloat(raw.replace(/[^\d.]/g, ''));
+            if (isNaN(num)) return 0;
+            return isUg ? num * 1000 : num; // always return ng/μl
+        }
+
+        // Helper to format volume: switches to mL if >= 1000 µL, omits .0 if integer.
+        function formatVol(valUl) {
+            if (valUl === '-' || isNaN(valUl) || valUl === null) return '-';
+            let unit = 'µL';
+            let displayVal = valUl;
+            if (valUl >= 1000) {
+                displayVal = valUl / 1000;
+                unit = 'mL';
+            }
+            let s = displayVal.toFixed(1);
+            if (s.endsWith('.0')) s = s.slice(0, -2);
+            return s + ' ' + unit;
+        }
+
+        // Helper to format mass: switches to mg if >= 1000 µg, omits .0 if integer.
+        function formatMass(valUg) {
+            if (valUg === '-' || isNaN(valUg) || valUg === null) return '-';
+            let unit = 'µg';
+            let displayVal = valUg;
+            if (valUg >= 1000) {
+                displayVal = valUg / 1000;
+                unit = 'mg';
+            }
+            let s = displayVal.toFixed(1);
+            if (s.endsWith('.0')) s = s.slice(0, -2);
+            return s + ' ' + unit;
+        }
+
+        // Formats a ng/μl number to a display string.
+        function displayDnaConc(ngPerUl) {
+            if (!ngPerUl || ngPerUl <= 0) return '';
+            if (ngPerUl >= 1000) {
+                let s = (ngPerUl / 1000).toFixed(2);
+                if (s.endsWith('.00')) s = s.slice(0, -3);
+                else if (s.endsWith('0')) s = s.slice(0, -1);
+                return s + ' μg/μl';
+            }
+            let s = ngPerUl.toFixed(1);
+            if (s.endsWith('.0')) s = s.slice(0, -2);
+            return s + ' ng/μl';
+        }
+
+        // Called on blur: re-format the value and trigger recalc.
+        function formatDnaConc(input, route, rid) {
+            const ng = parseDnaConc(input.value);
+            if (ng > 0) input.value = displayDnaConc(ng);
+            calcIVTRow(route, rid);
+        }
+
+        // Formats DNA Template Per Reaction field on blur — appends units and omits .0.
+        function formatDnaPerReac(input, route, rid) {
+            const num = parseFloat(input.value);
+            if (!isNaN(num) && num > 0) input.value = formatMass(num);
+            calcIVTRow(route, rid);
+        }
+
+        function calcIVTRow(route, rid) {
+            const table = document.getElementById(`ivt-table-${route}`);
+            const cells = table.querySelectorAll(`td[data-rid="${rid}"]`);
+            if (cells.length === 0) return;
+
+            let dnaseVol = 0;
+            const inputs = [];
+            cells.forEach(td => {
+                const input = td.querySelector('input');
+                if (input) inputs.push(input);
+            });
+
+            // inputs[0]: Sample ID
+            // inputs[1]: Number of Reactions
+            // inputs[2]: DNA Template Concentration
+            // inputs[3]: DNA Template Per Reaction
+            const numReac = parseFloat(inputs[1].value) || 0;
+            const kit = ivtConfig[route].kit;
+            const vol = kit === 'am1344' ? 500 : 100;
+            const conc = parseDnaConc(inputs[2].value);
+            const dnaPerReac = parseMass(inputs[3].value);
+
+            const totalVol = vol * numReac;
+            const totalDnaUg = dnaPerReac * numReac;
+
+            const ratio = totalVol / 100;
+            const dnaVol = conc > 0 ? (totalDnaUg * 1000) / conc : 0;
+
+            let buff, ntp, cap, pol;
+
+            if (kit === 'am1344') {
+                buff = 10 * ratio; // 50 per kit
+                ntp = 62.5; // (ntp * 4) = 250 per kit
+                if (numReac > 1) ntp *= numReac; // scale by number of kits
+                cap = 0;
+                pol = 10 * ratio; // 50 per kit
+            } else {
+                buff = 10 * ratio;
+                ntp = 10 * ratio;
+                cap = 4 * ratio;
+                pol = 10 * ratio;
+            }
+
+            const fixedTotal = buff + (ntp * 4) + cap + pol;
+            const water = (totalVol - fixedTotal - dnaVol);
+
+            // Water (inputs[4]) to Final Vol (inputs[13])
+            if (water >= 0) {
+                inputs[4].value = formatVol(water);
+                inputs[4].classList.remove('text-red-500');
+            } else if (totalVol > 0) {
+                inputs[4].value = 'Too low';
+                inputs[4].classList.add('text-red-500');
+            } else {
+                inputs[4].value = '-';
+            }
+
+            inputs[5].value = formatVol(buff);
+            if (kit === 'am1344') {
+                inputs[6].value = formatVol(ntp * 4);
+            } else {
+                inputs[6].value = formatVol(ntp);
+            }
+
+            inputs[7].value = formatVol(ntp);
+            inputs[8].value = formatVol(ntp);
+            inputs[9].value = formatVol(ntp);
+            inputs[10].value = formatVol(cap);
+
+            inputs[11].value = formatVol(dnaVol);
+            inputs[12].value = formatVol(pol);
+            inputs[13].value = formatVol(totalVol);
+
+            // Expected RNA Yield (inputs[14]): ~700 µg per reaction
+            if (numReac > 0) {
+                const yieldUg = 700 * numReac;
+                inputs[14].value = '~' + formatMass(yieldUg);
+            } else {
+                inputs[14].value = '-';
+            }
+
+            // Update DNase table if it exists
+            const dnaseTable = document.getElementById(`dnase-table-${route}`);
+            if (dnaseTable) {
+                const dnaseCells = dnaseTable.querySelectorAll(`td[data-rid="${rid}"]`);
+                if (dnaseCells.length > 0) {
+                    const dnaseInputs = [];
+                    dnaseCells.forEach(td => {
+                        const input = td.querySelector('input');
+                        if (input) dnaseInputs.push(input);
+                    });
+                    if (dnaseInputs.length >= 3) {
+                        dnaseInputs[0].value = inputs[0].value || `Sample ${rid}`;
+                        dnaseInputs[1].value = formatVol(totalVol);
+
+                        let dnaseVolValue = 0;
+                        if (kit === 'am1344') {
+                            // 50 µL for each 500 µL of IVT reaction vol
+                            dnaseVolValue = totalVol / 10;
+                        } else {
+                            // 1 µL for each µg of DNA Template Per Reaction
+                            dnaseVolValue = dnaPerReac * numReac;
+                        }
+                        dnaseInputs[2].value = formatVol(dnaseVolValue);
+                        dnaseVol = dnaseVolValue;
+                    }
+                }
+            }
+
+            // Update Cleanup table if it exists
+            const cleanupTable = document.getElementById(`cleanup-table-${route}`);
+            if (cleanupTable) {
+                const cleanupCells = cleanupTable.querySelectorAll(`td[data-rid="${rid}"]`);
+                if (cleanupCells.length > 0) {
+                    const cleanupInputs = [];
+                    cleanupCells.forEach(td => {
+                        const input = td.querySelector('input, select');
+                        if (input) cleanupInputs.push(input);
+                    });
+                    if (cleanupInputs.length >= 11) {
+                        // inputs[0]: Sample ID
+                        // inputs[1]: Kit (Select)
+                        // inputs[2]: Number of Columns
+                        // inputs[3]: Sample Volume
+                        // inputs[4]: Water to Add
+                        // inputs[5]: RLT
+                        // inputs[6]: Ethanol
+                        // inputs[7]: RPE 1
+                        // inputs[8]: RPE 2
+                        // inputs[9]: Water for Elution
+                        // inputs[10]: Final Clean RNA Vol
+
+                        cleanupInputs[0].value = inputs[0].value || `Sample ${rid}`;
+                        const totalSampleVol = totalVol + dnaseVol;
+
+                        // 1. Calculate and set Number of Columns (1 column per 4 reactions)
+                        const numCols = Math.ceil(numReac / 4) || 1;
+                        cleanupInputs[2].value = numCols;
+
+                        // 2. Auto-select kit based on yield threshold of 1mg (1000 µg)
+                        const estYieldUg = 700 * numReac;
+                        const cleanupKitId = estYieldUg > 1000 ? 'maxi' : 'midi';
+                        cleanupInputs[1].value = (cleanupKitId === 'midi' ? 'Midi' : 'Maxi');
+
+                        if (totalSampleVol > 0) {
+                            // 3. Set Sample Volume PER COLUMN
+                            const sampleVolPerCol = totalSampleVol / numCols;
+                            cleanupInputs[3].value = formatVol(sampleVolPerCol);
+
+                            let rltPerCol, ethanolPerCol, rpePerCol, wtaPerCol;
+
+                            if (cleanupKitId === 'midi') {
+                                rltPerCol = 2000;
+                                wtaPerCol = 600;
+                                ethanolPerCol = 1400;
+                                rpePerCol = 2500;
+                            } else {
+                                // Maxi
+                                rltPerCol = 7500;
+                                wtaPerCol = 2250;
+                                ethanolPerCol = 5250;
+                                rpePerCol = 10000;
+                            }
+
+                            // Update per-column reagent fields
+                            cleanupInputs[5].value = formatVol(rltPerCol);
+                            cleanupInputs[6].value = formatVol(ethanolPerCol);
+                            cleanupInputs[7].value = formatVol(rpePerCol);
+                            cleanupInputs[8].value = formatVol(rpePerCol);
+
+                            const actualWtaPerCol = wtaPerCol - sampleVolPerCol;
+                            if (actualWtaPerCol >= 0) {
+                                cleanupInputs[4].value = formatVol(actualWtaPerCol);
+                                cleanupInputs[4].classList.remove('text-red-500');
+                            } else {
+                                cleanupInputs[4].value = 'Too high';
+                                cleanupInputs[4].classList.add('text-red-500');
+                            }
+
+                            // Total and result fields
+                            cleanupInputs[9].value = formatVol(800 * numReac);
+                            cleanupInputs[10].value = '~' + formatVol(800 * numReac);
+                        } else {
+                            for (let i = 3; i <= 10; i++) cleanupInputs[i].value = '-';
+                        }
+                    }
+                }
+            }
+            refreshCleanupHeaders(route);
+        }
+    </script>
+
+</body>
+
+</html>
