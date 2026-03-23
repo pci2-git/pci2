@@ -195,19 +195,28 @@
         }
 
         .row-rna-yield th,
-        .row-final-vol th {
+        .row-final-vol th,
+        .row-final-amount th,
+        .row-final-conc th,
+        .maxi-row-yield th {
             background-color: #faf5ff !important;
             color: #7e22ce;
             font-weight: 600;
         }
 
         .row-rna-yield td,
-        .row-final-vol td {
+        .row-final-vol td,
+        .row-final-amount td,
+        .row-final-conc td,
+        .maxi-row-yield td {
             background-color: #faf5ff !important;
         }
 
         .row-rna-yield input.read-only,
-        .row-final-vol input.read-only {
+        .row-final-vol input.read-only,
+        .row-final-amount input.read-only,
+        .row-final-conc input.read-only,
+        .maxi-row-yield input.read-only {
             color: #7e22ce;
             font-style: italic;
         }
@@ -305,11 +314,65 @@
                 <h1 class="text-2xl font-extrabold text-slate-800 leading-tight">RNA Production</h1>
                 <p class="text-sm text-slate-500">Sayour Lab · PCI2 Calculators</p>
             </div>
+            <div class="ml-auto">
+                <button onclick="clearSavedState()"
+                    title="Clear all saved data and reset the page"
+                    class="flex items-center gap-1.5 text-xs text-slate-400 hover:text-red-500 transition-colors px-3 py-1.5 rounded-lg hover:bg-red-50 border border-transparent hover:border-red-100">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    Clear saved data
+                </button>
+            </div>
         </div>
     </header>
 
     <!-- ── Main ── -->
     <main class="max-w-6xl mx-auto px-6 py-10">
+
+        <!-- RNA Calculation Table (Helper) -->
+        <div class="mb-12 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="flex items-center justify-center w-8 h-8 rounded-lg bg-blue-100 text-blue-600 shadow-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-slate-800 text-sm">RNA Calculator</h2>
+                        <p class="text-[10px] text-slate-500 font-medium uppercase tracking-wider">Quick Calculation
+                            Tool</p>
+                    </div>
+                </div>
+                <button onclick="addRnaCalcRow()"
+                    class="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1.5 transition-all hover:scale-105">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Add Sample
+                </button>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="calc-table w-full" id="rna-helper-table">
+                    <thead>
+                        <tr>
+                            <th class="bg-slate-50 !text-slate-600 border-slate-200 py-3">Sample ID</th>
+                            <th class="bg-slate-50 !text-slate-600 border-slate-200 py-3 text-center">RNA/animal (µg)
+                            </th>
+                            <th class="bg-slate-50 !text-slate-600 border-slate-200 py-3 text-center">Vaccines/animal
+                            </th>
+                            <th class="bg-slate-50 !text-slate-600 border-slate-200 py-3 text-center">Number of animals
+                            </th>
+                            <th class="bg-slate-50 !text-slate-600 border-slate-200 py-3 text-center">Total RNA (µg)
+                            </th>
+                            <th class="bg-slate-50 !text-slate-600 border-slate-200 py-3 w-12"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="rna-helper-body"></tbody>
+                </table>
+            </div>
+        </div>
 
         <!-- Dropdown -->
         <div class="flex flex-wrap items-center gap-4 mb-8">
@@ -400,6 +463,37 @@
                         </svg>
                     </div>
 
+                    <!-- ── Sample Planner (master grid) for Tissue ── -->
+                    <div id="tissue-sample-planner" class="mt-5 bg-blue-50 border border-blue-200 rounded-2xl overflow-hidden">
+                        <div class="flex items-center justify-between px-5 py-3 bg-blue-100/60 border-b border-blue-200">
+                            <div class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                                <span class="font-bold text-blue-800 text-sm">Sample Planner</span>
+                                <span class="text-[0.7rem] text-blue-500 font-medium uppercase tracking-wider">· Define samples — propagates to all sections below</span>
+                            </div>
+                            <button onclick="addTissueSample()"
+                                class="text-xs bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded-lg shadow-sm transition-colors cursor-pointer">+ Add Sample</button>
+                        </div>
+                        <div class="overflow-x-auto p-4">
+                            <table class="calc-table w-full" id="tissue-planner-table">
+                                <tbody>
+                                    <tr class="planner-row-actions">
+                                        <th class="!bg-blue-50 !text-blue-700">Actions</th>
+                                    </tr>
+                                    <tr class="planner-row-id">
+                                        <th class="!bg-blue-50 !text-blue-700">Sample ID</th>
+                                    </tr>
+                                    <tr class="planner-row-rna">
+                                        <th class="!bg-blue-50 !text-blue-700">RNA to prepare (µg)</th>
+                                    </tr>
+                                    <tr class="planner-row-reacs" style="display:none;">
+                                        <th class="!bg-blue-50 !text-blue-600 font-bold">Number of Reactions</th>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
                     <!-- Step sections — tissue -->
                     <div class="mt-5 space-y-3">
 
@@ -446,19 +540,78 @@
                                     class="text-green-400 hover:text-green-700 text-xl leading-none px-1"
                                     title="Close">×</button>
                             </div>
-                            <div class="border border-t-0 border-green-200 rounded-b-xl p-4 bg-white">
-                                <table class="calc-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Parameter</th>
-                                            <th>Value</th>
-                                            <th>Unit</th>
-                                        </tr>
-                                    </thead>
+                            <div class="border border-t-0 border-green-200 rounded-b-xl p-6 bg-white overflow-x-auto max-w-full">
+                                <table class="calc-table w-full text-xs" id="tissue-cdna-unified-table">
                                     <tbody>
-                                        <tr>
-                                            <td colspan="3" class="text-slate-400 italic text-xs py-3">Calculations for
-                                                cDNA production will be added here.</td>
+                                        <!-- Step 0: Reaction Setup -->
+                                        <tr class="row-id">
+                                            <th class="!bg-slate-100/80 sticky left-0 z-10 min-w-[200px] text-left">Sample ID</th>
+                                        </tr>
+                                        <tr class="row-conc">
+                                            <th class="!bg-slate-100/80 sticky left-0 z-10 min-w-[200px] text-left">RNA conc. (ng/µL)</th>
+                                        </tr>
+                                        <tr class="row-cdna-reacs">
+                                            <th class="!bg-blue-50 sticky left-0 z-10 min-w-[200px] text-left text-blue-700 font-extrabold font-bold uppercase">number of reactions</th>
+                                        </tr>
+                                        <tr class="row-rna-per-reac-mass">
+                                            <th class="!bg-slate-100/80 sticky left-0 z-10 min-w-[200px] text-left font-bold border-t-2 border-slate-200">RNA per reaction (µg)</th>
+                                        </tr>
+                                        <tr class="row-total-rna-mass">
+                                            <th class="!bg-slate-100/80 sticky left-0 z-10 min-w-[200px] text-left">Total RNA (µg)</th>
+                                        </tr>
+
+                                        <!-- Step 1: Mix 1 -->
+                                        <tr class="section-bg-blue">
+                                            <th colspan="100" class="!bg-blue-600 !text-white text-center font-bold py-1 uppercase tracking-widest text-[10px]">Mix 1 Reagents</th>
+                                        </tr>
+                                        <tr class="row-rna-amt">
+                                            <th class="!bg-slate-100/80 sticky left-0 z-10 min-w-[200px] text-left">RNA amount (µL)</th>
+                                        </tr>
+                                        <tr class="row-water">
+                                            <th class="!bg-slate-100/80 sticky left-0 z-10 min-w-[200px] text-left">Water (RNAse free) (µL)</th>
+                                        </tr>
+                                        <tr class="row-cds">
+                                            <th class="!bg-slate-100/80 sticky left-0 z-10 min-w-[200px] text-left">CDSIII-R primer (100µM) (µL)</th>
+                                        </tr>
+                                        <tr class="row-mix1-total italic font-bold">
+                                            <th class="!bg-slate-200 sticky left-0 z-10 min-w-[200px] text-left">Total Mix 1 (µL)</th>
+                                        </tr>
+
+                                        <!-- Step 2: Mix 2 -->
+                                        <tr class="section-bg-blue">
+                                            <th colspan="100" class="!bg-blue-600 !text-white text-center font-bold py-1 uppercase tracking-widest text-[10px]">Mix 2 Reagents</th>
+                                        </tr>
+                                        <tr class="row-buffer">
+                                            <th class="!bg-slate-100/80 sticky left-0 z-10 min-w-[200px] text-left">5x Strand buffer (µL)</th>
+                                        </tr>
+                                        <tr class="row-dtt">
+                                            <th class="!bg-slate-100/80 sticky left-0 z-10 min-w-[200px] text-left">DTT (µL)</th>
+                                        </tr>
+                                        <tr class="row-dntp">
+                                            <th class="!bg-slate-100/80 sticky left-0 z-10 min-w-[200px] text-left">10 mM dNTP (µL)</th>
+                                        </tr>
+                                        <tr class="row-smart">
+                                            <th class="!bg-slate-100/80 sticky left-0 z-10 min-w-[200px] text-left">100 µM SMARTIII-F (µL)</th>
+                                        </tr>
+                                        <tr class="row-rt">
+                                            <th class="!bg-slate-100/80 sticky left-0 z-10 min-w-[200px] text-left">Reverse Transcriptase (µL)</th>
+                                        </tr>
+                                        <tr class="row-mix2-total italic font-bold">
+                                            <th class="!bg-slate-200 sticky left-0 z-10 min-w-[200px] text-left">Total Mix 2 (µL)</th>
+                                        </tr>
+
+                                        <!-- Step 3: Total Mix -->
+                                        <tr class="section-bg-blue">
+                                            <th colspan="100" class="!bg-blue-600 !text-white text-center font-bold py-1 uppercase tracking-widest text-[10px]">Final cDNA Mix Summary</th>
+                                        </tr>
+                                        <tr class="row-mix-combined">
+                                            <th class="!bg-slate-100/80 sticky left-0 z-10 min-w-[200px] text-left font-bold">Mix 1 + Mix 2 vol (µL)</th>
+                                        </tr>
+                                        <tr class="row-split">
+                                            <th class="!bg-slate-100/80 sticky left-0 z-10 min-w-[200px] text-left">Tubes to split</th>
+                                        </tr>
+                                        <tr class="row-aliquot">
+                                            <th class="!bg-blue-50 sticky left-0 z-10 min-w-[200px] text-left !text-blue-700 font-extrabold uppercase font-bold">Vol per tube (µL)</th>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -471,29 +624,120 @@
                                 <div class="flex items-center gap-2">
                                     <span
                                         class="w-5 h-5 rounded-full bg-green-600 text-white text-xs font-bold flex items-center justify-center">3</span>
-                                    <span class="font-semibold text-green-900 text-sm">PCR Amplification and Clean
-                                        Up</span>
+                                    <span class="font-semibold text-green-900 text-sm">PCR Amplification and Clean Up</span>
                                 </div>
                                 <button onclick="closeSection('tissue',2)"
                                     class="text-green-400 hover:text-green-700 text-xl leading-none px-1"
                                     title="Close">×</button>
                             </div>
-                            <div class="border border-t-0 border-green-200 rounded-b-xl p-4 bg-white">
-                                <table class="calc-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Parameter</th>
-                                            <th>Value</th>
-                                            <th>Unit</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td colspan="3" class="text-slate-400 italic text-xs py-3">Calculations for
-                                                PCR Amplification and Clean Up will be added here.</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                            <div class="border border-t-0 border-green-200 rounded-b-xl p-6 bg-white space-y-8 overflow-x-auto max-w-full">
+                                <!-- Sub-section: PCR Reaction -->
+                                <div>
+                                    <div class="sub-section-header">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a2 2 0 00-1.96 1.414l-.477 2.387a2 2 0 001.414 1.96l2.387.477a2 2 0 001.96-1.414l.477-2.387a2 2 0 00-1.414-1.96l-2.387-.477z" /></svg>
+                                        PCR Reaction
+                                    </div>
+                                    <table class="calc-table w-full text-xs" id="tissue-pcr-reaction-table">
+                                        <tbody>
+                                            <tr class="row-id">
+                                                <th class="!bg-slate-100/80 sticky left-0 z-10 min-w-[200px] text-left">Sample ID</th>
+                                            </tr>
+                                            <tr class="row-reacs">
+                                                <th class="!bg-blue-50 sticky left-0 z-10 min-w-[200px] text-left text-blue-700 font-extrabold font-bold uppercase">Number of reactions</th>
+                                            </tr>
+                                            <tr class="section-bg-blue">
+                                                <th colspan="100" class="!bg-blue-600 !text-white text-center font-bold py-1 uppercase tracking-widest text-[10px]">PCR Master Mix</th>
+                                            </tr>
+                                            <tr class="row-h2o">
+                                                <th class="!bg-slate-100/80 sticky left-0 z-10 min-w-[200px] text-left italic">H2O (DNase RNase free) (µL)</th>
+                                            </tr>
+                                            <tr class="row-buffer">
+                                                <th class="!bg-slate-100/80 sticky left-0 z-10 min-w-[200px] text-left">10X Advantage 2 buffer (Red) (µL)</th>
+                                            </tr>
+                                            <tr class="row-dntp">
+                                                <th class="!bg-slate-100/80 sticky left-0 z-10 min-w-[200px] text-left">Advantage dNTP 10 mM (Purple) (µL)</th>
+                                            </tr>
+                                            <tr class="row-t7smart">
+                                                <th class="!bg-slate-100/80 sticky left-0 z-10 min-w-[200px] text-left">T7/SMART primer (100µM) (µL)</th>
+                                            </tr>
+                                            <tr class="row-cds3">
+                                                <th class="!bg-slate-100/80 sticky left-0 z-10 min-w-[200px] text-left">CDS III primer (100µM) (µL)</th>
+                                            </tr>
+                                            <tr class="row-cdna-template">
+                                                <th class="!bg-slate-100/80 sticky left-0 z-10 min-w-[200px] text-left">cDNA (template) (µL)</th>
+                                            </tr>
+                                            <tr class="row-pol">
+                                                <th class="!bg-slate-100/80 sticky left-0 z-10 min-w-[200px] text-left">50x Advantage 2 polymerase (pink) (µL)</th>
+                                            </tr>
+                                            <tr class="row-pcr-total italic font-bold">
+                                                <th class="!bg-slate-200 sticky left-0 z-10 min-w-[200px] text-left">Total Volume (µL)</th>
+                                            </tr>
+                                            <tr class="section-bg-blue">
+                                                <th colspan="100" class="!bg-blue-600 !text-white text-center font-bold py-1 uppercase tracking-widest text-[10px]">Tube Distribution</th>
+                                            </tr>
+                                            <tr class="row-pcr-tubes">
+                                                <th class="!bg-slate-100/80 sticky left-0 z-10 min-w-[200px] text-left">PCR Tubes</th>
+                                            </tr>
+                                            <tr class="row-vol-tube">
+                                                <th class="!bg-blue-50 sticky left-0 z-10 min-w-[200px] text-left !text-blue-700 font-extrabold uppercase font-bold text-[10px]">Vol. per tube (µL)</th>
+                                            </tr>
+                                            <tr class="section-bg-green">
+                                               <th colspan="100" class="!bg-green-600 !text-white text-center font-bold py-1 uppercase tracking-widest text-[10px]">Expected Production</th>
+                                            </tr>
+                                            <tr class="row-pcr-expected-mass">
+                                                <th class="!bg-slate-100/80 sticky left-0 z-10 min-w-[200px] text-left font-bold">≈ Expected DNA prodution (µg)</th>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Sub-section: PCR clean up -->
+                                <div>
+                                    <div class="sub-section-header">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a2 2 0 00-1.96 1.414l-.477 2.387a2 2 0 001.414 1.96l2.387.477a2 2 0 001.96-1.414l.477-2.387a2 2 0 00-1.414-1.96l-2.387-.477z" /></svg>
+                                        PCR clean up
+                                    </div>
+                                     <table class="calc-table w-full text-xs" id="tissue-pcr-cleanup-table">
+                                         <tbody>
+                                             <tr class="row-id">
+                                                 <th class="!bg-slate-100/80 sticky left-0 z-10 min-w-[200px] text-left">Sample ID</th>
+                                             </tr>
+                                             <tr class="row-pcr-sample-vol">
+                                                 <th class="!bg-slate-100/80 sticky left-0 z-10 min-w-[200px] text-left italic">Sample vol. (µL)</th>
+                                             </tr>
+                                             <tr class="row-num-columns">
+                                                 <th class="!bg-blue-50 sticky left-0 z-10 min-w-[200px] text-left text-blue-700 font-extrabold font-bold uppercase">Number of Columns</th>
+                                             </tr>
+                                             <tr class="section-bg-blue">
+                                                <th colspan="100" class="!bg-blue-600 !text-white text-center font-bold py-1 uppercase tracking-widest text-[10px]">Clean Up Protocol</th>
+                                             </tr>
+                                             <tr class="row-pb-buffer">
+                                                 <th class="!bg-slate-100/80 sticky left-0 z-10 min-w-[200px] text-left">PB buffer (µL)</th>
+                                             </tr>
+                                             <tr class="row-sample-pb-mix">
+                                                 <th class="!bg-slate-100/80 sticky left-0 z-10 min-w-[200px] text-left italic">Sample+PB mix per column (µL)</th>
+                                             </tr>
+                                             <tr class="row-pe-buffer">
+                                                 <th class="!bg-slate-100/80 sticky left-0 z-10 min-w-[200px] text-left">PE buffer per column (µL)</th>
+                                             </tr>
+                                             <tr class="row-water-elution">
+                                                 <th class="!bg-slate-100/80 sticky left-0 z-10 min-w-[200px] text-left">RNAse free water (µL)</th>
+                                             </tr>
+                                             <tr class="section-bg-green">
+                                                <th colspan="100" class="!bg-green-600 !text-white text-center font-bold py-1 uppercase tracking-widest text-[10px]">Expected Recovery</th>
+                                             </tr>
+                                             <tr class="row-clean-dna-vol">
+                                                 <th class="!bg-slate-100/80 sticky left-0 z-10 min-w-[200px] text-left font-bold">≈ Expected Clean DNA vol (µL)</th>
+                                             </tr>
+                                             <tr class="row-clean-dna-mass">
+                                                 <th class="!bg-slate-100/80 sticky left-0 z-10 min-w-[200px] text-left font-bold">≈ Expected Clean DNA amount (µg)</th>
+                                             </tr>
+                                             <tr class="row-clean-dna-conc">
+                                                 <th class="!bg-green-50 sticky left-0 z-10 min-w-[200px] text-left !text-green-700 font-extrabold uppercase font-bold text-[10px]">≈ Expected Clean DNA Conc (ng/µL)</th>
+                                             </tr>
+                                         </tbody>
+                                     </table>
+                                </div>
                             </div>
                         </div>
 
@@ -506,9 +750,6 @@
                                     <span class="font-semibold text-green-900 text-sm">IVT Reaction and Clean Up</span>
                                 </div>
                                 <div class="flex items-center gap-3">
-                                    <button onclick="addIVTRow('tissue')"
-                                        class="text-xs bg-green-600 hover:bg-green-700 text-white font-bold py-1 px-3 rounded-lg shadow-sm transition-colors cursor-pointer">+
-                                        Add Sample</button>
                                     <button onclick="closeSection('tissue',3)"
                                         class="text-green-400 hover:text-green-700 text-xl leading-none px-1"
                                         title="Close">×</button>
@@ -555,20 +796,36 @@
                                     <div class="overflow-x-auto">
                                         <table class="calc-table w-full" id="ivt-table-tissue">
                                             <tbody>
-                                                <tr class="row-actions">
-                                                    <th>Actions</th>
-                                                </tr>
                                                 <tr class="row-id">
                                                     <th>Sample ID</th>
                                                 </tr>
                                                 <tr class="row-reac">
-                                                    <th id="reac-head-tissue">Number of Reactions</th>
+                                                    <th class="p-0">
+                                                        <div class="flex items-center justify-between gap-2 px-3 py-2 h-full min-h-[44px]">
+                                                            <span id="reac-head-tissue">Number of Reactions</span>
+                                                            <button onclick="toggleRowLock('ivt-table-tissue', 'row-reac', this)" class="text-slate-400 hover:text-blue-600 transition-colors p-1" title="Toggle Lock">
+                                                                <svg class="w-3.5 h-3.5 lock-icon" fill="currentColor" viewBox="0 0 20 20"><path d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" /></svg>
+                                                                <svg class="w-3.5 h-3.5 unlock-icon hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2H7V7a3 3 0 016 0z" /></svg>
+                                                            </button>
+                                                        </div>
+                                                    </th>
                                                 </tr>
                                                 <tr class="row-conc">
                                                     <th>DNA Concentration</th>
                                                 </tr>
                                                 <tr class="row-dna-base">
-                                                    <th id="dna-base-head-tissue">DNA Template Per Reaction</th>
+                                                    <th class="p-0">
+                                                        <div class="flex items-center justify-between gap-2 px-3 py-2 h-full min-h-[44px]">
+                                                            <span id="dna-base-head-tissue">DNA Template Per Reaction</span>
+                                                            <button onclick="toggleRowLock('ivt-table-tissue', 'row-dna-base', this)" class="text-slate-400 hover:text-blue-600 transition-colors p-1" title="Toggle Lock">
+                                                                <svg class="w-3.5 h-3.5 lock-icon" fill="currentColor" viewBox="0 0 20 20"><path d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" /></svg>
+                                                                <svg class="w-3.5 h-3.5 unlock-icon hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2H7V7a3 3 0 016 0z" /></svg>
+                                                            </button>
+                                                        </div>
+                                                    </th>
+                                                </tr>
+                                                <tr class="row-total-dna-needed">
+                                                    <th>Total DNA Template needed (µg)</th>
                                                 </tr>
                                                 <tr class="row-separator">
                                                     <th>Mix to prepare</th>
@@ -613,21 +870,6 @@
                                     </div>
                                 </div>
 
-                                <!-- Sub-section: Nanodrop QC Analysis -->
-                                <div>
-                                    <div class="sub-section-header">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                        </svg>
-                                        Nanodrop QC Analysis
-                                    </div>
-                                    <div
-                                        class="bg-slate-50 border border-slate-200 rounded-xl p-8 text-center text-slate-400 italic text-sm">
-                                        Calculations for Nanodrop QC Analysis will be added here.
-                                    </div>
-                                </div>
-
                                 <!-- Sub-section: DNase Treatment -->
                                 <div>
                                     <div class="sub-section-header">
@@ -640,9 +882,6 @@
                                     <div id="dnase-container-tissue" class="overflow-x-auto"></div>
                                     <table class="calc-table w-full" id="dnase-table-tissue">
                                         <tbody>
-                                            <tr class="row-actions">
-                                                <th>Actions</th>
-                                            </tr>
                                             <tr class="row-id">
                                                 <th>Sample ID</th>
                                             </tr>
@@ -669,9 +908,6 @@
                                 <div id="cleanup-container-tissue" class="overflow-x-auto"></div>
                                 <table class="calc-table w-full" id="cleanup-table-tissue">
                                     <tbody>
-                                        <tr class="row-actions">
-                                            <th>Actions</th>
-                                        </tr>
                                         <tr class="row-id">
                                             <th>Sample ID</th>
                                         </tr>
@@ -699,15 +935,26 @@
                                         <tr class="row-rpe2">
                                             <th>RPE (Wash 2)</th>
                                         </tr>
-                                        <tr class="row-water-dil">
-                                            <th>Water for Elution</th>
+                                        <tr class="row-water-elution-1">
+                                            <th>Water Elution 1</th>
+                                        </tr>
+                                        <tr class="row-water-elution-2">
+                                            <th>Water Elution 2</th>
                                         </tr>
                                         <tr class="row-final-vol bg-purple-yield italic font-bold">
                                             <th>≈ Expected final Clean RNA Vol</th>
                                         </tr>
+                                        <tr class="row-final-amount bg-purple-yield italic font-bold">
+                                            <th>≈ Expected final Clean RNA amount</th>
+                                        </tr>
+                                        <tr class="row-final-conc bg-purple-yield italic font-bold">
+                                            <th>≈ Expected final Clean RNA Conc</th>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
+                            <p class="text-[0.7rem] text-slate-400 mt-3 italic">💡 Add samples using the <strong>Sample Planner</strong> above — columns will appear here automatically.</p>
+                        </div>
                         </div>
                     </div>
                 </div>
@@ -717,13 +964,13 @@
 
         <!-- ══════════════════════════════════════════
                      ROUTE: sRNA from Plasmid
-                     Steps (4): Plasmid Maxi Preparation | Plasmid Restriction
-                               | Open Plasmid Precipitation | IVT Reaction and Clean Up
+                     Steps (3): Plasmid Maxi Preparation | Plasmid Restriction and Precipitation
+                               | IVT Reaction and Clean Up
                 ══════════════════════════════════════════ -->
         <div id="svg-plasmid" class="diagram-svg" style="display:none;">
             <div class="svg-scroll">
-                <svg viewBox="0 0 695 130" xmlns="http://www.w3.org/2000/svg"
-                    style="min-width:500px;width:100%;max-width:695px;height:130px;display:block;overflow:visible;">
+                <svg viewBox="0 0 580 130" xmlns="http://www.w3.org/2000/svg"
+                    style="min-width:500px;width:100%;max-width:580px;height:130px;display:block;overflow:visible;">
 
                     <!-- Box 0: Plasmid Maxi Preparation -->
                     <g class="step-box" id="box-plasmid-0" onclick="toggleSection('plasmid',0)"
@@ -738,43 +985,61 @@
 
                     <line x1="150" y1="65" x2="195" y2="65" stroke="#94a3b8" stroke-width="2" marker-end="url(#arr)" />
 
-                    <!-- Box 1: Plasmid Restriction -->
+                    <!-- Box 1: Plasmid Restriction and Precipitation -->
                     <g class="step-box" id="box-plasmid-1" onclick="toggleSection('plasmid',1)"
                         onmouseenter="hoverBox('plasmid',1,true)" onmouseleave="hoverBox('plasmid',1,false)">
-                        <rect id="rect-plasmid-1" x="195" y="30" width="130" height="70" rx="10" fill="#e2e8f0"
+                        <rect id="rect-plasmid-1" x="195" y="30" width="180" height="70" rx="10" fill="#e2e8f0"
                             stroke="#94a3b8" stroke-width="2" />
-                        <text x="260" y="57" font-family="Inter,sans-serif" font-size="13" font-weight="600"
-                            fill="#475569" text-anchor="middle">Plasmid</text>
-                        <text x="260" y="74" font-family="Inter,sans-serif" font-size="13" font-weight="600"
-                            fill="#475569" text-anchor="middle">Restriction</text>
+                        <text x="285" y="52" font-family="Inter,sans-serif" font-size="12" font-weight="600"
+                            fill="#475569" text-anchor="middle">Plasmid Restriction</text>
+                        <text x="285" y="68" font-family="Inter,sans-serif" font-size="12" font-weight="600"
+                            fill="#475569" text-anchor="middle">and Precipitation</text>
                     </g>
 
-                    <line x1="325" y1="65" x2="370" y2="65" stroke="#94a3b8" stroke-width="2" marker-end="url(#arr)" />
+                    <line x1="375" y1="65" x2="420" y2="65" stroke="#94a3b8" stroke-width="2" marker-end="url(#arr)" />
 
-                    <!-- Box 2: Open Plasmid Precipitation -->
+                    <!-- Box 2: IVT Reaction and Clean Up -->
                     <g class="step-box" id="box-plasmid-2" onclick="toggleSection('plasmid',2)"
                         onmouseenter="hoverBox('plasmid',2,true)" onmouseleave="hoverBox('plasmid',2,false)">
-                        <rect id="rect-plasmid-2" x="370" y="30" width="130" height="70" rx="10" fill="#e2e8f0"
+                        <rect id="rect-plasmid-2" x="420" y="30" width="140" height="70" rx="10" fill="#e2e8f0"
                             stroke="#94a3b8" stroke-width="2" />
-                        <text x="435" y="52" font-family="Inter,sans-serif" font-size="12" font-weight="600"
-                            fill="#475569" text-anchor="middle">Open Plasmid</text>
-                        <text x="435" y="68" font-family="Inter,sans-serif" font-size="12" font-weight="600"
-                            fill="#475569" text-anchor="middle">Precipitation</text>
-                    </g>
-
-                    <line x1="500" y1="65" x2="545" y2="65" stroke="#94a3b8" stroke-width="2" marker-end="url(#arr)" />
-
-                    <!-- Box 3: IVT Reaction and Clean Up -->
-                    <g class="step-box" id="box-plasmid-3" onclick="toggleSection('plasmid',3)"
-                        onmouseenter="hoverBox('plasmid',3,true)" onmouseleave="hoverBox('plasmid',3,false)">
-                        <rect id="rect-plasmid-3" x="545" y="30" width="130" height="70" rx="10" fill="#e2e8f0"
-                            stroke="#94a3b8" stroke-width="2" />
-                        <text x="610" y="57" font-family="Inter,sans-serif" font-size="12" font-weight="600"
+                        <text x="490" y="57" font-family="Inter,sans-serif" font-size="12" font-weight="600"
                             fill="#475569" text-anchor="middle">IVT Reaction</text>
-                        <text x="610" y="74" font-family="Inter,sans-serif" font-size="12" font-weight="600"
+                        <text x="490" y="74" font-family="Inter,sans-serif" font-size="12" font-weight="600"
                             fill="#475569" text-anchor="middle">and Clean Up</text>
                     </g>
                 </svg>
+            </div>
+
+            <!-- ── Sample Planner (master grid) ── -->
+            <div id="plasmid-sample-planner" class="mt-5 bg-blue-50 border border-blue-200 rounded-2xl overflow-hidden">
+                <div class="flex items-center justify-between px-5 py-3 bg-blue-100/60 border-b border-blue-200">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                        <span class="font-bold text-blue-800 text-sm">Sample Planner</span>
+                        <span class="text-[0.7rem] text-blue-500 font-medium uppercase tracking-wider">· Define samples — propagates to all sections below</span>
+                    </div>
+                    <button onclick="addPlasmidSample()"
+                        class="text-xs bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded-lg shadow-sm transition-colors cursor-pointer">+ Add Sample</button>
+                </div>
+                <div class="overflow-x-auto p-4">
+                    <table class="calc-table w-full" id="plasmid-planner-table">
+                        <tbody>
+                            <tr class="planner-row-actions">
+                                <th class="!bg-blue-50 !text-blue-700">Actions</th>
+                            </tr>
+                            <tr class="planner-row-id">
+                                <th class="!bg-blue-50 !text-blue-700">Sample ID</th>
+                            </tr>
+                            <tr class="planner-row-rna">
+                                <th class="!bg-blue-50 !text-blue-700">RNA to prepare (µg)</th>
+                            </tr>
+                            <tr class="planner-row-kits" style="display:none;">
+                                <th class="!bg-blue-50 !text-blue-600 font-bold">Number of Kits / Reactions</th>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- Step sections — plasmid -->
@@ -792,22 +1057,35 @@
                             class="text-green-400 hover:text-green-700 text-xl leading-none px-1"
                             title="Close">×</button>
                     </div>
-                    <div class="border border-t-0 border-green-200 rounded-b-xl p-4 bg-white">
-                        <table class="calc-table">
-                            <thead>
-                                <tr>
-                                    <th>Parameter</th>
-                                    <th>Value</th>
-                                    <th>Unit</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td colspan="3" class="text-slate-400 italic text-xs py-3">Calculations for
-                                        Plasmid Maxi Preparation will be added here.</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <div class="border border-t-0 border-green-200 rounded-b-xl p-6 bg-white">
+                        <div class="overflow-x-auto">
+                            <table class="calc-table w-full" id="maxi-table">
+                                <tbody>
+
+                                    <tr class="maxi-row-id">
+                                        <th>Sample ID</th>
+                                    </tr>
+                                    <tr class="maxi-row-ampicillin">
+                                        <th>Ampicillin (µL)</th>
+                                    </tr>
+                                    <tr class="maxi-row-lb">
+                                        <th class="p-0">
+                                            <div class="flex items-center justify-between gap-2 px-3 py-2 h-full min-h-[44px]">
+                                                <span>LB Medium (mL)</span>
+                                                <button onclick="toggleRowLock('maxi-table', 'maxi-row-lb', this)" class="text-slate-400 hover:text-blue-600 transition-colors p-1" title="Toggle Lock">
+                                                    <svg class="w-3.5 h-3.5 lock-icon" fill="currentColor" viewBox="0 0 20 20"><path d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" /></svg>
+                                                    <svg class="w-3.5 h-3.5 unlock-icon hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2H7V7a3 3 0 016 0z" /></svg>
+                                                </button>
+                                            </div>
+                                        </th>
+                                    </tr>
+                                    <tr class="maxi-row-yield bg-purple-yield italic font-bold">
+                                        <th>Expected DNA yield (µg)</th>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="text-[0.7rem] text-slate-400 mt-3 italic">💡 Add samples using the <strong>Sample Planner</strong> above — columns will appear here automatically.</p>
                     </div>
                 </div>
 
@@ -817,75 +1095,169 @@
                         <div class="flex items-center gap-2">
                             <span
                                 class="w-5 h-5 rounded-full bg-green-600 text-white text-xs font-bold flex items-center justify-center">2</span>
-                            <span class="font-semibold text-green-900 text-sm">Plasmid Restriction</span>
+                            <span class="font-semibold text-green-900 text-sm">Plasmid Restriction and Precipitation</span>
                         </div>
-                        <button onclick="closeSection('plasmid',1)"
-                            class="text-green-400 hover:text-green-700 text-xl leading-none px-1"
-                            title="Close">×</button>
+                        <div class="flex items-center gap-3">
+                            <button onclick="closeSection('plasmid',1)"
+                                class="text-green-400 hover:text-green-700 text-xl leading-none px-1"
+                                title="Close">×</button>
+                        </div>
                     </div>
-                    <div class="border border-t-0 border-green-200 rounded-b-xl p-4 bg-white">
-                        <table class="calc-table">
-                            <thead>
-                                <tr>
-                                    <th>Parameter</th>
-                                    <th>Value</th>
-                                    <th>Unit</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td colspan="3" class="text-slate-400 italic text-xs py-3">Calculations for
-                                        Plasmid Restriction will be added here.</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <div class="border border-t-0 border-green-200 rounded-b-xl p-6 bg-white space-y-8">
+                        <div>
+                            <div class="sub-section-header">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a2 2 0 00-1.96 1.414l-.477 2.387a2 2 0 001.414 1.96l2.387.477a2 2 0 001.96-1.414l.477-2.387a2 2 0 00-1.414-1.96l-2.387-.477z" />
+                                </svg>
+                                Plasmid Restriction
+                            </div>
+                        <!-- IVT Kit + Plasmid Vector Toggles -->
+                        <div class="flex items-center gap-6 mb-5 flex-wrap">
+                            <div class="flex flex-col gap-1.5">
+                                <label class="text-[0.7rem] font-bold text-slate-400 tracking-wider">IVT Kit and Plasmid Vector</label>
+                                <div class="toggle-group w-[400px]" id="restr-kit-toggle">
+                                    <div onclick="setRestrictionKit('am1344')" class="toggle-btn active" id="btn-restr-am1344">mMESSAGE (AM1344)<br>with pGEM-4z</div>
+                                    <div onclick="setRestrictionKit('k7413')" class="toggle-btn" id="btn-restr-k7413">CleanScript (K7413)<br>with pGEM-5z</div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Restriction Table (transposed: rows=parameters, cols=samples) -->
+                        <div class="overflow-x-auto">
+                            <table class="calc-table w-full" id="restriction-table">
+                                <tbody>
+
+                                    <tr class="restr-row-id">
+                                        <th>DNA Sample ID</th>
+                                    </tr>
+                                    <tr class="restr-row-conc">
+                                        <th>DNA Conc. (ng/µL)</th>
+                                    </tr>
+                                    <tr class="restr-row-dna-cut">
+                                        <th class="p-0">
+                                            <div class="flex items-center justify-between gap-2 px-3 py-2 h-full min-h-[44px]">
+                                                <span>DNA to cut (µg)</span>
+                                                <button onclick="toggleRowLock('restriction-table', 'restr-row-dna-cut', this)" class="text-slate-400 hover:text-blue-600 transition-colors p-1" title="Toggle Lock">
+                                                    <svg class="w-3.5 h-3.5 lock-icon" fill="currentColor" viewBox="0 0 20 20"><path d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" /></svg>
+                                                    <svg class="w-3.5 h-3.5 unlock-icon hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2H7V7a3 3 0 016 0z" /></svg>
+                                                </button>
+                                            </div>
+                                        </th>
+                                    </tr>
+
+                                    <tr class="restr-row-enzyme-units">
+                                        <th class="p-0">
+                                            <div class="flex items-center justify-between gap-2 px-3 py-2 h-full min-h-[44px]">
+                                                <span>Enzyme Units (U/µg)</span>
+                                                <button onclick="toggleRowLock('restriction-table', 'restr-row-enzyme-units', this)" class="text-slate-400 hover:text-blue-600 transition-colors p-1" title="Toggle Lock">
+                                                    <svg class="w-3.5 h-3.5 lock-icon" fill="currentColor" viewBox="0 0 20 20"><path d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" /></svg>
+                                                    <svg class="w-3.5 h-3.5 unlock-icon hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2H7V7a3 3 0 016 0z" /></svg>
+                                                </button>
+                                            </div>
+                                        </th>
+                                    </tr>
+                                    <tr class="restr-row-separator row-separator">
+                                        <th>Reaction Mix</th>
+                                    </tr>
+                                    <tr class="restr-row-water">
+                                        <th>Water (µL)</th>
+                                    </tr>
+                                    <tr class="restr-row-cutsmart">
+                                        <th>CutSmart 10x (µL)</th>
+                                    </tr>
+                                    <tr class="restr-row-dna-rxn">
+                                        <th>DNA (µL)</th>
+                                    </tr>
+                                    <tr class="restr-row-enzyme-vol">
+                                        <th id="restr-enzyme-title">Spe I-HF (20 Units/µL)</th>
+                                    </tr>
+                                    <tr class="restr-row-total bg-slate-50 italic font-bold">
+                                        <th>Total volume (µL)</th>
+                                    </tr>
+                                    <tr class="restr-row-temp">
+                                        <th>Temp (°C)</th>
+                                    </tr>
+                                    <tr class="restr-row-time">
+                                        <th class="p-0">
+                                            <div class="flex items-center justify-between gap-2 px-3 py-2 h-full min-h-[44px]">
+                                                <span>Time (hours)</span>
+                                                <button onclick="toggleRowLock('restriction-table', 'restr-row-time', this)" class="text-slate-400 hover:text-blue-600 transition-colors p-1" title="Toggle Lock">
+                                                    <svg class="w-3.5 h-3.5 lock-icon" fill="currentColor" viewBox="0 0 20 20"><path d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" /></svg>
+                                                    <svg class="w-3.5 h-3.5 unlock-icon hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2H7V7a3 3 0 016 0z" /></svg>
+                                                </button>
+                                            </div>
+                                        </th>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        </div>
+                        
+                        <div>
+                            <div class="sub-section-header">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a2 2 0 00-1.96 1.414l-.477 2.387a2 2 0 001.414 1.96l2.387.477a2 2 0 001.96-1.414l.477-2.387a2 2 0 00-1.414-1.96l-2.387-.477z" />
+                                </svg>
+                                Open Plasmid Precipitation
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="calc-table w-full" id="precipitation-table">
+                                    <tbody>
+                                        <tr class="precip-row-id">
+                                            <th>Sample ID</th>
+                                        </tr>
+                                        <tr class="precip-row-v-dna">
+                                            <th>DNA volume (µL)</th>
+                                        </tr>
+                                        <tr class="precip-row-na-ac">
+                                            <th>0.1 vol of 3M Sodium Acetate (µL)</th>
+                                        </tr>
+                                        <tr class="precip-row-etoh">
+                                            <th>2.5 vol cold 100% ethanol (µL)</th>
+                                        </tr>
+                                        <tr class="precip-row-total bg-gray-final italic font-bold">
+                                            <th>Total volume (µL)</th>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- 75% Ethanol Mix Summary Table -->
+                            <div class="mt-6 flex justify-start">
+                                <div class="w-72 bg-slate-50 rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+                                    <div class="px-4 py-2 border-b border-slate-200 bg-green-50 text-green-800 text-[10px] font-bold uppercase tracking-widest flex items-center gap-2">
+                                        <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                                        75% Ethanol Mix to prepare
+                                    </div>
+                                    <table class="calc-table w-full text-[13px]">
+                                        <tbody>
+                                            <tr class="border-b border-slate-200">
+                                                <th class="!bg-transparent text-slate-500 font-medium py-2 px-4 text-left border-r border-slate-200 w-1/2">Ethanol 100%</th>
+                                                <td id="precip-summary-etoh" class="bg-white py-2 px-4 text-left font-bold text-slate-700">-</td>
+                                            </tr>
+                                            <tr class="border-b border-slate-200">
+                                                <th class="!bg-transparent text-slate-500 font-medium py-2 px-4 text-left border-r border-slate-200 w-1/2">RNAse free water</th>
+                                                <td id="precip-summary-water" class="bg-white py-2 px-4 text-left font-bold text-slate-700">-</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div id="section-plasmid-2" class="step-section" style="display:none;">
+                <div id="section-plasmid-2" class="step-section" style="display:none;" data-dna-base="5.0">
                     <div
                         class="flex items-center justify-between bg-green-50 border border-green-200 rounded-t-xl px-4 py-3">
                         <div class="flex items-center gap-2">
                             <span
                                 class="w-5 h-5 rounded-full bg-green-600 text-white text-xs font-bold flex items-center justify-center">3</span>
-                            <span class="font-semibold text-green-900 text-sm">Open Plasmid Precipitation</span>
-                        </div>
-                        <button onclick="closeSection('plasmid',2)"
-                            class="text-green-400 hover:text-green-700 text-xl leading-none px-1"
-                            title="Close">×</button>
-                    </div>
-                    <div class="border border-t-0 border-green-200 rounded-b-xl p-4 bg-white">
-                        <table class="calc-table">
-                            <thead>
-                                <tr>
-                                    <th>Parameter</th>
-                                    <th>Value</th>
-                                    <th>Unit</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td colspan="3" class="text-slate-400 italic text-xs py-3">Calculations for
-                                        Open Plasmid Precipitation will be added here.</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div id="section-plasmid-3" class="step-section" style="display:none;" data-dna-base="5.0">
-                    <div
-                        class="flex items-center justify-between bg-green-50 border border-green-200 rounded-t-xl px-4 py-3">
-                        <div class="flex items-center gap-2">
-                            <span
-                                class="w-5 h-5 rounded-full bg-green-600 text-white text-xs font-bold flex items-center justify-center">4</span>
                             <span class="font-semibold text-green-900 text-sm">IVT Reaction and Clean Up</span>
                         </div>
                         <div class="flex items-center gap-3">
-                            <button onclick="addIVTRow('plasmid')"
-                                class="text-xs bg-green-600 hover:bg-green-700 text-white font-bold py-1 px-3 rounded-lg shadow-sm transition-colors cursor-pointer">+
-                                Add Sample</button>
-                            <button onclick="closeSection('plasmid',3)"
+                            <button onclick="closeSection('plasmid',2)"
                                 class="text-green-400 hover:text-green-700 text-xl leading-none px-1"
                                 title="Close">×</button>
                         </div>
@@ -905,13 +1277,10 @@
                             <!-- Toggles -->
                             <div class="flex items-center gap-6 mb-5">
                                 <div class="flex flex-col gap-1.5">
-                                    <label class="text-[0.7rem] font-bold text-slate-400 tracking-wider">Ivt
-                                        Kit</label>
-                                    <div class="toggle-group w-64" id="kit-toggle-plasmid">
-                                        <div onclick="setIVTKit('plasmid', 'am1344')" class="toggle-btn active"
-                                            id="btn-plasmid-am1344">mMESSAGE<br>(AM1344)</div>
-                                        <div onclick="setIVTKit('plasmid', 'k7413')" class="toggle-btn"
-                                            id="btn-plasmid-k7413">CleanScript<br>(K7413)</div>
+                                    <label class="text-[0.7rem] font-bold text-slate-400 tracking-wider">IVT Kit and Plasmid Vector</label>
+                                    <div class="toggle-group w-[400px]" id="kit-toggle-plasmid">
+                                        <div onclick="setIVTKit('plasmid', 'am1344')" class="toggle-btn active" id="btn-plasmid-am1344">mMESSAGE (AM1344)<br>with pGEM-4z</div>
+                                        <div onclick="setIVTKit('plasmid', 'k7413')" class="toggle-btn" id="btn-plasmid-k7413">CleanScript (K7413)<br>with pGEM-5z</div>
                                     </div>
                                 </div>
                                 <div class="flex flex-col gap-1.5" id="nuc-toggle-container-plasmid">
@@ -931,20 +1300,37 @@
                             <div class="overflow-x-auto">
                                 <table class="calc-table w-full" id="ivt-table-plasmid">
                                     <tbody>
-                                        <tr class="row-actions">
-                                            <th>Actions</th>
-                                        </tr>
+
                                         <tr class="row-id">
                                             <th>Sample Id</th>
                                         </tr>
                                         <tr class="row-reac">
-                                            <th id="reac-head-plasmid">Num Reac</th>
+                                            <th class="p-0">
+                                                <div class="flex items-center justify-between gap-2 px-3 py-2 h-full min-h-[44px]">
+                                                    <span id="reac-head-plasmid">Num Reac</span>
+                                                    <button onclick="toggleRowLock('ivt-table-plasmid', 'row-reac', this)" class="text-slate-400 hover:text-blue-600 transition-colors p-1" title="Toggle Lock">
+                                                        <svg class="w-3.5 h-3.5 lock-icon" fill="currentColor" viewBox="0 0 20 20"><path d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" /></svg>
+                                                        <svg class="w-3.5 h-3.5 unlock-icon hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2H7V7a3 3 0 016 0z" /></svg>
+                                                    </button>
+                                                </div>
+                                            </th>
                                         </tr>
                                         <tr class="row-conc">
                                             <th>DNA Template Concentration</th>
                                         </tr>
                                         <tr class="row-dna-base">
-                                            <th id="dna-base-head-plasmid">DNA Template Per Reaction</th>
+                                            <th class="p-0">
+                                                <div class="flex items-center justify-between gap-2 px-3 py-2 h-full min-h-[44px]">
+                                                    <span id="dna-base-head-plasmid">DNA Template Per Reaction</span>
+                                                    <button onclick="toggleRowLock('ivt-table-plasmid', 'row-dna-base', this)" class="text-slate-400 hover:text-blue-600 transition-colors p-1" title="Toggle Lock">
+                                                        <svg class="w-3.5 h-3.5 lock-icon" fill="currentColor" viewBox="0 0 20 20"><path d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" /></svg>
+                                                        <svg class="w-3.5 h-3.5 unlock-icon hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2H7V7a3 3 0 016 0z" /></svg>
+                                                    </button>
+                                                </div>
+                                            </th>
+                                        </tr>
+                                        <tr class="row-total-dna-needed">
+                                            <th>Total DNA Template needed (µg)</th>
                                         </tr>
                                         <tr class="row-separator">
                                             <th>Mix to prepare</th>
@@ -987,21 +1373,6 @@
                             </div>
                         </div>
 
-                        <!-- Sub-section: Nanodrop QC Analysis -->
-                        <div>
-                            <div class="sub-section-header">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                </svg>
-                                Nanodrop QC Analysis
-                            </div>
-                            <div
-                                class="bg-slate-50 border border-slate-200 rounded-xl p-8 text-center text-slate-400 italic text-sm">
-                                Calculations for Nanodrop QC Analysis will be added here.
-                            </div>
-                        </div>
-
                         <!-- Sub-section: DNase Treatment -->
                         <div>
                             <div class="sub-section-header">
@@ -1014,9 +1385,7 @@
                             <div id="dnase-container-plasmid" class="overflow-x-auto">
                                 <table class="calc-table w-full" id="dnase-table-plasmid">
                                     <tbody>
-                                        <tr class="row-actions">
-                                            <th>Actions</th>
-                                        </tr>
+
                                         <tr class="row-id">
                                             <th>Sample ID</th>
                                         </tr>
@@ -1043,9 +1412,7 @@
                             <div id="cleanup-container-plasmid" class="overflow-x-auto"></div>
                             <table class="calc-table w-full" id="cleanup-table-plasmid">
                                 <tbody>
-                                    <tr class="row-actions">
-                                        <th>Actions</th>
-                                    </tr>
+
                                     <tr class="row-id">
                                         <th>Sample ID</th>
                                     </tr>
@@ -1072,12 +1439,21 @@
                                     </tr>
                                     <tr class="row-rpe2">
                                         <th>RPE (Wash 2)</th>
-                                    </tr>
-                                    <tr class="row-water-dil">
-                                        <th>Water for Elution</th>
-                                    </tr>
+                                        </tr>
+                                        <tr class="row-water-elution-1">
+                                            <th>Water Elution 1</th>
+                                        </tr>
+                                        <tr class="row-water-elution-2">
+                                            <th>Water Elution 2</th>
+                                        </tr>
                                     <tr class="row-final-vol bg-purple-yield italic font-bold">
                                         <th>≈ Expected final Clean RNA Vol</th>
+                                    </tr>
+                                    <tr class="row-final-amount bg-purple-yield italic font-bold">
+                                        <th>≈ Expected final Clean RNA amount</th>
+                                    </tr>
+                                    <tr class="row-final-conc bg-purple-yield italic font-bold">
+                                        <th>≈ Expected final Clean RNA Conc</th>
                                     </tr>
                                 </tbody>
                             </table>
@@ -1114,6 +1490,37 @@
             <!-- Step section — pcr -->
             <div class="mt-5 space-y-3">
 
+                <!-- ── Sample Planner (master grid) for PCR ── -->
+                <div id="pcr-sample-planner" class="mt-5 bg-blue-50 border border-blue-200 rounded-2xl overflow-hidden">
+                    <div class="flex items-center justify-between px-5 py-3 bg-blue-100/60 border-b border-blue-200">
+                        <div class="flex items-center gap-2">
+                            <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                            <span class="font-bold text-blue-800 text-sm">Sample Planner</span>
+                            <span class="text-[0.7rem] text-blue-500 font-medium uppercase tracking-wider">· Define samples — propagates to all sections below</span>
+                        </div>
+                        <button onclick="addPcrSample()"
+                            class="text-xs bg-blue-600 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded-lg shadow-sm transition-colors cursor-pointer">+ Add Sample</button>
+                    </div>
+                    <div class="overflow-x-auto p-4">
+                        <table class="calc-table w-full" id="pcr-planner-table">
+                            <tbody>
+                                <tr class="planner-row-actions">
+                                    <th class="!bg-blue-50 !text-blue-700">Actions</th>
+                                </tr>
+                                <tr class="planner-row-id">
+                                    <th class="!bg-blue-50 !text-blue-700">Sample ID</th>
+                                </tr>
+                                <tr class="planner-row-rna">
+                                    <th class="!bg-blue-50 !text-blue-700">RNA to prepare (µg)</th>
+                                </tr>
+                                <tr class="planner-row-reacs" style="display:none;">
+                                    <th class="!bg-blue-50 !text-blue-600 font-bold">Number of Reactions</th>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
                 <div id="section-pcr-0" class="step-section" style="display:none;" data-dna-base="2.5">
                     <div
                         class="flex items-center justify-between bg-green-50 border border-green-200 rounded-t-xl px-4 py-3">
@@ -1123,9 +1530,6 @@
                             <span class="font-semibold text-green-900 text-sm">IVT Reaction and Clean Up</span>
                         </div>
                         <div class="flex items-center gap-3">
-                            <button onclick="addIVTRow('pcr')"
-                                class="text-xs bg-green-600 hover:bg-green-700 text-white font-bold py-1 px-3 rounded-lg shadow-sm transition-colors cursor-pointer">+
-                                Add Sample</button>
                             <button onclick="closeSection('pcr',0)"
                                 class="text-green-400 hover:text-green-700 text-xl leading-none px-1"
                                 title="Close">×</button>
@@ -1170,20 +1574,36 @@
                             <div class="overflow-x-auto">
                                 <table class="calc-table w-full" id="ivt-table-pcr">
                                     <tbody>
-                                        <tr class="row-actions">
-                                            <th>Actions</th>
-                                        </tr>
                                         <tr class="row-id">
                                             <th>Sample Id</th>
                                         </tr>
                                         <tr class="row-reac">
-                                            <th id="reac-head-pcr">Num Reac</th>
+                                            <th class="p-0">
+                                                <div class="flex items-center justify-between gap-2 px-3 py-2 h-full min-h-[44px]">
+                                                    <span id="reac-head-pcr">Num Reac</span>
+                                                    <button onclick="toggleRowLock('ivt-table-pcr', 'row-reac', this)" class="text-slate-400 hover:text-blue-600 transition-colors p-1" title="Toggle Lock">
+                                                        <svg class="w-3.5 h-3.5 lock-icon" fill="currentColor" viewBox="0 0 20 20"><path d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" /></svg>
+                                                        <svg class="w-3.5 h-3.5 unlock-icon hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2H7V7a3 3 0 016 0z" /></svg>
+                                                    </button>
+                                                </div>
+                                            </th>
                                         </tr>
                                         <tr class="row-conc">
                                             <th>DNA Template Concentration</th>
                                         </tr>
                                         <tr class="row-dna-base">
-                                            <th id="dna-base-head-pcr">DNA Template Per Reaction</th>
+                                            <th class="p-0">
+                                                <div class="flex items-center justify-between gap-2 px-3 py-2 h-full min-h-[44px]">
+                                                    <span id="dna-base-head-pcr">DNA Template Per Reaction</span>
+                                                    <button onclick="toggleRowLock('ivt-table-pcr', 'row-dna-base', this)" class="text-slate-400 hover:text-blue-600 transition-colors p-1" title="Toggle Lock">
+                                                        <svg class="w-3.5 h-3.5 lock-icon" fill="currentColor" viewBox="0 0 20 20"><path d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" /></svg>
+                                                        <svg class="w-3.5 h-3.5 unlock-icon hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2H7V7a3 3 0 016 0z" /></svg>
+                                                    </button>
+                                                </div>
+                                            </th>
+                                        </tr>
+                                        <tr class="row-total-dna-needed">
+                                            <th>Total DNA Template needed (µg)</th>
                                         </tr>
                                         <tr class="row-separator">
                                             <th>Mix to prepare</th>
@@ -1226,21 +1646,6 @@
                             </div>
                         </div>
 
-                        <!-- Sub-section: Nanodrop QC Analysis -->
-                        <div>
-                            <div class="sub-section-header">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                                </svg>
-                                Nanodrop QC Analysis
-                            </div>
-                            <div
-                                class="bg-slate-50 border border-slate-200 rounded-xl p-8 text-center text-slate-400 italic text-sm">
-                                Calculations for Nanodrop QC Analysis will be added here.
-                            </div>
-                        </div>
-
                         <!-- Sub-section: DNase Treatment -->
                         <div>
                             <div class="sub-section-header">
@@ -1253,9 +1658,6 @@
                             <div id="dnase-container-pcr" class="overflow-x-auto">
                                 <table class="calc-table w-full" id="dnase-table-pcr">
                                     <tbody>
-                                        <tr class="row-actions">
-                                            <th>Actions</th>
-                                        </tr>
                                         <tr class="row-id">
                                             <th>Sample ID</th>
                                         </tr>
@@ -1282,9 +1684,6 @@
                             <div id="cleanup-container-pcr" class="overflow-x-auto"></div>
                             <table class="calc-table w-full" id="cleanup-table-pcr">
                                 <tbody>
-                                    <tr class="row-actions">
-                                        <th>Actions</th>
-                                    </tr>
                                     <tr class="row-id">
                                         <th>Sample ID</th>
                                     </tr>
@@ -1312,15 +1711,26 @@
                                     <tr class="row-rpe2">
                                         <th>RPE (Wash 2)</th>
                                     </tr>
-                                    <tr class="row-water-dil">
-                                        <th>Water for Elution</th>
+                                    <tr class="row-water-elution-1">
+                                        <th>Water Elution 1</th>
+                                    </tr>
+                                    <tr class="row-water-elution-2">
+                                        <th>Water Elution 2</th>
                                     </tr>
                                     <tr class="row-final-vol bg-purple-yield italic font-bold">
                                         <th>≈ Expected final Clean RNA Vol</th>
                                     </tr>
+                                    <tr class="row-final-amount bg-purple-yield italic font-bold">
+                                        <th>≈ Expected final Clean RNA amount</th>
+                                    </tr>
+                                    <tr class="row-final-conc bg-purple-yield italic font-bold">
+                                        <th>≈ Expected final Clean RNA Conc</th>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
+                        <p class="text-[0.7rem] text-slate-400 mt-3 italic">💡 Add samples using the <strong>Sample Planner</strong> above — columns will appear here automatically.</p>
+                    </div>
                     </div>
                 </div>
             </div>
@@ -1341,7 +1751,7 @@
         const TCOLOR = { def: '#475569', active: '#14532d' };
 
         // Number of steps per route
-        const ROUTE_STEPS = { tissue: 4, plasmid: 4, pcr: 1 };
+        const ROUTE_STEPS = { tissue: 4, plasmid: 3, pcr: 1 };
 
         // Current open/closed state per box
         const openState = { tissue: {}, plasmid: {}, pcr: {} };
@@ -1406,13 +1816,17 @@
             pcr: { kit: 'am1344', nuc: 'normal' }
         };
 
-        function setIVTKit(route, kitId) {
+        function setIVTKit(route, kitId, fromSync = false) {
             if (!route) return;
             ivtConfig[route].kit = kitId;
             // Update UI
             document.querySelectorAll(`#kit-toggle-${route} .toggle-btn`).forEach(b => b.classList.remove('active'));
             const btn = document.getElementById(`btn-${route}-${kitId}`);
             if (btn) btn.classList.add('active');
+
+            if (route === 'plasmid' && !fromSync) {
+                setRestrictionKit(kitId, true);
+            }
 
             // Apply kit-specific table style
             const table = document.getElementById(`ivt-table-${route}`);
@@ -1453,9 +1867,12 @@
                 if (ntpCol) ntpCol.textContent = 'ATP (100 mM)';
                 if (capCol) capCol.textContent = 'CleanCap AG (3\' OMe) (100 mM) (blue cap)';
                 if (polCol) polCol.textContent = 'CleanScribe RNA Pol Mix (10X) (orange cap)';
-                if (dnaBaseCol) dnaBaseCol.textContent = 'DNA Template Per Reaction';
-                ntpOnlyCols.forEach(col => col.style.display = ''); // Show them
+                if (dnaBaseCol) dnaBaseCol.textContent = 'DNA Template Per reaction';
+                ntpOnlyCols.forEach(col => col.style.display = ''); 
             }
+            
+            // Update all reaction units in the table
+            updateAllIVTUnits(route);
 
             // Toggle DNase container visibility and update header
             const dnaseContainer = document.getElementById(`dnase-container-${route}`);
@@ -1496,6 +1913,25 @@
                     });
                 }
             }
+            // Update all samples in Sample Planner and following sections
+            if (route === 'tissue') {
+                for (let rid in tissueSamples) {
+                    calcTissuePlannerSample(rid);
+                }
+            }
+        }
+
+        function updateAllIVTUnits(route) {
+            const table = document.getElementById(`ivt-table-${route}`);
+            if (!table) return;
+            const kit = ivtConfig[route].kit;
+            table.querySelectorAll('.row-reac td input').forEach(inp => {
+                const n = parseInt(inp.value) || 0;
+                if (n > 0) {
+                    const unit = (kit === 'am1344') ? 'kit' : 'reaction';
+                    inp.value = n + ' ' + unit + (n === 1 ? '' : 's');
+                }
+            });
         }
 
         function setNucleotide(route, nucId) {
@@ -1550,7 +1986,7 @@
             document.querySelectorAll('.step-section').forEach(s => s.style.display = 'none');
         }
 
-        function selectRoute(val) {
+        function selectRoute(val, isRestoring = false) {
             const panel = document.getElementById('diagram-panel');
             resetAll();
             if (!val) { panel.classList.remove('visible'); return; }
@@ -1573,80 +2009,1341 @@
             panel.classList.add('visible');
 
             // Initialize IVT tables if they are empty
-            const table = document.getElementById(`ivt-table-${val}`);
-            if (table && table.querySelector('.row-id').querySelectorAll('td').length === 0) {
-                addIVTRow(val);
+            if (val === 'plasmid') {
+                if (plasmidSampleCount === 0 && !isRestoring) addPlasmidSample();
+            } else if (val === 'pcr') {
+                if (pcrSampleCount === 0 && !isRestoring) addPcrSample();
+            } else if (val === 'tissue') {
+                if (tissueSampleCount === 0 && !isRestoring) addTissueSample();
             }
 
             // Set initial toggle states and recalculate
             setIVTKit(val, ivtConfig[val].kit);
             setNucleotide(val, ivtConfig[val].nuc);
+            
+            if (val === 'tissue') updateTissueCdna();
 
             setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+        }
+
+        // ── cDNA Production (Tissue) ──────────────────────────
+        function _addCdnaColumn(rid) {
+            const table = document.getElementById('tissue-cdna-unified-table');
+            if (!table) return;
+            const trs = table.querySelectorAll('tr');
+            
+            const sample = tissueSamples[rid] || { id: `Sample ${rid}` };
+            
+            const rowsHtml = [
+                `<input type="text" readonly class="read-only bg-yellow-input text-center font-bold" value="${sample.id}">`, // 0: ID
+                `<input type="text" value="" placeholder="ng/µL" class="text-center bg-yellow-input" onchange="updateTissueCdna()">`, // 1: Conc
+                `<input type="number" value="1" min="1" class="text-center bg-blue-50 font-bold border-blue-200" onchange="updateTissueCdna()">`, // 2: Reacs (row-cdna-reacs)
+                `<div class="text-center font-bold">-</div>`, // 3: RNA / reac (µg) (row-rna-per-reac-mass)
+                `<div class="text-center">-</div>`, // 4: Total RNA (µg) (row-total-rna-mass)
+                null, // 5: Header Mix 1
+                `<div class="text-center font-bold text-blue-600">-</div>`, // 6: RNA amt (µL) (row-rna-amt)
+                `<div class="text-center">-</div>`, // 7: Water (row-water)
+                `<div class="text-center">0.1</div>`, // 8: CDS (row-cds)
+                `<div class="font-bold text-center">-</div>`, // 9: Mix 1 Total (row-mix1-total)
+                null, // 10: Header Mix 2
+                `<div class="text-center">2.0</div>`, // 11: Buffer (row-buffer)
+                `<div class="text-center">1.0</div>`, // 12: DTT (row-dtt)
+                `<div class="text-center">1.0</div>`, // 13: dNTP (row-dntp)
+                `<div class="text-center">0.1</div>`, // 14: SMART (row-smart)
+                `<div class="text-center">1.0</div>`, // 15: RT (row-rt)
+                `<div class="font-bold text-center">-</div>`, // 16: Mix 2 Total (row-mix2-total)
+                null, // 17: Header Final
+                `<div class="font-bold text-center">-</div>`, // 18: Combined (row-mix-combined)
+                `<input type="text" readonly class="read-only bg-slate-50 text-center font-bold" value="1">`, // 19: Tubes (row-split)
+                `<div class="font-bold text-center text-blue-700">-</div>` // 20: Per tube (row-aliquot)
+            ];
+
+            rowsHtml.forEach((html, i) => {
+                const tr = trs[i];
+                if (!tr) return;
+                // Skip rows that have th[colspan] (headers)
+                if (tr.querySelector('th[colspan]')) return;
+
+                const td = document.createElement('td');
+                td.setAttribute('data-rid', rid);
+                td.className = 'text-center border-l';
+                td.innerHTML = html || ''; // Ensure nulls are handled
+                tr.appendChild(td);
+            });
+        }
+
+        function updateTissueCdna() {
+            const table = document.getElementById('tissue-cdna-unified-table');
+            if (!table) return;
+            const idRow = table.querySelector('.row-id');
+            if (!idRow) return;
+            const samples = idRow.querySelectorAll('td');
+            const nCols = samples.length;
+            
+            const getTdByClass = (cls, colIdx) => table.querySelector(`tr.${cls}`)?.querySelectorAll('td')[colIdx];
+            const getDivByClass = (cls, colIdx) => getTdByClass(cls, colIdx)?.querySelector('div');
+            const getInpByClass = (cls, colIdx) => getTdByClass(cls, colIdx)?.querySelector('input');
+
+            for (let col = 0; col < nCols; col++) {
+                const realRid = samples[col].getAttribute('data-rid');
+                const sample = tissueSamples[realRid];
+                const baseCdna = sample ? (sample.baseCdna || 1) : 1;
+                const rnaConc = parseFloat(getInpByClass('row-conc', col)?.value) || 0;
+                
+                let standardRnaVol = 0;
+                if (rnaConc > 0) {
+                    standardRnaVol = (rnaConc < 500) ? 4.8 : (2000 / rnaConc);
+                }
+
+                let finalCdna = baseCdna;
+                if (baseCdna < 5 && standardRnaVol > 3.0) finalCdna = 5;
+                
+                const reacInp = getInpByClass('row-cdna-reacs', col);
+                if (reacInp) reacInp.value = finalCdna;
+                const nReacs = finalCdna;
+
+                const useDilute = (nReacs < 5);
+                const primVolPerReac = useDilute ? 1.0 : 0.1;
+                const rnaMaxPerReac = useDilute ? 3.0 : 4.8;
+                
+                const cdsTh = table.querySelector('.row-cds th');
+                if (cdsTh) cdsTh.textContent = useDilute ? "CDSIII-R primer (10µM) (µL)" : "CDSIII-R primer (100µM) (µL)";
+                const smartTh = table.querySelector('.row-smart th');
+                if (smartTh) smartTh.textContent = useDilute ? "SMARTIII-F primer (10µM) (µL)" : "100 µM SMARTIII-F (µL)";
+
+                let rnaVolPerReac = 0;
+                let massPerReac = 0;
+                if (rnaConc > 0) {
+                    rnaVolPerReac = Math.min(rnaMaxPerReac, standardRnaVol);
+                    massPerReac = (rnaConc * rnaVolPerReac) / 1000;
+                }
+                
+                const rmDiv = getDivByClass('row-rna-per-reac-mass', col);
+                if (rmDiv) rmDiv.textContent = massPerReac.toFixed(2);
+                const tmDiv = getDivByClass('row-total-rna-mass', col);
+                if (tmDiv) tmDiv.textContent = (massPerReac * nReacs).toFixed(2);
+
+                const rnaVolTotal = rnaVolPerReac * nReacs;
+                const rnaVolDiv = getDivByClass('row-rna-amt', col);
+                if (rnaVolDiv) rnaVolDiv.textContent = formatVol(rnaVolTotal);
+
+                let waterPerReac = Math.max(0, rnaMaxPerReac - rnaVolPerReac);
+                let sum1 = 0;
+                const waterDiv = getDivByClass('row-water', col);
+                const wTotal = waterPerReac * nReacs;
+                if (waterDiv) waterDiv.textContent = formatVol(wTotal);
+                sum1 += wTotal;
+
+                const cdsDiv = getDivByClass('row-cds', col);
+                const cdsTotal = primVolPerReac * nReacs;
+                if (cdsDiv) cdsDiv.textContent = formatVol(cdsTotal);
+                sum1 += cdsTotal;
+
+                sum1 += rnaVolTotal;
+                const m1Total = getDivByClass('row-mix1-total', col);
+                if (m1Total) m1Total.textContent = formatVol(sum1);
+
+                const mapping2 = [
+                    { cls: 'row-buffer', bv: 2.0 },
+                    { cls: 'row-dtt', bv: 1.0 },
+                    { cls: 'row-dntp', bv: 1.0 },
+                    { cls: 'row-rt', bv: 1.0 }
+                ];
+                let sum2 = 0;
+                mapping2.forEach(m => {
+                    const t = m.bv * nReacs;
+                    const di = getDivByClass(m.cls, col);
+                    if (di) di.textContent = formatVol(t);
+                    sum2 += t;
+                });
+                const smartDiv = getDivByClass('row-smart', col);
+                const smartTotal = primVolPerReac * nReacs;
+                if (smartDiv) smartDiv.textContent = formatVol(smartTotal);
+                sum2 += smartTotal;
+
+                const m2TotalDiv = getDivByClass('row-mix2-total', col);
+                if (m2TotalDiv) m2TotalDiv.textContent = formatVol(sum2);
+
+                const finalVol = sum1 + sum2;
+                const combinedDiv = getDivByClass('row-mix-combined', col);
+                if (combinedDiv) combinedDiv.textContent = formatVol(finalVol);
+
+                const nTubes = Math.ceil(finalVol / 50.0) || 1;
+                const splitInp = getInpByClass('row-split', col);
+                if (splitInp) splitInp.value = nTubes;
+                const aliDiv = getDivByClass('row-aliquot', col);
+                if (aliDiv) aliDiv.textContent = formatVol(finalVol / nTubes);
+                
+                // --- PROPAGATION TO PCR ---
+                const pcrTable = document.getElementById('tissue-pcr-reaction-table');
+                if (pcrTable && sample) {
+                    const basePcr = sample.basePcr || 5;
+                    const scaleFactor = nReacs / baseCdna;
+                    const finalPcrValue = Math.round(basePcr * scaleFactor);
+                    
+                    // Use a query selector that targets the specific RID column
+                    const pcrInp = pcrTable.querySelector(`tr.row-reacs td[data-rid="${realRid}"] input`);
+                    if (pcrInp) {
+                        pcrInp.value = finalPcrValue;
+                    }
+                }
+            }
+            // After all cDNA columns updated, refresh downstream tables
+            updateTissuePcr();
+            updateTissuePcrCleanUp();
+        }
+
+        /** PCR CLEAN UP (TISSUE) */
+        function updateTissuePcrCleanUp() {
+            const table = document.getElementById('tissue-pcr-cleanup-table');
+            if (!table) return;
+            const idRow = table.querySelector('.row-id');
+            if (!idRow) return;
+            const samples = idRow.querySelectorAll('td');
+            const nCols = samples.length;
+            
+            const getTdByClass = (cls, colIdx) => table.querySelector(`tr.${cls}`)?.querySelectorAll('td')[colIdx];
+            const getDivByClass = (cls, colIdx) => getTdByClass(cls, colIdx)?.querySelector('div');
+            
+            const pcrTable = document.getElementById('tissue-pcr-reaction-table');
+
+            for (let col = 0; col < nCols; col++) {
+                const realRid = samples[col].getAttribute('data-rid');
+                
+                // Get PCR reaction count to derive sample volume
+                let nPcr = 1;
+                if (pcrTable) {
+                    const pcrInp = pcrTable.querySelector(`tr.row-reacs td[data-rid="${realRid}"] input`);
+                    nPcr = parseFloat(pcrInp?.value) || 1;
+                }
+                
+                const sampleVol = nPcr * 50.0;
+                const sampleVolDiv = getDivByClass('row-pcr-sample-vol', col);
+                if (sampleVolDiv) sampleVolDiv.textContent = formatVol(sampleVol);
+                
+                // Column scaling: 1 column per 8ug DNA. 
+                // Since 1 reac = 4ug, this is 1 column per 2 reactions.
+                const expectedMass = nPcr * 4.0;
+                const nColsRef = Math.ceil(expectedMass / 8.0) || 1;
+                const colDiv = getDivByClass('row-num-columns', col);
+                if (colDiv) colDiv.textContent = nColsRef;
+                
+                // PB Buffer: 5:1 ratio
+                const pbVol = sampleVol * 5;
+                const pbDiv = getDivByClass('row-pb-buffer', col);
+                if (pbDiv) pbDiv.textContent = formatVol(pbVol);
+                
+                const mixPerCol = (sampleVol + pbVol) / nColsRef;
+                const mixDiv = getDivByClass('row-sample-pb-mix', col);
+                if (mixDiv) mixDiv.textContent = formatVol(mixPerCol);
+                
+                // PE wash: 0.75mL per col
+                const peDiv = getDivByClass('row-pe-buffer', col);
+                if (peDiv) peDiv.textContent = formatVol(750);
+                
+                // Water Elution: 50uL per col
+                const waterDiv = getDivByClass('row-water-elution', col);
+                if (waterDiv) waterDiv.textContent = formatVol(50);
+                
+                // Expected Results
+                // 50uL water -> ~48uL recovery
+                const recoveryVol = 48 * nColsRef;
+                const recoveryVolDiv = getDivByClass('row-clean-dna-vol', col);
+                if (recoveryVolDiv) recoveryVolDiv.textContent = formatVol(recoveryVol);
+                
+                // Expected Mass: 4ug per reaction with 90% recovery
+                const recoveredMass = nPcr * 4.0 * 0.9; 
+                const massDiv = getDivByClass('row-clean-dna-mass', col);
+                if (massDiv) massDiv.textContent = recoveredMass.toFixed(1);
+                
+                const finalConc = (recoveredMass * 1000) / recoveryVol;
+                const concDiv = getDivByClass('row-clean-dna-conc', col);
+                if (concDiv) concDiv.textContent = finalConc.toFixed(0);
+            }
+        }
+
+        function _addPcrCleanUpColumn(rid) {
+            const table = document.getElementById('tissue-pcr-cleanup-table');
+            if (!table) return;
+            
+            const sample = tissueSamples[rid] || { id: `Sample ${rid}` };
+            const rowsHtml = [
+                `<div class="text-center font-bold">${sample.id}</div>`, // row-id
+                `<div class="text-center">-</div>`, // row-pcr-sample-vol
+                `<div class="text-center font-bold">-</div>`, // row-num-columns
+                null, // header
+                `<div class="text-center">-</div>`, // row-pb-buffer
+                `<div class="text-center italic">-</div>`, // row-sample-pb-mix
+                `<div class="text-center">750</div>`, // row-pe-buffer
+                `<div class="text-center">50</div>`, // row-water-elution
+                null, // header
+                `<div class="text-center">-</div>`, // row-clean-dna-vol
+                `<div class="text-center font-bold">-</div>`, // row-clean-dna-mass
+                `<div class="text-center font-bold text-green-700">-</div>` // row-clean-dna-conc
+            ];
+
+            const trs = table.querySelectorAll('tbody tr');
+            rowsHtml.forEach((html, i) => {
+                const tr = trs[i];
+                if (!tr || tr.querySelector('th[colspan]')) return;
+                const td = document.createElement('td');
+                td.setAttribute('data-rid', rid);
+                td.className = 'text-center border-l';
+                td.innerHTML = html || '';
+                tr.appendChild(td);
+            });
+        }
+
+        /** PCR SECTION (TISSUE) */
+        function updateTissuePcr() {
+            const table = document.getElementById('tissue-pcr-reaction-table');
+            if (!table) return;
+            const trs = table.querySelectorAll('tbody tr');
+            const idRow = table.querySelector('.row-id');
+            if (!idRow) return;
+            const nCols = idRow.querySelectorAll('td').length;
+            
+            const getTdByClass = (cls, colIdx) => table.querySelector(`tr.${cls}`)?.querySelectorAll('td')[colIdx];
+            const getDivByClass = (cls, colIdx) => getTdByClass(cls, colIdx)?.querySelector('div');
+            const getInpByClass = (cls, colIdx) => getTdByClass(cls, colIdx)?.querySelector('input');
+
+            for (let col = 0; col < nCols; col++) {
+                const nReacs = parseFloat(getInpByClass('row-reacs', col)?.value) || 1;
+                
+                // Volume units (per 50µL reaction)
+                // H2O: 41.8, Buffer: 5.0, dNTP: 1.0, T7SMART: 0.1, CDSIII: 0.1, cDNA: 1.0, Pol: 1.0
+                const mapping = [
+                    { cls: 'row-h2o', bv: 41.8 },
+                    { cls: 'row-buffer', bv: 5.0 },
+                    { cls: 'row-dntp', bv: 1.0 },
+                    { cls: 'row-t7smart', bv: 0.1 },
+                    { cls: 'row-cds3', bv: 0.1 },
+                    { cls: 'row-cdna-template', bv: 1.0 },
+                    { cls: 'row-pol', bv: 1.0 }
+                ];
+                
+                let totalMix = 0;
+                mapping.forEach(m => {
+                    const val = m.bv * nReacs;
+                    const div = getDivByClass(m.cls, col);
+                    if (div) div.textContent = formatVol(val);
+                    totalMix += val;
+                });
+                
+                const totalVolDiv = getDivByClass('row-pcr-total', col);
+                if (totalVolDiv) totalVolDiv.textContent = formatVol(totalMix);
+                
+                const tubesDiv = getDivByClass('row-pcr-tubes', col);
+                if (tubesDiv) tubesDiv.textContent = nReacs;
+                
+                const volPerTubeDiv = getDivByClass('row-vol-tube', col);
+                if (volPerTubeDiv) volPerTubeDiv.textContent = formatVol(50.0);
+                
+                // Expected Production: 4ug per reaction
+                const expMass = nReacs * 4.0;
+                const massDiv = getDivByClass('row-pcr-expected-mass', col);
+                if (massDiv) massDiv.textContent = expMass.toFixed(0);
+            }
+        }
+
+        function _addPcrColumn(rid) {
+            const table = document.getElementById('tissue-pcr-reaction-table');
+            if (!table) return;
+            
+            const sample = tissueSamples[rid] || { id: `Sample ${rid}` };
+            
+            const rowsHtml = [
+                `<input type="text" readonly class="read-only bg-yellow-input text-center font-bold" value="${sample.id}">`, // 0
+                `<input type="number" value="1" min="1" class="text-center bg-blue-50 font-bold border-blue-200" onchange="updateTissuePcr()">`, // 1
+                null, // 2 Header
+                `<div class="text-center opacity-70 italic">-</div>`, // 3: H2O
+                `<div class="text-center">-</div>`, // 4: Buffer
+                `<div class="text-center">-</div>`, // 5: dNTP
+                `<div class="text-center">-</div>`, // 6: T7
+                `<div class="text-center">-</div>`, // 7: CDS
+                `<div class="text-center">-</div>`, // 8: cDNA
+                `<div class="text-center">-</div>`, // 9: Pol
+                `<div class="font-bold text-center">-</div>`, // 10: Total
+                null, // 11 Header
+                `<div class="text-center font-bold text-blue-600">-</div>`, // 12: Tubes
+                `<div class="font-bold text-center text-blue-700">-</div>`, // 13: Vol / tube
+                null, // 14: Header
+                `<div class="font-bold text-center">-</div>` // 15: Mass
+            ];
+            
+            const trs = table.querySelectorAll('tbody tr');
+            rowsHtml.forEach((html, i) => {
+                const tr = trs[i];
+                if (!tr || tr.querySelector('th[colspan]')) return;
+                const td = document.createElement('td');
+                td.setAttribute('data-rid', rid);
+                td.className = 'text-center border-l';
+                td.innerHTML = html || '';
+                tr.appendChild(td);
+            });
+        }
+
+        // ── Tissue Sample Planner ────────────────────────────
+        const tissueSamples = {};
+        let tissueSampleCount = 0;
+
+        function addTissueSample() {
+            tissueSampleCount++;
+            const rid = tissueSampleCount;
+            
+            // Initialization: use existing data if we are restoring, otherwise set defaults
+            tissueSamples[rid] = tissueSamples[rid] || { id: `Sample ${rid}`, rna: 700 };
+            const sample = tissueSamples[rid];
+
+            const actionHtml = `
+                <div class="flex items-center justify-center gap-1.5 py-1 px-2">
+                    <button onclick="duplicateTissueSample(${rid})" class="text-green-500 hover:text-green-700 p-1 bg-green-50 rounded" title="Duplicate">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" /></svg>
+                    </button>
+                    <button onclick="removeTissueSample(${rid})" class="text-red-400 hover:text-red-700 p-1 bg-red-50 rounded" title="Delete">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                </div>`;
+
+            const pt = document.getElementById('tissue-planner-table');
+            if (pt) {
+                const ptRows = pt.querySelectorAll('tr');
+                const addPCell = (rowIdx, content, cls = '') => {
+                    const td = document.createElement('td');
+                    td.setAttribute('data-rid', rid);
+                    if (cls) td.className = cls;
+                    td.innerHTML = content;
+                    ptRows[rowIdx].appendChild(td);
+                };
+                addPCell(0, actionHtml, 'text-center p-2 border-b border-l');
+                addPCell(1, `<input type="text" value="${sample.id}" placeholder="Sample ID" oninput="updateTissueSampleId(${rid}, this.value)">`, 'bg-yellow-input');
+                addPCell(2, `<input type="text" value="${formatMass(sample.rna)}" placeholder="µg" oninput="tissueSamples[${rid}].rna=parseMass(this.value); calcTissuePlannerSample(${rid})" onblur="this.value=formatMass(parseMass(this.value))">`, 'bg-yellow-input');
+                addPCell(3, `<input type="text" class="read-only" readonly value="-">`, 'bg-blue-50 font-bold');
+            }
+
+            addIVTRow('tissue', rid);
+            _addCdnaColumn(rid);
+            _addPcrColumn(rid); // Add PCR column
+            _addPcrCleanUpColumn(rid); // Add Clean up column
+            
+            // Ensure DOM is ready before updating calculations
+            setTimeout(() => {
+                calcTissuePlannerSample(rid);
+            }, 10);
+        }
+
+        function updateTissueSampleId(rid, newId) {
+            tissueSamples[rid] = tissueSamples[rid] || {};
+            tissueSamples[rid].id = newId;
+
+            // Update cDNA unified table
+            const cdnaIdCell = document.querySelector(`#tissue-cdna-unified-table tr.row-id td[data-rid="${rid}"]`);
+            if (cdnaIdCell) {
+                const inp = cdnaIdCell.querySelector('input');
+                if (inp) inp.value = newId;
+            }
+
+            // Update PCR table
+            const pcrTable = document.getElementById('tissue-pcr-reaction-table');
+            if (pcrTable) {
+                const pcrIdCell = pcrTable.querySelector(`tbody tr:first-child td[data-rid="${rid}"]`);
+                if (pcrIdCell) {
+                    const inp = pcrIdCell.querySelector('input');
+                    if (inp) inp.value = newId;
+                }
+            }
+
+            const ivtIdCell = document.querySelector(`#ivt-table-tissue td[data-rid="${rid}"].ivt-id-cell`);
+            if (ivtIdCell) {
+                const inp = ivtIdCell.querySelector('input');
+                if (inp) {
+                    inp.value = newId;
+                    calcIVTRow('tissue', rid); 
+                }
+            }
+        }
+
+        function calcTissuePlannerSample(rid) {
+            const sample = tissueSamples[rid];
+            if (!sample) return;
+
+            // Tier 1: IVT Scaling (1 unit per 700µg)
+            const numIVT = Math.ceil(sample.rna / 700) || 1;
+            
+            // Tier 2: PCR Scaling (10 per AM1344 kit, 5 per K7413 reac)
+            const kit = ivtConfig['tissue'].kit;
+            const numPcr = numIVT * (kit === 'am1344' ? 10 : 5);
+            
+            // 3. cDNA Scaling (2 per 10 PCR, i.e., 5 PCR per 1 cDNA)
+            const numCdna = Math.ceil(numPcr / 5);
+            
+            // Save bases for adaptive snapping
+            sample.baseCdna = numCdna;
+            sample.basePcr  = numPcr;
+
+            // 1. Update Planner Row (Hide/Show handled in addTissueSample, here we update value)
+            const pt = document.getElementById('tissue-planner-table');
+            if (pt) {
+                const reacsInput = pt.querySelector(`.planner-row-reacs td[data-rid="${rid}"] input`);
+                if (reacsInput) {
+                    reacsInput.value = numIVT + ' unit' + (numIVT === 1 ? '' : 's');
+                }
+            }
+
+            // 2. Update cDNA Table
+            const cdnaTable = document.getElementById('tissue-cdna-unified-table');
+            if (cdnaTable) {
+                const reacsRow = cdnaTable.querySelector('.row-cdna-reacs');
+                if (reacsRow) {
+                    const cell = reacsRow.querySelector(`td[data-rid="${rid}"]`);
+                    if (cell) {
+                        const inp = cell.querySelector('input');
+                        if (inp) {
+                            inp.value = numCdna;
+                        }
+                    }
+                }
+            }
+
+            // 3. Update PCR Table
+            const pcrTable = document.getElementById('tissue-pcr-reaction-table');
+            if (pcrTable) {
+                const pcrReacsRow = pcrTable.querySelector('.row-reacs');
+                if (pcrReacsRow) {
+                    const cell = pcrReacsRow.querySelector(`td[data-rid="${rid}"]`);
+                    if (cell) {
+                        const inp = cell.querySelector('input');
+                        if (inp) {
+                            inp.value = numPcr;
+                        }
+                    }
+                }
+            }
+
+            // 4. Update IVT Table
+            const ivtTable = document.getElementById('ivt-table-tissue');
+            if (ivtTable) {
+                const reacInput = ivtTable.querySelector(`.row-reac td[data-rid="${rid}"] input`);
+                if (reacInput && !reacInput.dataset.userEdited) {
+                    const kitUnit = (kit === 'am1344') ? 'kit' : 'reaction';
+                    reacInput.value = numIVT + ' ' + (numIVT === 1 ? kitUnit : (kitUnit + 's'));
+                    calcIVTRow('tissue', rid);
+                }
+            }
+            
+            // Now run the full recalculations for these tables
+            updateTissueCdna();
+            updateTissuePcr();
+        }
+
+        function duplicateTissueSample(rid) {
+            addTissueSample();
+            const newRid = tissueSampleCount;
+            const original = tissueSamples[rid];
+            if (original) {
+                tissueSamples[newRid].rna = original.rna;
+                setTimeout(() => {
+                    const rnaInput = document.querySelector(`#tissue-planner-table tr:nth-child(3) td[data-rid="${newRid}"] input`);
+                    if (rnaInput) rnaInput.value = formatMass(original.rna);
+                    calcTissuePlannerSample(newRid);
+                }, 0);
+            }
+        }
+
+        function removeTissueSample(rid) {
+            delete tissueSamples[rid];
+            document.querySelectorAll(`[data-rid="${rid}"]`).forEach(el => el.remove());
+            // Re-index remaining samples if necessary, or just leave gaps
+            // For now, just remove.
+        }
+
+        // ── PCR Sample Planner ────────────────────────────
+        const pcrSamples = {};
+        let pcrSampleCount = 0;
+
+        function addPcrSample() {
+            pcrSampleCount++;
+            const rid = pcrSampleCount;
+
+            // Initialization: use existing data if we are restoring, otherwise set defaults
+            pcrSamples[rid] = pcrSamples[rid] || { id: `Sample ${rid}`, rna: 700 };
+            const sample = pcrSamples[rid];
+
+            const actionHtml = `
+                <div class="flex items-center justify-center gap-1.5 py-1 px-2">
+                    <button onclick="duplicatePcrSample(${rid})" class="text-green-500 hover:text-green-700 p-1 bg-green-50 rounded" title="Duplicate">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" /></svg>
+                    </button>
+                    <button onclick="removePcrSample(${rid})" class="text-red-400 hover:text-red-700 p-1 bg-red-50 rounded" title="Delete">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                </div>`;
+
+            const pt = document.getElementById('pcr-planner-table');
+            if (pt) {
+                const ptRows = pt.querySelectorAll('tr');
+                const addPCell = (rowIdx, content, cls = '') => {
+                    const td = document.createElement('td');
+                    td.setAttribute('data-rid', rid);
+                    if (cls) td.className = cls;
+                    td.innerHTML = content;
+                    ptRows[rowIdx].appendChild(td);
+                };
+                addPCell(0, actionHtml, 'text-center p-2 border-b border-l');
+                addPCell(1, `<input type="text" value="${sample.id}" placeholder="Sample ID" oninput="updatePcrSampleId(${rid}, this.value)">`, 'bg-yellow-input');
+                addPCell(2, `<input type="text" value="${formatMass(sample.rna)}" placeholder="µg" oninput="pcrSamples[${rid}].rna=parseMass(this.value); calcPcrPlannerSample(${rid})" onblur="this.value=formatMass(parseMass(this.value))">`, 'bg-yellow-input');
+                addPCell(3, `<input type="text" class="read-only" readonly value="-">`, 'bg-blue-50 font-bold');
+            }
+
+            addIVTRow('pcr', rid);
+            calcPcrPlannerSample(rid);
+        }
+
+        function updatePcrSampleId(rid, newId) {
+            pcrSamples[rid] = pcrSamples[rid] || {};
+            pcrSamples[rid].id = newId;
+
+            const ivtIdCell = document.querySelector(`#ivt-table-pcr td[data-rid="${rid}"].ivt-id-cell`);
+            if (ivtIdCell) {
+                const inp = ivtIdCell.querySelector('input');
+                if (inp) {
+                    inp.value = newId;
+                    calcIVTRow('pcr', rid); 
+                }
+            }
+        }
+
+        function calcPcrPlannerSample(rid) {
+            const sample = pcrSamples[rid];
+            if (!sample) return;
+
+            const numReac = Math.ceil(sample.rna / 700) || 1;
+            
+            const pt = document.getElementById('pcr-planner-table');
+            if (pt) {
+                const reacsRow = pt.querySelector('.planner-row-reacs');
+                if (reacsRow) reacsRow.style.display = 'table-row';
+                
+                const reacsInput = pt.querySelector(`.planner-row-reacs td[data-rid="${rid}"] input`);
+                if (reacsInput) reacsInput.value = numReac + (numReac === 1 ? ' reaction' : ' reactions');
+            }
+
+            const ivtTable = document.getElementById('ivt-table-pcr');
+            if (ivtTable) {
+                const reacInput = ivtTable.querySelector(`.row-reac td[data-rid="${rid}"] input`);
+                if (reacInput && !reacInput.dataset.userEdited) {
+                    const kitUnit = (ivtConfig['pcr'].kit === 'am1344') ? 'kit' : 'reaction';
+                    reacInput.value = numReac + ' ' + (numReac === 1 ? kitUnit : (kitUnit + 's'));
+                    calcIVTRow('pcr', rid);
+                }
+            }
+        }
+
+        function duplicatePcrSample(rid) {
+            addPcrSample();
+            const newRid = pcrSampleCount;
+            const original = pcrSamples[rid];
+            if (original) {
+                pcrSamples[newRid].rna = original.rna;
+                setTimeout(() => {
+                    const rnaInput = document.querySelector(`#pcr-planner-table tr:nth-child(3) td[data-rid="${newRid}"] input`);
+                    if (rnaInput) rnaInput.value = formatMass(original.rna);
+                    calcPcrPlannerSample(newRid);
+                }, 0);
+            }
+        }
+
+        function removePcrSample(rid) {
+            delete pcrSamples[rid];
+            document.querySelectorAll(`[data-rid="${rid}"]`).forEach(el => el.remove());
+        }
+
+        // ── Plasmid Sample Planner ────────────────────────────
+        // Central registry: plasmidSamples[rid] = { id, rna }
+        const plasmidSamples = {};
+        let plasmidSampleCount = 0;
+
+        function addPlasmidSample() {
+            plasmidSampleCount++;
+            const rid = plasmidSampleCount;
+            
+            // Initialization: use existing data if we are restoring, otherwise set defaults
+            plasmidSamples[rid] = plasmidSamples[rid] || { id: `Sample ${rid}`, rna: 700 };
+            const sample = plasmidSamples[rid];
+
+            const actionHtml = `
+                <div class="flex items-center justify-center gap-1.5 py-1 px-2">
+                    <button onclick="duplicatePlasmidSample(${rid})" class="text-green-500 hover:text-green-700 p-1 bg-green-50 rounded" title="Duplicate">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" /></svg>
+                    </button>
+                    <button onclick="movePlasmidSample(${rid}, 'left')" class="text-blue-500 hover:text-blue-700 p-1 bg-blue-50 rounded" title="Move Left">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                    </button>
+                    <button onclick="movePlasmidSample(${rid}, 'right')" class="text-blue-500 hover:text-blue-700 p-1 bg-blue-50 rounded" title="Move Right">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                    </button>
+                    <button onclick="removePlasmidSample(${rid})" class="text-red-400 hover:text-red-700 p-1 bg-red-50 rounded" title="Delete">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                </div>`;
+
+            // 1. Add to planner table
+            const pt = document.getElementById('plasmid-planner-table');
+            if (pt) {
+                const ptRows = pt.querySelectorAll('tr');
+                const addPCell = (rowIdx, content, cls = '') => {
+                    const td = document.createElement('td');
+                    td.setAttribute('data-rid', rid);
+                    if (cls) td.className = cls;
+                    td.innerHTML = content;
+                    ptRows[rowIdx].appendChild(td);
+                };
+                addPCell(0, actionHtml, 'text-center p-2 border-b border-l');
+                addPCell(1, `<input type="text" value="${sample.id}" placeholder="Sample ID" oninput="updatePlasmidSampleId(${rid}, this.value)">`, 'bg-yellow-input');
+                addPCell(2, `<input type="text" value="${formatMass(sample.rna)}" placeholder="µg" oninput="plasmidSamples[${rid}].rna=parseMass(this.value); calcPlannerSample(${rid})" onblur="this.value=formatMass(parseMass(this.value))">`, 'bg-yellow-input planner-row-rna');
+                addPCell(3, `<input type="text" class="read-only" readonly value="1">`, 'bg-blue-50 font-bold text-blue-700');
+            }
+
+            // 2. Add column to Maxi Prep table
+            _addMaxiColumn(rid);
+
+            // 3. Add column to Restriction table
+            _addRestrictionColumn(rid);
+
+            // 3.5 Add column to Precipitation table
+            _addPrecipitationColumn(rid);
+
+            // 4. Add column to IVT/DNase/Cleanup table
+            addIVTRow('plasmid', rid);
+
+            // 5. Initial calc
+            calcPlannerSample(rid);
+        }
+
+        function updatePlasmidSampleId(rid, newId) {
+            plasmidSamples[rid] = plasmidSamples[rid] || {};
+            plasmidSamples[rid].id = newId;
+
+            // Propagate to maxi-table (row-id, read-only)
+            const maxiIdCell = document.querySelector(`#maxi-table td[data-rid="${rid}"].maxi-id-cell`);
+            if (maxiIdCell) {
+                const inp = maxiIdCell.querySelector('input');
+                if (inp) inp.value = newId;
+            }
+
+            // Propagate to restriction-table (row-id, read-only)
+            const restrIdCell = document.querySelector(`#restriction-table td[data-rid="${rid}"].restr-id-cell`);
+            if (restrIdCell) {
+                const inp = restrIdCell.querySelector('input');
+                if (inp) inp.value = newId;
+            }
+
+            // Propagate to precipitation-table (row-id, read-only)
+            const precipIdCell = document.querySelector(`#precipitation-table td[data-rid="${rid}"].precip-id-cell`);
+            if (precipIdCell) {
+                const inp = precipIdCell.querySelector('input');
+                if (inp) inp.value = newId;
+            }
+
+            // Propagate to ivt-table-plasmid (row-id, read-only) -> cascades to DNase and Cleanup
+            const ivtIdCell = document.querySelector(`#ivt-table-plasmid td[data-rid="${rid}"].ivt-id-cell`);
+            if (ivtIdCell) {
+                const inp = ivtIdCell.querySelector('input');
+                if (inp) {
+                    inp.value = newId;
+                    calcIVTRow('plasmid', rid); 
+                }
+            }
+        }
+
+        function duplicatePlasmidSample(rid) {
+            addPlasmidSample();
+            const newRid = plasmidSampleCount;
+            
+            setTimeout(() => {
+                const oldData = plasmidSamples[rid];
+                if (!oldData) return;
+                
+                const tables = ['plasmid-planner-table', 'maxi-table', 'restriction-table', 'ivt-table-plasmid'];
+                tables.forEach(tId => {
+                    const table = document.getElementById(tId);
+                    if (!table) return;
+                    table.querySelectorAll('tr').forEach(tr => {
+                        const oldCell = tr.querySelector(`td[data-rid="${rid}"]`);
+                        const newCell = tr.querySelector(`td[data-rid="${newRid}"]`);
+                        if (!oldCell || !newCell) return;
+                        const oldInp = oldCell.querySelector('input');
+                        const newInp = newCell.querySelector('input');
+                        if (oldInp && newInp && !oldInp.readOnly && !oldInp.disabled) {
+                            newInp.value = oldInp.value;
+                            if (oldInp.dataset.userEdited) newInp.dataset.userEdited = oldInp.dataset.userEdited;
+                        }
+                    });
+                });
+                
+                // Set the ID properly and trigger calculations
+                updatePlasmidSampleId(newRid, oldData.id + ' (Copy)');
+                
+                // Planner manually needs updating internal object before calc
+                const pt = document.getElementById('plasmid-planner-table');
+                const rnaInp = pt?.querySelector(`.planner-row-rna td[data-rid="${newRid}"] input`);
+                if (rnaInp) {
+                    plasmidSamples[newRid].rna = parseFloat(rnaInp.value) || 0;
+                }
+                calcPlannerSample(newRid); 
+                calcRestrictionRow(newRid);
+                calcIVTRow('plasmid', newRid);
+            }, 10);
+        }
+
+        function movePlasmidSample(rid, dir) {
+            const tables = ['plasmid-planner-table', 'maxi-table', 'restriction-table', 'precipitation-table', 'ivt-table-plasmid', 'dnase-table-plasmid', 'cleanup-table-plasmid'];
+            tables.forEach(tId => {
+                const table = document.getElementById(tId);
+                if (!table) return;
+                table.querySelectorAll('tr').forEach(tr => {
+                    const cell = tr.querySelector(`td[data-rid="${rid}"]`);
+                    if (!cell) return;
+                    if (dir === 'left') {
+                        const prev = cell.previousElementSibling;
+                        if (prev && prev.tagName === 'TD') tr.insertBefore(cell, prev);
+                    } else if (dir === 'right') {
+                        const next = cell.nextElementSibling;
+                        if (next) tr.insertBefore(cell, next.nextElementSibling);
+                    }
+                });
+            });
+        }
+
+        function removePlasmidSample(rid) {
+            if (!confirm('Remove this sample from all sections?')) return;
+            delete plasmidSamples[rid];
+            // Remove from all tables by data-rid
+            document.querySelectorAll(`[data-rid="${rid}"]`).forEach(c => c.remove());
+            updatePrecipitationSummary();
+        }
+
+        // Yield per kit/reaction (µg) — used for Number of Kits calculation
+        const YIELD_PER_KIT = 700;
+
+        /**
+         * calcPlannerSample(rid)
+         * Central cascade: RNA to prepare → Number of Kits → DNA to cut → IVT Reactions
+         */
+        function calcPlannerSample(rid) {
+            const pt = document.getElementById('plasmid-planner-table');
+            if (!pt) return;
+
+            // Read RNA to prepare
+            const rnaInput = pt.querySelector(`.planner-row-rna td[data-rid="${rid}"] input`);
+            const kitsInput = pt.querySelector(`.planner-row-kits td[data-rid="${rid}"] input`);
+            const rnaUg = parseMass(rnaInput?.value) || 0;
+
+            // ─ 1. Number of Kits = ceil(RNA / 700)
+            const numKits = rnaUg > 0 ? Math.ceil(rnaUg / YIELD_PER_KIT) : 1;
+            if (kitsInput) {
+                const kitUnit = (restrictionKit === 'am1344') ? 'kit' : 'reaction';
+                kitsInput.value = numKits + ' ' + kitUnit + (numKits === 1 ? '' : 's');
+            }
+
+            // ─ 2. Propagate to Restriction table — DNA to cut (only if not user-edited)
+            const restrTable = document.getElementById('restriction-table');
+            if (restrTable) {
+                const dnaCutInput = restrTable.querySelector(`.restr-row-dna-cut td[data-rid="${rid}"] input`);
+                if (dnaCutInput && !dnaCutInput.dataset.userEdited) {
+                    dnaCutInput.value = formatMass(2 * numKits * KIT_DNA_CUT[restrictionKit]);
+                    calcRestrictionRow(rid);
+                }
+            }
+
+            // ─ 2.5 Propagate to Maxi Prep table
+            const maxiTable = document.getElementById('maxi-table');
+            if (maxiTable) {
+                const dnaNeeded = (2 * numKits * KIT_DNA_CUT[restrictionKit]) || 0;
+                const calcLbVol = Math.max(250, Math.ceil(dnaNeeded / 250) * 250);
+                
+                const ampInput = maxiTable.querySelector(`.maxi-row-ampicillin td[data-rid="${rid}"] input`);
+                const lbInput = maxiTable.querySelector(`.maxi-row-lb td[data-rid="${rid}"] input`);
+                const yieldInput = maxiTable.querySelector(`.maxi-row-yield td[data-rid="${rid}"] input`);
+                
+                let actualLbVol = calcLbVol;
+                if (lbInput) {
+                    if (!lbInput.dataset.userEdited) {
+                        lbInput.value = formatVol(calcLbVol * 1000);
+                    } else {
+                        actualLbVol = parseFloat(lbInput.value) || calcLbVol;
+                    }
+                }
+                
+                if (ampInput) ampInput.value = formatVol(actualLbVol); // 1:1,000 ratio assuming µL/mL
+                if (yieldInput) yieldInput.value = '~' + formatMass(actualLbVol); // Assuming conservative 1 µg/mL
+            }
+
+            // ─ 3. Propagate to IVT table — Number of Kits/Reactions (only if not user-edited)
+            const ivtTable = document.getElementById('ivt-table-plasmid');
+            if (ivtTable) {
+                const numKitsIvt = ivtTable.querySelector(`.row-reac td[data-rid="${rid}"] input`);
+                if (numKitsIvt && !numKitsIvt.dataset.userEdited) {
+                    numKitsIvt.value = numKits;
+                    calcIVTRow('plasmid', rid);
+                }
+            }
+        }
+
+        // Re-run planner calcs for all samples (called when kit toggles change)
+        function recalcAllPlannerSamples() {
+            const pt = document.getElementById('plasmid-planner-table');
+            if (!pt) return;
+            pt.querySelectorAll('.planner-row-rna td[data-rid]').forEach(td => {
+                const rid = parseInt(td.getAttribute('data-rid'));
+                if (rid) calcPlannerSample(rid);
+            });
+        }
+
+        // ── Internal: add a column to the Maxi Prep table ────
+        function _addMaxiColumn(rid) {
+            const table = document.getElementById('maxi-table');
+            if (!table) return;
+            const rows = table.querySelectorAll('tr');
+            const addCell = (rowIdx, content, cls = '') => {
+                const td = document.createElement('td');
+                td.setAttribute('data-rid', rid);
+                if (cls) td.className = cls;
+                td.innerHTML = content;
+                rows[rowIdx].appendChild(td);
+            };
+            // Row 0: Sample ID (read-only, synced from planner)
+            addCell(0, `<input type="text" class="read-only" readonly value="Sample ${rid}">`, 'bg-yellow-input maxi-id-cell');
+            // Row 1: Ampicillin (µL) – calculated
+            addCell(1, `<input type="text" class="read-only" readonly value="-">`, 'bg-green-mix');
+            // Row 2: LB Medium (mL) – calculated
+            const isLbLocked = rowLockStates['maxi-table__maxi-row-lb'];
+            addCell(2, `<input type="text" ${isLbLocked ? 'readonly class="read-only"' : ''} oninput="this.dataset.userEdited='1'; calcPlannerSample(${rid})" onblur="const v=parseFloat(this.value)||250; this.value=v+' mL'; calcPlannerSample(${rid})" value="-">`, 'bg-yellow-input');
+            // Row 3: Expected DNA yield (µg) – calculated
+            addCell(3, `<input type="text" class="read-only" readonly value="-">`, 'bg-purple-yield');
+        }
+
+        // ── Plasmid Restriction ───────────────────────────────
+        let restrictionRowCount = 0;
+        let plasmidVector = 'pGEM4Z'; // 'pGEM4Z' or 'pGEM5Z'
+        let restrictionKit = 'am1344'; // 'am1344' | 'k7413'
+
+        // DNA to cut (µg) default per kit
+        const KIT_DNA_CUT = {
+            am1344: 25,   // 25 µg per mMESSAGE kit
+            k7413:   5    // 5 µg per CleanScript reaction
+        };
+
+        // Vector defaults: enzyme name, temp, time
+        const VECTOR_DEFAULTS = {
+            pGEM4Z: { enzyme: 'ScaI', temp: 37, time: 2 },
+            pGEM5Z: { enzyme: 'ApaI', temp: 37, time: 2 }
+        };
+
+        const rowLockStates = { 
+            'maxi-table__maxi-row-lb': true,
+            'restriction-table__restr-row-enzyme-units': true, 
+            'restriction-table__restr-row-time': true,
+            'restriction-table__restr-row-dna-cut': true,
+            'ivt-table-plasmid__row-reac': true,
+            'ivt-table-plasmid__row-dna-base': true,
+            'ivt-table-pcr__row-reac': true,
+            'ivt-table-pcr__row-dna-base': true,
+            'ivt-table-tissue__row-reac': true,
+            'ivt-table-tissue__row-dna-base': true
+        };
+
+        function toggleRowLock(tableId, rowClass, btn) {
+            const key = tableId + '__' + rowClass;
+            rowLockStates[key] = !rowLockStates[key];
+            const isNowLocked = rowLockStates[key];
+            
+            // Update UI: icons
+            btn.querySelector('.lock-icon').classList.toggle('hidden', !isNowLocked);
+            btn.querySelector('.unlock-icon').classList.toggle('hidden', isNowLocked);
+
+            // Update UI: inputs in table
+            const table = document.getElementById(tableId);
+            if (table) {
+                const row = table.querySelector(`.${rowClass}`);
+                if (row) {
+                    row.querySelectorAll('td input').forEach(inp => {
+                        inp.readOnly = isNowLocked;
+                        if (isNowLocked) inp.classList.add('read-only');
+                        else inp.classList.remove('read-only');
+                    });
+                }
+            }
+        }
+
+        function setRestrictionKit(kitId, fromSync = false) {
+            restrictionKit = kitId;
+            // Update toggle UI
+            document.querySelectorAll('#restr-kit-toggle .toggle-btn').forEach(b => b.classList.remove('active'));
+            const btn = document.getElementById(`btn-restr-${kitId}`);
+            if (btn) btn.classList.add('active');
+
+            const restrEnzTitle = document.getElementById('restr-enzyme-title');
+            if (restrEnzTitle) {
+                restrEnzTitle.textContent = (kitId === 'am1344') ? 'Spe I-HF (20 Units/µL)' : 'BspQI-HF (10 Units/µL)';
+            }
+
+            if (!fromSync) {
+                setIVTKit('plasmid', kitId, true);
+            }
+
+            // Sync the underlying vector since the toggles are now unified
+            setPlasmidVector(kitId === 'am1344' ? 'pGEM4Z' : 'pGEM5Z');
+
+            // Cascade: RNA → numKits → DNA to cut (using new kit) → calc restriction → calc IVT
+            // For samples managed by the planner, use the full cascade
+            recalcAllPlannerSamples();
+
+            // For any restriction columns NOT managed by the planner (direct adds), fall back
+            const table = document.getElementById('restriction-table');
+            if (table) {
+                table.querySelectorAll('.restr-row-dna-cut td').forEach(td => {
+                    const rid = parseInt(td.getAttribute('data-rid'));
+                    const inp = td.querySelector('input');
+                    // Only update rows that are NOT covered by the planner
+                    if (inp && !inp.dataset.userEdited && !plasmidSamples[rid]) {
+                        inp.value = 2 * KIT_DNA_CUT[kitId];
+                        calcRestrictionRow(rid);
+                    }
+                });
+            }
+        }
+
+
+
+        function setPlasmidVector(vectorId) {
+            plasmidVector = vectorId;
+            document.querySelectorAll('#vector-toggle .toggle-btn').forEach(b => b.classList.remove('active'));
+            const btn = document.getElementById(`btn-vector-${vectorId}`);
+            if (btn) btn.classList.add('active');
+
+            // Update temp/time defaults for all existing rows
+            const table = document.getElementById('restriction-table');
+            if (!table) return;
+            const defaults = VECTOR_DEFAULTS[vectorId];
+            table.querySelectorAll('.restr-row-temp td').forEach(td => {
+                const inp = td.querySelector('input');
+                if (inp && !inp.dataset.userEdited) {
+                    const n = parseInt(defaults.temp) || 37;
+                    inp.value = n + ' °C';
+                }
+            });
+            table.querySelectorAll('.restr-row-time td').forEach(td => {
+                const inp = td.querySelector('input');
+                if (inp && !inp.dataset.userEdited) {
+                    const n = parseFloat(defaults.time) || 2;
+                    inp.value = n + (n === 1 ? ' hour' : ' hours');
+                }
+            });
+
+            // Recalculate all columns
+            const idRow = table.querySelector('.restr-row-id');
+            if (idRow) {
+                idRow.querySelectorAll('td').forEach(cell => {
+                    const rid = parseInt(cell.getAttribute('data-rid'));
+                    calcRestrictionRow(rid);
+                });
+            }
+        }
+
+        function _addRestrictionColumn(rid) {
+            const defaults = VECTOR_DEFAULTS[plasmidVector];
+            const sampleId = (plasmidSamples[rid] && plasmidSamples[rid].id) || `Sample ${rid}`;
+
+            const table = document.getElementById('restriction-table');
+            if (!table) return;
+            const rows = table.querySelectorAll('tr');
+
+            const addCell = (rowIdx, content, className = '') => {
+                const td = document.createElement('td');
+                td.setAttribute('data-rid', rid);
+                if (className) td.className = className;
+                td.innerHTML = content;
+                rows[rowIdx].appendChild(td);
+            };
+
+            // Row 0: Sample ID — read-only, synced from planner
+            addCell(0, `<input type="text" class="read-only" readonly value="${sampleId}">`, 'bg-yellow-input restr-id-cell');
+            // Row 1: DNA Conc (ng/µL)
+            addCell(1, `<input type="text" placeholder="ng/μL" oninput="calcRestrictionRow(${rid})" onblur="const ng=parseDnaConc(this.value); if(ng>0) this.value=displayDnaConc(ng); else calcRestrictionRow(${rid})">`, 'bg-yellow-input');
+            // Row 2: DNA to cut (µg) — pre-filled from kit default, user-overridable
+            const isDnaCutLocked = rowLockStates['restriction-table__restr-row-dna-cut'];
+            addCell(2, `<input type="text" value="${formatMass(KIT_DNA_CUT[restrictionKit])}" ${isDnaCutLocked ? 'readonly class="read-only"' : ''} placeholder="µg" oninput="this.dataset.userEdited='1'; calcRestrictionRow(${rid})" onblur="this.value=formatMass(parseMass(this.value))">`, 'bg-yellow-input restr-row-dna-cut');
+
+            // Row 3: Enzyme Units per µg (U)
+            const isUnitsLocked = rowLockStates['restriction-table__restr-row-enzyme-units'];
+            addCell(3, `<input type="text" value="2 U/µg" ${isUnitsLocked ? 'readonly class="read-only"' : ''} oninput="calcRestrictionRow(${rid})" onblur="const val=parseFloat(this.value); this.value = isNaN(val) ? '2 U/µg' : val + ' U/µg'">`, 'bg-yellow-input');
+            // Row 4: Separator
+            addCell(4, '', 'bg-slate-50');
+            // Row 5: Water — calculated
+            addCell(5, `<input type="text" class="read-only" readonly value="-">`, 'bg-green-mix');
+            // Row 6: CutSmart 10x — calculated
+            addCell(6, `<input type="text" class="read-only" readonly value="-">`, 'bg-green-mix');
+            // Row 7: DNA (µL) = dnaVol
+            addCell(7, `<input type="text" class="read-only" readonly value="-">`, 'bg-green-mix');
+            // Row 8: Enzyme — calculated
+            addCell(8, `<input type="text" class="read-only" readonly value="-">`, 'bg-green-mix');
+            // Row 9: Total volume — calculated
+            addCell(9, `<input type="text" class="read-only" readonly value="-">`, 'bg-gray-final');
+            // Row 10: Temp
+            addCell(10, `<input type="text" class="read-only" readonly value="${defaults.temp} °C">`, 'bg-yellow-input');
+            // Row 11: Time
+            const isTimeLocked = rowLockStates['restriction-table__restr-row-time'];
+            addCell(11, `<input type="text" value="${defaults.time} hours" ${isTimeLocked ? 'readonly class="read-only"' : ''} oninput="this.dataset.userEdited='1'" onblur="const n=parseFloat(this.value)||${defaults.time}; this.value=n+(n===1?' hour':' hours')">`, 'bg-yellow-input');
+
+            calcRestrictionRow(rid);
+        }
+
+
+
+
+        function calcRestrictionRow(rid) {
+            const table = document.getElementById('restriction-table');
+            if (!table) return;
+            const cells = table.querySelectorAll(`td[data-rid="${rid}"]`);
+            if (cells.length === 0) return;
+
+            const inputs = [];
+            cells.forEach(td => {
+                const inp = td.querySelector('input');
+                inputs.push(inp);
+            });
+
+            const conc    = parseDnaConc(inputs[1] && inputs[1].value) || 0;  // ng/µL
+            const dnaCut  = parseMass(inputs[2] && inputs[2].value) || 0;  // µg
+            const units   = parseFloat(inputs[3] && inputs[3].value) || 0;  // U/µg
+            
+            // Enzyme Stock Conc is bound to the restrictionKit:
+            const stock = (restrictionKit === 'am1344') ? 20 : 10;
+
+            // Target Total Volume Formula (based on Excel spreadsheet logic) with a minimum of 50 µL:
+            // The idea is to increase the total volume when the concentration is low.
+            // Formula: IF(B3<589, IF(B3<385, IF(B3<230, C3*10, C3*5), C3*3), C3*2)
+            let totalVol = 0; 
+            if (conc > 0 && dnaCut > 0) {
+                let formulaVol;
+                if (conc < 230) {
+                    formulaVol = dnaCut * 10;
+                } else if (conc < 385) {
+                    formulaVol = dnaCut * 5;
+                } else if (conc < 589) {
+                    formulaVol = dnaCut * 3;
+                } else {
+                    formulaVol = dnaCut * 2;
+                }
+                // Fix a minimum volume of 50 µL for easier handling
+                totalVol = Math.max(50, formulaVol);
+            }
+
+            const cutSmartVol = totalVol > 0 ? totalVol / 10 : 0; // 10% of total volume
+
+            // DNA volume = (DNA to cut µg × 1000) / conc ng/µL
+            let dnaVol = (conc > 0 && dnaCut > 0) ? (dnaCut * 1000) / conc : 0;
+
+            // Enzyme volume calculation:
+            // Use 'units' per µg (default 2), with a minimum of 1 µL of enzyme stock (20 units for Spe I-HF, 10 units for BspQI-HF).
+            const minUnits = (restrictionKit === 'am1344') ? 20 : 10;
+            let targetUnits = (dnaCut > 0) ? Math.max(minUnits, dnaCut * units) : 0;
+            let enzymeVol = (stock > 0 && targetUnits > 0) ? targetUnits / stock : 0;
+
+            // Water = total - cutsmart - dna - enzyme
+            let water = totalVol > 0 ? (totalVol - cutSmartVol - dnaVol - enzymeVol) : 0;
+
+            if (inputs[9])  inputs[9].value  = formatVol(totalVol);
+            if (inputs[6])  inputs[6].value  = formatVol(cutSmartVol);
+            if (inputs[7])  inputs[7].value  = formatVol(dnaVol);
+            if (inputs[8])  inputs[8].value  = formatVol(enzymeVol);
+            
+            if (inputs[5]) {
+                if (totalVol <= 0) {
+                    inputs[5].value = '-';
+                } else {
+                    inputs[5].value  = water >= 0 ? formatVol(water) : 'Too low';
+                    inputs[5].classList.toggle('text-red-500', water < 0);
+                }
+            }
+
+            // Cascade to Precipitation Table
+            calcPrecipitationRow(rid);
+        }
+
+        function _addPrecipitationColumn(rid) {
+            const sampleId = (plasmidSamples[rid] && plasmidSamples[rid].id) || `Sample ${rid}`;
+            const table = document.getElementById('precipitation-table');
+            if (!table) return;
+            const rows = table.querySelectorAll('tr');
+
+            const addCell = (rowIdx, content, className = '') => {
+                const td = document.createElement('td');
+                td.setAttribute('data-rid', rid);
+                if (className) td.className = className;
+                td.innerHTML = content;
+                rows[rowIdx].appendChild(td);
+            };
+
+            // Row 0: Sample ID
+            addCell(0, `<input type="text" class="read-only" readonly value="${sampleId}">`, 'bg-yellow-input precip-id-cell');
+            // Row 1: DNA volume (µL) – from Restriction Total
+            addCell(1, `<input type="text" class="read-only" readonly value="-">`, 'bg-green-mix');
+            // Row 2: Sodium Acetate
+            addCell(2, `<input type="text" class="read-only" readonly value="-">`, 'bg-green-mix');
+            // Row 3: Ethanol
+            addCell(3, `<input type="text" class="read-only" readonly value="-">`, 'bg-green-mix');
+            // Row 4: Total
+            addCell(4, `<input type="text" class="read-only" readonly value="-">`, 'bg-gray-final');
+
+            calcPrecipitationRow(rid);
+            updatePrecipitationSummary();
+        }
+
+        function updatePrecipitationSummary() {
+            const table = document.getElementById('precipitation-table');
+            if (!table) return;
+            // The first row is the ID row, count columns excluding the first header cell.
+            const row = table.querySelector('.precip-row-id');
+            const cols = row ? row.querySelectorAll('td') : [];
+            const count = cols.length;
+
+            const etohVal = count * 750;
+            const waterVal = count * 250;
+
+            const cEl = document.getElementById('precip-summary-count');
+            const eEl = document.getElementById('precip-summary-etoh');
+            const wEl = document.getElementById('precip-summary-water');
+
+            if (cEl) cEl.textContent = count > 0 ? count : '-';
+            if (eEl) eEl.textContent = count > 0 ? formatVol(etohVal, false, 2) : '-';
+            if (wEl) wEl.textContent = count > 0 ? formatVol(waterVal, false, 2) : '-';
+        }
+
+        function calcPrecipitationRow(rid) {
+            const restrTable = document.getElementById('restriction-table');
+            const precipTable = document.getElementById('precipitation-table');
+            if (!restrTable || !precipTable) return;
+
+            const restrCells = restrTable.querySelectorAll(`td[data-rid="${rid}"]`);
+            const precipCells = precipTable.querySelectorAll(`td[data-rid="${rid}"]`);
+            if (restrCells.length < 10 || precipCells.length < 5) return;
+
+            // restriction inputs[9] is Total Vol
+            const restrTotalInp = restrCells[9].querySelector('input');
+            const dnaVolUl = parseMass(restrTotalInp?.value) || 0;
+
+            const pInputs = [];
+            precipCells.forEach(td => {
+                const inp = td.querySelector('input');
+                if (inp) pInputs.push(inp);
+            });
+
+            const naAc = dnaVolUl * 0.1;
+            const etoh = dnaVolUl * 2.5;
+            const total = dnaVolUl + naAc + etoh;
+
+            const fmtUl = (v) => {
+                if (v <= 0 || isNaN(v)) return '-';
+                let s = v.toFixed(1);
+                if (s.endsWith('.0')) s = s.slice(0, -2);
+                return s + ' µL';
+            };
+
+            if (pInputs[1]) pInputs[1].value = formatVol(dnaVolUl);
+            if (pInputs[2]) pInputs[2].value = formatVol(naAc);
+            if (pInputs[3]) pInputs[3].value = fmtUl(etoh);
+            if (pInputs[4]) pInputs[4].value = formatVol(total);
         }
 
         // ── IVT Calculations ──────────────────────────────────
         let ivtRowCount = { tissue: 0, plasmid: 0, pcr: 0 };
 
-        function addIVTRow(route) {
-            ivtRowCount[route]++;
-            const rid = ivtRowCount[route];
+        function addIVTRow(route, forcedRid = null) {
+            let rid;
+            if (forcedRid !== null) {
+                rid = forcedRid;
+                ivtRowCount[route] = Math.max(ivtRowCount[route] || 0, rid);
+            } else {
+                ivtRowCount[route]++;
+                rid = ivtRowCount[route];
+            }
 
-            const actionHtml = `
-                <div class="flex items-center justify-center gap-1.5 py-1 px-2">
-                    <button onclick="duplicateIVTColumn('${route}', ${rid})" class="text-green-500 hover:text-green-700 p-1 bg-green-50 rounded" title="Duplicate">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" /></svg>
-                    </button>
-                    <button onclick="moveColumn('${route}', ${rid}, 'left')" class="text-blue-500 hover:text-blue-700 p-1 bg-blue-50 rounded" title="Move Left">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
-                    </button>
-                    <button onclick="moveColumn('${route}', ${rid}, 'right')" class="text-blue-500 hover:text-blue-700 p-1 bg-blue-50 rounded" title="Move Right">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-                    </button>
-                    <button onclick="removeIVTRow('${route}', ${rid})" class="text-red-500 hover:text-red-700 p-1 bg-red-50 rounded" title="Delete">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                    </button>
-                </div>
-            `;
+            const isPlannerManaged = true; // Always managed by the planner for all routes
+
+            let actionHtml = '';
+            if (!isPlannerManaged) {
+                actionHtml = `
+                    <div class="flex items-center justify-center gap-1.5 py-1 px-2">
+                        <button onclick="duplicateIVTColumn('${route}', ${rid})" class="text-green-500 hover:text-green-700 p-1 bg-green-50 rounded" title="Duplicate">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" /></svg>
+                        </button>
+                        <button onclick="moveColumn('${route}', ${rid}, 'left')" class="text-blue-500 hover:text-blue-700 p-1 bg-blue-50 rounded" title="Move Left">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                        </button>
+                        <button onclick="moveColumn('${route}', ${rid}, 'right')" class="text-blue-500 hover:text-blue-700 p-1 bg-blue-50 rounded" title="Move Right">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                        </button>
+                        <button onclick="removeIVTRow('${route}', ${rid})" class="text-red-500 hover:text-red-700 p-1 bg-red-50 rounded" title="Delete">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        </button>
+                    </div>
+                `;
+            }
 
             // 1. Update IVT Table
             const ivtTable = document.getElementById(`ivt-table-${route}`);
+            if (!ivtTable) return;
             const ivtRows = ivtTable.querySelectorAll('tr');
             const addIvtCell = (rowIdx, content, className = '') => {
+                const effIdx = rowIdx + (isPlannerManaged ? -1 : 0);
+                if (effIdx < 0 || effIdx >= ivtRows.length) return;
                 const td = document.createElement('td');
                 td.setAttribute('data-rid', rid);
                 if (className) td.className = className;
                 td.innerHTML = content;
-                ivtRows[rowIdx].appendChild(td);
+                ivtRows[effIdx].appendChild(td);
             };
 
-            addIvtCell(0, actionHtml, 'text-center p-2 border-b border-l');
-            addIvtCell(1, `<input type="text" placeholder="Sample ${rid}">`, 'bg-yellow-input');
-            addIvtCell(2, `<input type="number" value="1" min="1" oninput="calcIVTRow('${route}', ${rid})">`, 'bg-yellow-input');
+            const sampleIdVal = (isPlannerManaged && plasmidSamples[rid]) ? plasmidSamples[rid].id : `Sample ${rid}`;
+            const idHtml = isPlannerManaged 
+                ? `<input type="text" class="read-only" readonly value="${sampleIdVal}">` 
+                : `<input type="text" placeholder="Sample ${rid}">`;
+
+            if (!isPlannerManaged) addIvtCell(0, actionHtml, 'text-center p-2 border-b border-l');
+            addIvtCell(1, idHtml, isPlannerManaged ? 'bg-yellow-input ivt-id-cell' : 'bg-yellow-input');
+            const kitUnit = (ivtConfig[route].kit === 'am1344') ? 'kit' : 'reaction';
+            const isReacLocked = rowLockStates[`ivt-table-${route}__row-reac`];
+            addIvtCell(2, `<input type="text" value="1 ${kitUnit}" ${isReacLocked ? 'readonly class="read-only"' : ''} oninput="this.dataset.userEdited='1'; calcIVTRow('${route}', ${rid})" onblur="const n=parseInt(this.value)||1; const k=ivtConfig['${route}'].kit; this.value = n + ' ' + (k==='am1344'?'kit':'reaction') + (n===1?'':'s'); calcIVTRow('${route}', ${rid})">`, 'bg-yellow-input');
             const currentKit = ivtConfig[route].kit;
             const defValNum = currentKit === 'am1344' ? 25 : (route === 'pcr' ? 2.5 : 5);
             const defVal = formatMass(defValNum);
             addIvtCell(3, `<input type="text" placeholder="ng/μl" oninput="calcIVTRow('${route}', ${rid})" onblur="formatDnaConc(this, '${route}', ${rid})">`, 'bg-yellow-input');
-            addIvtCell(4, `<input type="text" value="${defVal}" placeholder="μg" oninput="calcIVTRow('${route}', ${rid})" onblur="formatDnaPerReac(this, '${route}', ${rid})">`, 'bg-yellow-input');
-            addIvtCell(5, '', 'bg-slate-50');
-            for (let i = 6; i <= 14; i++) {
+            const isDnaBaseLocked = rowLockStates[`ivt-table-${route}__row-dna-base`];
+            addIvtCell(4, `<input type="text" value="${defVal}" ${isDnaBaseLocked ? 'readonly class="read-only"' : ''} placeholder="μg" oninput="calcIVTRow('${route}', ${rid})" onblur="formatDnaPerReac(this, '${route}', ${rid})">`, 'bg-yellow-input');
+            addIvtCell(5, `<input type="text" class="read-only" readonly value="-">`, 'bg-slate-50 font-bold'); // Total DNA needed
+            addIvtCell(6, '', 'bg-slate-50'); // row-separator
+            for (let i = 7; i <= 15; i++) {
                 addIvtCell(i, `<input type="text" class="read-only" readonly value="-">`, 'bg-green-mix');
             }
-            addIvtCell(15, `<input type="text" class="read-only" readonly value="-">`, 'bg-gray-final');
-            addIvtCell(16, `<input type="text" class="read-only" readonly value="-">`, 'bg-purple-yield');
+            addIvtCell(16, `<input type="text" class="read-only" readonly value="-">`, 'bg-gray-final');
+            addIvtCell(17, `<input type="text" class="read-only" readonly value="-">`, 'bg-purple-yield');
 
             // 2. Update DNase Table
             const dnaseTable = document.getElementById(`dnase-table-${route}`);
             if (dnaseTable) {
                 const dnaseRows = dnaseTable.querySelectorAll('tr');
                 const addDnaseCell = (rowIdx, content, className = '') => {
+                    const effIdx = rowIdx + (isPlannerManaged ? -1 : 0);
+                    if (effIdx < 0 || effIdx >= dnaseRows.length) return;
                     const td = document.createElement('td');
                     td.setAttribute('data-rid', rid);
                     if (className) td.className = className;
                     td.innerHTML = content;
-                    dnaseRows[rowIdx].appendChild(td);
+                    dnaseRows[effIdx].appendChild(td);
                 };
-                addDnaseCell(0, actionHtml, 'text-center p-2 border-b border-l');
+                if (!isPlannerManaged) addDnaseCell(0, actionHtml, 'text-center p-2 border-b border-l');
                 addDnaseCell(1, `<input type="text" class="read-only" readonly value="-">`);
                 addDnaseCell(2, `<input type="text" class="read-only" readonly value="-">`);
                 addDnaseCell(3, `<input type="text" class="read-only" readonly value="-">`);
@@ -1657,15 +3354,17 @@
             if (cleanupTable) {
                 const cleanupRows = cleanupTable.querySelectorAll('tr');
                 const addCleanupCell = (rowIdx, content, className = '') => {
+                    const effIdx = rowIdx + (isPlannerManaged ? -1 : 0);
+                    if (effIdx < 0 || effIdx >= cleanupRows.length) return;
                     const td = document.createElement('td');
                     td.setAttribute('data-rid', rid);
                     if (className) td.className = className;
                     td.innerHTML = content;
-                    cleanupRows[rowIdx].appendChild(td);
+                    cleanupRows[effIdx].appendChild(td);
                 };
-                addCleanupCell(0, actionHtml, 'text-center p-2 border-b border-l');
+                if (!isPlannerManaged) addCleanupCell(0, actionHtml, 'text-center p-2 border-b border-l');
                 addCleanupCell(1, `<input type="text" class="read-only" readonly value="-">`);
-                addCleanupCell(2, `<input type="text" class="read-only" readonly value="-">`);
+                addCleanupCell(2, `<input type="text" class="read-only" readonly value="1 column">`, 'bg-blue-50 font-bold text-blue-700');
                 addCleanupCell(3, `<input type="text" class="read-only" readonly value="-">`);
                 addCleanupCell(4, `<input type="text" class="read-only" readonly value="-">`);
                 addCleanupCell(5, `<input type="text" class="read-only" readonly value="-">`);
@@ -1675,6 +3374,9 @@
                 addCleanupCell(9, `<input type="text" class="read-only" readonly value="-">`);
                 addCleanupCell(10, `<input type="text" class="read-only" readonly value="-">`);
                 addCleanupCell(11, `<input type="text" class="read-only" readonly value="-">`);
+                addCleanupCell(12, `<input type="text" class="read-only" readonly value="-">`);
+                addCleanupCell(13, `<input type="text" class="read-only" readonly value="-">`);
+                addCleanupCell(14, `<input type="text" class="read-only" readonly value="-">`);
             }
 
             calcIVTRow(route, rid);
@@ -1791,16 +3493,17 @@
         }
 
         // Helper to format volume: switches to mL if >= 1000 µL, omits .0 if integer.
-        function formatVol(valUl) {
+        function formatVol(valUl, forceUl = false, precision = 1) {
             if (valUl === '-' || isNaN(valUl) || valUl === null) return '-';
             let unit = 'µL';
             let displayVal = valUl;
-            if (valUl >= 1000) {
+            if (!forceUl && valUl >= 1000) {
                 displayVal = valUl / 1000;
                 unit = 'mL';
             }
-            let s = displayVal.toFixed(1);
-            if (s.endsWith('.0')) s = s.slice(0, -2);
+            let s = displayVal.toFixed(precision);
+            // Only trim .0 if precision is 1 or if it ends exactly in .0
+            if (precision === 1 && s.endsWith('.0')) s = s.slice(0, -2);
             return s + ' ' + unit;
         }
 
@@ -1862,7 +3565,7 @@
             // inputs[1]: Number of Reactions
             // inputs[2]: DNA Template Concentration
             // inputs[3]: DNA Template Per Reaction
-            const numReac = parseFloat(inputs[1].value) || 0;
+            const numReac = parseInt(inputs[1].value) || 0;
             const kit = ivtConfig[route].kit;
             const vol = kit === 'am1344' ? 500 : 100;
             const conc = parseDnaConc(inputs[2].value);
@@ -1870,6 +3573,9 @@
 
             const totalVol = vol * numReac;
             const totalDnaUg = dnaPerReac * numReac;
+            
+            // Result 1: Total DNA Template needed (inputs[4])
+            inputs[4].value = formatMass(totalDnaUg);
 
             const ratio = totalVol / 100;
             const dnaVol = conc > 0 ? (totalDnaUg * 1000) / conc : 0;
@@ -1892,39 +3598,39 @@
             const fixedTotal = buff + (ntp * 4) + cap + pol;
             const water = (totalVol - fixedTotal - dnaVol);
 
-            // Water (inputs[4]) to Final Vol (inputs[13])
+            // Water (inputs[5]) to Final Vol (inputs[14])
             if (water >= 0) {
-                inputs[4].value = formatVol(water);
-                inputs[4].classList.remove('text-red-500');
+                inputs[5].value = formatVol(water, true);
+                inputs[5].classList.remove('text-red-500');
             } else if (totalVol > 0) {
-                inputs[4].value = 'Too low';
-                inputs[4].classList.add('text-red-500');
+                inputs[5].value = 'Too low';
+                inputs[5].classList.add('text-red-500');
             } else {
-                inputs[4].value = '-';
+                inputs[5].value = '-';
             }
 
-            inputs[5].value = formatVol(buff);
+            inputs[6].value = formatVol(buff, true);
             if (kit === 'am1344') {
-                inputs[6].value = formatVol(ntp * 4);
+                inputs[7].value = formatVol(ntp * 4, true);
             } else {
-                inputs[6].value = formatVol(ntp);
+                inputs[7].value = formatVol(ntp, true);
             }
 
-            inputs[7].value = formatVol(ntp);
-            inputs[8].value = formatVol(ntp);
-            inputs[9].value = formatVol(ntp);
-            inputs[10].value = formatVol(cap);
+            inputs[8].value = formatVol(ntp, true);
+            inputs[9].value = formatVol(ntp, true);
+            inputs[10].value = formatVol(ntp, true);
+            inputs[11].value = formatVol(cap, true);
 
-            inputs[11].value = formatVol(dnaVol);
-            inputs[12].value = formatVol(pol);
-            inputs[13].value = formatVol(totalVol);
+            inputs[12].value = formatVol(dnaVol, true);
+            inputs[13].value = formatVol(pol, true);
+            inputs[14].value = formatVol(totalVol);
 
-            // Expected RNA Yield (inputs[14]): ~700 µg per reaction
+            // Expected RNA Yield (inputs[15]): ~700 µg per reaction
             if (numReac > 0) {
                 const yieldUg = 700 * numReac;
-                inputs[14].value = '~' + formatMass(yieldUg);
+                inputs[15].value = '~' + formatMass(yieldUg);
             } else {
-                inputs[14].value = '-';
+                inputs[15].value = '-';
             }
 
             // Update DNase table if it exists
@@ -1975,15 +3681,16 @@
                         // inputs[6]: Ethanol
                         // inputs[7]: RPE 1
                         // inputs[8]: RPE 2
-                        // inputs[9]: Water for Elution
-                        // inputs[10]: Final Clean RNA Vol
+                        // inputs[9]: Water Elution 1
+                        // inputs[10]: Water Elution 2
+                        // inputs[11]: Final Clean RNA Vol
 
                         cleanupInputs[0].value = inputs[0].value || `Sample ${rid}`;
                         const totalSampleVol = totalVol + dnaseVol;
 
                         // 1. Calculate and set Number of Columns (1 column per 4 reactions)
                         const numCols = Math.ceil(numReac / 4) || 1;
-                        cleanupInputs[2].value = numCols;
+                        cleanupInputs[2].value = numCols + (numCols === 1 ? ' column' : ' columns');
 
                         // 2. Auto-select kit based on yield threshold of 1mg (1000 µg)
                         const estYieldUg = 700 * numReac;
@@ -1993,7 +3700,7 @@
                         if (totalSampleVol > 0) {
                             // 3. Set Sample Volume PER COLUMN
                             const sampleVolPerCol = totalSampleVol / numCols;
-                            cleanupInputs[3].value = formatVol(sampleVolPerCol);
+                            cleanupInputs[3].value = formatVol(sampleVolPerCol, true);
 
                             let rltPerCol, ethanolPerCol, rpePerCol, wtaPerCol;
 
@@ -2012,13 +3719,13 @@
 
                             // Update per-column reagent fields
                             cleanupInputs[5].value = formatVol(rltPerCol);
-                            cleanupInputs[6].value = formatVol(ethanolPerCol);
+                            cleanupInputs[6].value = formatVol(ethanolPerCol, true);
                             cleanupInputs[7].value = formatVol(rpePerCol);
                             cleanupInputs[8].value = formatVol(rpePerCol);
 
                             const actualWtaPerCol = wtaPerCol - sampleVolPerCol;
                             if (actualWtaPerCol >= 0) {
-                                cleanupInputs[4].value = formatVol(actualWtaPerCol);
+                                cleanupInputs[4].value = formatVol(actualWtaPerCol, true);
                                 cleanupInputs[4].classList.remove('text-red-500');
                             } else {
                                 cleanupInputs[4].value = 'Too high';
@@ -2026,16 +3733,307 @@
                             }
 
                             // Total and result fields
-                            cleanupInputs[9].value = formatVol(800 * numReac);
-                            cleanupInputs[10].value = '~' + formatVol(800 * numReac);
+                            const totalElutionPerCol = (cleanupKitId === 'midi') ? 800 : (800 * (numReac / numCols));
+                            const elutionHalf = totalElutionPerCol / 2;
+                            cleanupInputs[9].value = formatVol(elutionHalf);
+                            cleanupInputs[10].value = formatVol(elutionHalf);
+                            
+                            const retentionPerCol = (cleanupKitId === 'midi') ? 100 : 200;
+                            const recovVolPerCol = Math.max(0, totalElutionPerCol - retentionPerCol);
+                            const totalRecovVol = recovVolPerCol * numCols;
+                            
+                            cleanupInputs[11].value = `~${totalRecovVol.toFixed(0)} µL (${(totalRecovVol/1000).toFixed(2)} mL)`;
+                            
+                            const initialMassUg = 700 * numReac;
+                            // Loss is proportional to retained volume
+                            const massLossPerCol = initialMassUg * (retentionPerCol / (totalElutionPerCol * numCols / numCols));
+                            const totalMassLoss = massLossPerCol * numCols;
+                            const recovMassUg = Math.max(0, initialMassUg - totalMassLoss);
+                            
+                            cleanupInputs[12].value = `~${formatMass(recovMassUg)}`;
+                            
+                            if (totalRecovVol > 0) {
+                                const concNgUl = (recovMassUg * 1000) / totalRecovVol;
+                                cleanupInputs[13].value = `~${concNgUl.toFixed(1)} ng/µL`;
+                            } else {
+                                cleanupInputs[13].value = '-';
+                            }
                         } else {
-                            for (let i = 3; i <= 10; i++) cleanupInputs[i].value = '-';
+                            for (let i = 3; i <= 14; i++) cleanupInputs[i].value = '-';
                         }
                     }
                 }
             }
             refreshCleanupHeaders(route);
         }
+
+        // ── RNA Helper Calculator ────────────────────────
+        function addRnaCalcRow(data = { id: '', rna: 25, vac: 6, animals: 12 }) {
+            const tbody = document.getElementById('rna-helper-body');
+            const tr = document.createElement('tr');
+            tr.className = "hover:bg-slate-50/50 transition-colors";
+            tr.innerHTML = `
+                <td class="bg-yellow-input"><input type="text" value="${data.id}" placeholder="Sample ID" class="w-full font-medium"></td>
+                <td class="bg-yellow-input"><input type="number" value="${data.rna}" oninput="calculateRnaRow(this)" class="w-full text-center"></td>
+                <td class="bg-yellow-input"><input type="number" value="${data.vac}" oninput="calculateRnaRow(this)" class="w-full text-center"></td>
+                <td class="bg-yellow-input"><input type="number" value="${data.animals}" oninput="calculateRnaRow(this)" class="w-full text-center"></td>
+                <td class="bg-white"><input type="text" readonly class="read-only w-full text-center font-bold text-slate-800" value="0"></td>
+                <td class="text-center p-2">
+                    <button onclick="this.closest('tr').remove()" class="text-slate-300 hover:text-red-500 transition-colors p-1" title="Delete row">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+            calculateRnaRow(tr.querySelector('input[type="number"]'));
+        }
+
+        function calculateRnaRow(input) {
+            const tr = input.closest('tr');
+            const inputs = tr.querySelectorAll('input[type="number"]');
+            const output = tr.querySelector('input[readonly]');
+            const rna = parseFloat(inputs[0].value) || 0;
+            const vac = parseFloat(inputs[1].value) || 0;
+            const animals = parseFloat(inputs[2].value) || 0;
+            output.value = Math.round(rna * vac * animals).toLocaleString();
+        }
+
+        // ── State Persistence (localStorage) ─────────────────────────────────
+        const STORAGE_KEY = 'pci2_rna_v2';
+        let _saveDebounce;
+
+        // Auto-save on any input/change anywhere on the page
+        document.addEventListener('input',  () => { clearTimeout(_saveDebounce); _saveDebounce = setTimeout(persistState, 800); });
+        document.addEventListener('change', () => { clearTimeout(_saveDebounce); _saveDebounce = setTimeout(persistState, 800); });
+
+        // Capture all input/select values in a table, keyed by data-rid
+        // Returns { [rid]: [value0, value1, ...] }
+        function captureTableInputs(tableId) {
+            const table = document.getElementById(tableId);
+            if (!table) return {};
+            const result = {};
+            table.querySelectorAll('td[data-rid]').forEach(td => {
+                const rid = td.getAttribute('data-rid');
+                if (!result[rid]) result[rid] = [];
+                const inp = td.querySelector('input, select');
+                result[rid].push(inp ? inp.value : null);
+            });
+            return result;
+        }
+
+        function fillTableInputs(tableId, dataMap) {
+            if (!dataMap) return;
+            const table = document.getElementById(tableId);
+            if (!table) return;
+            const ptables = ['maxi-table', 'restriction-table', 'ivt-table-plasmid', 'dnase-table-plasmid', 'cleanup-table-plasmid'];
+            Object.entries(dataMap).forEach(([rid, vals]) => {
+                if (vals && vals.length > 0 && vals[0] === null && ptables.includes(tableId)) {
+                    vals.shift(); // Remove the null corresponding to the old Actions row
+                }
+                
+                // Migrate old saves containing the 3 deleted restriction rows (indices 3, 4, 5)
+                if (tableId === 'restriction-table' && vals && vals.length >= 15) {
+                    vals.splice(3, 3);
+                }
+                
+                const cells = Array.from(table.querySelectorAll(`td[data-rid="${rid}"]`));
+                cells.forEach((td, i) => {
+                    const inp = td.querySelector('input, select');
+                    if (inp && vals[i] !== undefined && vals[i] !== null) inp.value = vals[i];
+                });
+            });
+        }
+
+        function persistState() {
+            try {
+                const state = {
+                    route:              document.getElementById('route-select').value,
+                    restrictionKit,
+                    plasmidVector,
+                    ivtConfig:          JSON.parse(JSON.stringify(ivtConfig)),
+                    plasmidSampleCount,
+                    plasmidSamplesReg:  JSON.parse(JSON.stringify(plasmidSamples)),
+                    pcrSampleCount,
+                    pcrSamplesReg:      JSON.parse(JSON.stringify(pcrSamples)),
+                    tissueSampleCount,
+                    tissueSamplesReg:   JSON.parse(JSON.stringify(tissueSamples)),
+                    ivtRowCount:        { ...ivtRowCount },
+                    openState:          JSON.parse(JSON.stringify(openState)),
+                    rnaHelper: Array.from(document.querySelectorAll('#rna-helper-body tr')).map(tr => {
+                        const ins = tr.querySelectorAll('input');
+                        return { id: ins[0]?.value||'', rna: ins[1]?.value||25, vac: ins[2]?.value||6, animals: ins[3]?.value||12 };
+                    }),
+                    tables: {
+                        'plasmid-planner-table': captureTableInputs('plasmid-planner-table'),
+                        'pcr-planner-table':     captureTableInputs('pcr-planner-table'),
+                        'tissue-planner-table':  captureTableInputs('tissue-planner-table'),
+                        'maxi-table':            captureTableInputs('maxi-table'),
+                        'restriction-table':     captureTableInputs('restriction-table'),
+                        'ivt-table-tissue':      captureTableInputs('ivt-table-tissue'),
+                        'ivt-table-plasmid':     captureTableInputs('ivt-table-plasmid'),
+                        'ivt-table-pcr':         captureTableInputs('ivt-table-pcr'),
+                        'dnase-table-tissue':    captureTableInputs('dnase-table-tissue'),
+                        'dnase-table-plasmid':   captureTableInputs('dnase-table-plasmid'),
+                        'dnase-table-pcr':       captureTableInputs('dnase-table-pcr'),
+                        'cleanup-table-tissue':  captureTableInputs('cleanup-table-tissue'),
+                        'cleanup-table-plasmid': captureTableInputs('cleanup-table-plasmid'),
+                        'cleanup-table-pcr':     captureTableInputs('cleanup-table-pcr'),
+                        'tissue-cdna-unified-table': captureTableInputs('tissue-cdna-unified-table'),
+                        'tissue-pcr-reaction-table': captureTableInputs('tissue-pcr-reaction-table'),
+                    },
+                    cdnaTissue: {
+                        // Legacy support for master mix fields (if users had them saved)
+                        numReacs: document.getElementById('tissue-cdna-reacs')?.value,
+                        numTubes: document.getElementById('cdna-tubes-split')?.value
+                    }
+                };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            } catch(e) { console.warn('pci2: save failed', e); }
+        }
+
+        function restoreState() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) {
+                    // No saved state: show the example row
+                    addRnaCalcRow({ id: 'Example: K7M2', rna: 25, vac: 6, animals: 30 });
+                    return;
+                }
+                const s = JSON.parse(raw);
+                if (!s) { addRnaCalcRow({ id: 'Example: K7M2', rna: 25, vac: 6, animals: 30 }); return; }
+
+                // 1 ─ RNA Helper table
+                document.getElementById('rna-helper-body').innerHTML = '';
+                if (s.rnaHelper?.length) {
+                    s.rnaHelper.forEach(r => addRnaCalcRow({ id: r.id||'', rna: +r.rna||25, vac: +r.vac||6, animals: +r.animals||12 }));
+                }
+
+                // 2 ─ Route (opens sections, auto-adds 1 IVT row for that route)
+                if (s.route) {
+                    document.getElementById('route-select').value = s.route;
+                    selectRoute(s.route, true);
+                }
+
+                // 3 ─ IVT kit & nucleotide toggles per route
+                if (s.ivtConfig) {
+                    ['tissue', 'plasmid', 'pcr'].forEach(r => {
+                        if (s.ivtConfig[r]) {
+                            setIVTKit(r, s.ivtConfig[r].kit || 'am1344');
+                            setNucleotide(r, s.ivtConfig[r].nuc || 'normal');
+                        }
+                    });
+                }
+
+                // 4 ─ Restriction-section toggles
+                if (s.restrictionKit) setRestrictionKit(s.restrictionKit);
+                if (s.plasmidVector)  setPlasmidVector(s.plasmidVector);
+
+                // 5 ─ Plasmid samples (planner → maxi + restriction)
+                if (s.plasmidSampleCount > 0) {
+                    if (s.plasmidSamplesReg) Object.assign(plasmidSamples, s.plasmidSamplesReg);
+                    for (let i = 1; i <= s.plasmidSampleCount; i++) {
+                        addPlasmidSample(true); // Don't trigger auto-ID sync yet
+                    }
+                    fillTableInputs('plasmid-planner-table', s.tables?.['plasmid-planner-table']);
+                }
+                
+                // 5b ─ PCR samples
+                if (s.pcrSampleCount > 0) {
+                    if (s.pcrSamplesReg) Object.assign(pcrSamples, s.pcrSamplesReg);
+                    for (let i = 1; i <= s.pcrSampleCount; i++) {
+                        addPcrSample(true);
+                    }
+                    fillTableInputs('pcr-planner-table', s.tables?.['pcr-planner-table']);
+                }
+
+                // 5c ─ Tissue samples
+                if (s.tissueSampleCount > 0) {
+                    if (s.tissueSamplesReg) Object.assign(tissueSamples, s.tissueSamplesReg);
+                    for (let i = 1; i <= s.tissueSampleCount; i++) {
+                        addTissueSample(true);
+                    }
+                    fillTableInputs('tissue-planner-table', s.tables?.['tissue-planner-table']);
+                }
+
+                // Sync all Planner IDs to their respective sections
+                ['plasmid', 'pcr', 'tissue'].forEach(route => {
+                    const plannerTable = document.getElementById(`${route}-planner-table`);
+                    if (!plannerTable) return;
+                    plannerTable.querySelectorAll('.planner-row-id td input').forEach(inp => {
+                        const ridStr = inp.closest('td').getAttribute('data-rid');
+                        if (ridStr) {
+                            const rid = parseInt(ridStr);
+                            const val = inp.value;
+                            if (route === 'plasmid') updatePlasmidSampleId(rid, val);
+                            else if (route === 'pcr') updatePcrSampleId(rid, val);
+                            else if (route === 'tissue') updateTissueSampleId(rid, val);
+                        }
+                    });
+                });
+
+                // Final Calcs for all samples
+                if (s.plasmidSampleCount > 0) {
+                    for (let i = 1; i <= s.plasmidSampleCount; i++) {
+                        calcPlannerSample(i);
+                        calcRestrictionRow(i);
+                    }
+                    fillTableInputs('maxi-table',            s.tables?.['maxi-table']);
+                    fillTableInputs('restriction-table',     s.tables?.['restriction-table']);
+                    updatePrecipitationSummary();
+                }
+                if (s.pcrSampleCount > 0) {
+                    for (let i = 1; i <= s.pcrSampleCount; i++) calcPcrPlannerSample(i);
+                }
+                if (s.tissueSampleCount > 0) {
+                    for (let i = 1; i <= s.tissueSampleCount; i++) calcTissuePlannerSample(i);
+                    fillTableInputs('tissue-cdna-unified-table', s.tables?.['tissue-cdna-unified-table']);
+                    fillTableInputs('tissue-pcr-reaction-table',  s.tables?.['tissue-pcr-reaction-table']);
+                }
+
+                // 6 ─ Extra IVT rows (selectRoute already added row 1)
+                if (s.route && s.ivtRowCount) {
+                    const route    = s.route;
+                    const savedCnt = s.ivtRowCount[route] || 0;
+                    const curCnt   = ivtRowCount[route]   || 1;
+                    for (let i = curCnt + 1; i <= savedCnt; i++) addIVTRow(route);
+                }
+                // Fill all IVT / DNase / Cleanup tables
+                ['tissue', 'plasmid', 'pcr'].forEach(r => {
+                    fillTableInputs(`ivt-table-${r}`,     s.tables?.[`ivt-table-${r}`]);
+                    fillTableInputs(`dnase-table-${r}`,   s.tables?.[`dnase-table-${r}`]);
+                    fillTableInputs(`cleanup-table-${r}`, s.tables?.[`cleanup-table-${r}`]);
+                });
+
+                // 7 ─ Section open / closed states
+                //    selectRoute opened everything; close sections the user had closed
+                if (s.openState) {
+                    Object.entries(s.openState).forEach(([route, states]) => {
+                        Object.entries(states).forEach(([idx, isOpen]) => {
+                            if (!isOpen) {
+                                const sec = document.getElementById(`section-${route}-${idx}`);
+                                if (sec) { openState[route][idx] = false; sec.style.display = 'none'; }
+                                setBoxState(route, parseInt(idx), 'def');
+                            }
+                        });
+                    });
+                }
+
+                // 8 ─ cDNA Tissue state restoration
+                // Handled via captureTableInputs above for sample columns
+                updateTissueCdna();
+
+            } catch(e) { console.warn('pci2: restore failed', e); }
+        }
+
+        function clearSavedState() {
+            if (confirm('Clear all saved data and reload the page?')) {
+                localStorage.removeItem(STORAGE_KEY);
+                location.reload();
+            }
+        }
+
+        // ── Boot ──────────────────────────────────────────────────────────────
+        restoreState();  // Restore or show example if nothing saved
     </script>
 
 </body>
