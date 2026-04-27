@@ -540,8 +540,21 @@
                                     class="text-green-400 hover:text-green-700 text-xl leading-none px-1"
                                     title="Close">×</button>
                             </div>
-                            <div class="border border-t-0 border-green-200 rounded-b-xl p-6 bg-white overflow-x-auto max-w-full">
-                                <table class="calc-table w-full text-xs" id="tissue-cdna-unified-table">
+                            <div class="border border-t-0 border-green-200 rounded-b-xl p-6 bg-white space-y-8">
+                                <!-- Primer Set Selection -->
+                                <div class="flex items-center gap-6 mb-5">
+                                    <div class="flex flex-col gap-1.5">
+                                        <label class="text-[0.7rem] font-bold text-slate-400 tracking-wider">PRIMER SET SELECTION</label>
+                                        <div class="toggle-group w-[600px]" id="primer-set-toggle-tissue">
+                                            <div onclick="setTissuePrimerSet('cds3')" class="toggle-btn active" id="btn-p-cds3">CDS3 / SMART3</div>
+                                            <div onclick="setTissuePrimerSet('cds4_s4')" class="toggle-btn" id="btn-p-cds4_s4">CDS4 / SMART4</div>
+                                            <div onclick="setTissuePrimerSet('cds4_s5')" class="toggle-btn" id="btn-p-cds4_s5">CDS4 / SMART5</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="overflow-x-auto max-w-full">
+                                    <table class="calc-table w-full text-xs" id="tissue-cdna-unified-table">
                                     <tbody>
                                         <!-- Step 0: Reaction Setup -->
                                         <tr class="row-id">
@@ -1815,6 +1828,28 @@
             plasmid: { kit: 'am1344', nuc: 'normal' },
             pcr: { kit: 'am1344', nuc: 'normal' }
         };
+        
+        // --- PRIMER SELECTION ---
+        let tissuePrimerSet = 'cds3';
+
+        function setTissuePrimerSet(setId) {
+            tissuePrimerSet = setId;
+            // UI
+            document.querySelectorAll('#primer-set-toggle-tissue .toggle-btn').forEach(b => b.classList.remove('active'));
+            const btn = document.getElementById(`btn-p-${setId}`);
+            if (btn) btn.classList.add('active');
+            
+            // Auto kit
+            if (setId === 'cds3' || setId === 'cds4_s4') {
+                setIVTKit('tissue', 'am1344');
+            } else if (setId === 'cds4_s5') {
+                setIVTKit('tissue', 'k7413');
+            }
+            
+            // Recalc
+            updateTissueCdna();
+            updateTissuePcr();
+        }
 
         function setIVTKit(route, kitId, fromSync = false) {
             if (!route) return;
@@ -2106,10 +2141,21 @@
                 const primVolPerReac = useDilute ? 1.0 : 0.1;
                 const rnaMaxPerReac = useDilute ? 3.0 : 4.8;
                 
+                // Label Primer Set based on selection
+                const isCds3 = (tissuePrimerSet === 'cds3');
+                const isCds4_s4 = (tissuePrimerSet === 'cds4_s4');
+                const isCds4_s5 = (tissuePrimerSet === 'cds4_s5');
+                
+                const cdsPrefix = useDilute ? "10 µM " : "100µM ";
+                const smartPrefix = useDilute ? "10 µM " : "100µM ";
+                
+                let cdsName = (isCds3) ? "CDSIII-R" : "CDS4";
+                let smartName = (isCds3) ? "SMARTIII-F" : (isCds4_s4 ? "SMART4" : "SMART5");
+                
                 const cdsTh = table.querySelector('.row-cds th');
-                if (cdsTh) cdsTh.textContent = useDilute ? "CDSIII-R primer (10µM) (µL)" : "CDSIII-R primer (100µM) (µL)";
+                if (cdsTh) cdsTh.textContent = cdsPrefix + cdsName + " primer (µL)";
                 const smartTh = table.querySelector('.row-smart th');
-                if (smartTh) smartTh.textContent = useDilute ? "SMARTIII-F primer (10µM) (µL)" : "100 µM SMARTIII-F (µL)";
+                if (smartTh) smartTh.textContent = smartPrefix + smartName + " (µL)";
 
                 let rnaVolPerReac = 0;
                 let massPerReac = 0;
@@ -2310,6 +2356,16 @@
             for (let col = 0; col < nCols; col++) {
                 const nReacs = parseFloat(getInpByClass('row-reacs', col)?.value) || 1;
                 
+                // Label PCR Primer Set
+                const isCds3 = (tissuePrimerSet === 'cds3');
+                const t7Name = isCds3 ? "T7/SMART primer (100µM)" : "PCI-F2 primer (100µM)";
+                const cdsPName = isCds3 ? "CDS III primer (100µM)" : "PCI-R2 primer (100µM)";
+                
+                const t7Th = table.querySelector('.row-t7smart th');
+                if (t7Th) t7Th.textContent = t7Name + " (µL)";
+                const cdsPTh = table.querySelector('.row-cds3 th');
+                if (cdsPTh) cdsPTh.textContent = cdsPName + " (µL)";
+
                 // Volume units (per 50µL reaction)
                 // H2O: 41.8, Buffer: 5.0, dNTP: 1.0, T7SMART: 0.1, CDSIII: 0.1, cDNA: 1.0, Pol: 1.0
                 const mapping = [
